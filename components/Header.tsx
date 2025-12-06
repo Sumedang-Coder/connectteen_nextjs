@@ -12,21 +12,21 @@ export function Header() {
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-linear-to-br from-blue-400 to-purple-500 rounded-full p-2 shadow-lg">
+            <div className="bg-blue-400 rounded-full p-2 shadow-lg">
               <MessageCircle className="w-8 h-8 text-white" />
             </div>
-            <span className="text-xl text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">ConnectTeen</span>
+            <span className="text-xl text-transparent bg-clip-text bg-blue-400">ConnectTeen</span>
           </div>
           
           <nav className="hidden text-lg md:flex items-center gap-6">
-            <a href="#" className="hover:text-blue-  transition-colors font-medium">Home 🏠</a>
-            <a href="#" className="hover:text-purple-600 transition-colors font-medium">Send 💌</a>
-            <a href="#" className="hover:text-pink-600 transition-colors font-medium">Explore 🔍</a>
-            <a href="#" className="hover:text-orange-600 transition-colors font-medium">History 📜</a>
+            <a href="#" className="hover:text-blue-600  transition-colors font-medium">Home</a>
+            <a href="#" className="hover:text-purple-600 transition-colors font-medium">Send</a>
+            <a href="#" className="hover:text-pink-600 transition-colors font-medium">Explore</a>
+            <a href="#" className="hover:text-orange-600 transition-colors font-medium">History</a>
           </nav>
           
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" className="hover:bg-blue-100">Sign In</Button>
+            <Button variant="ghost" className="hover:bg-blue-100 text-lg">Sign In</Button>
           </div>
           
           <Button 

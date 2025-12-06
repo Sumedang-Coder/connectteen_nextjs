@@ -13,8 +13,6 @@ const messages = [
       artist: "Bruno Mars",
       album: "Doo-Wops & Hooligans"
     },
-    color: "from-pink-400 to-rose-400",
-    bgColor: "from-pink-50 to-rose-50"
   },
   {
     id: 2,
@@ -26,8 +24,6 @@ const messages = [
       artist: "Lady Gaga",
       album: "The Fame Monster"
     },
-    color: "from-purple-400 to-indigo-400",
-    bgColor: "from-purple-50 to-indigo-50"
   },
   {
     id: 3,
@@ -39,8 +35,6 @@ const messages = [
       artist: "Bruno Mars",
       album: "Unorthodox Jukebox"
     },
-    color: "from-cyan-400 to-blue-400",
-    bgColor: "from-cyan-50 to-blue-50"
   },
   {
     id: 4,
@@ -52,8 +46,6 @@ const messages = [
       artist: "Lady Gaga",
       album: "The Fame"
     },
-    color: "from-yellow-400 to-orange-400",
-    bgColor: "from-yellow-50 to-orange-50"
   },
   {
     id: 5,
@@ -65,8 +57,6 @@ const messages = [
       artist: "Bruno Mars",
       album: "24K Magic"
     },
-    color: "from-green-400 to-emerald-400",
-    bgColor: "from-green-50 to-emerald-50"
   },
   {
     id: 6,
@@ -92,17 +82,17 @@ export function RecentPosts() {
       
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-12">
-          <h2 className="mb-4 text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">Recent Messages 💌</h2>
-          <p className="text-xl">See what your friends are sharing!</p>
+          <h2 className="mb-4 text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">Pesan Terbaru 💌</h2>
+          <p className="text-xl">Ayo lihat apa yang temanmu bagikan!</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {messages.map((msg) => (
             <Card key={msg.id} className="overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 border-4 border-white shadow-lg">
-              <CardHeader className={`pb-3 bg-linear-to-br ${msg.bgColor}`}>
+              <CardHeader className={`pb-3 bg-linear-to-br bg-cyan-50`}>
                 <div className="flex items-center gap-3">
                   <Avatar className="border-3 border-white shadow-md">
-                    <AvatarFallback className={`bg-linear-to-br ${msg.color} text-white`}>
+                    <AvatarFallback className={`bg-linear-to-br bg-blue-400 text-white`}>
                       {msg.avatar}
                     </AvatarFallback>
                   </Avatar>
@@ -113,9 +103,9 @@ export function RecentPosts() {
               </CardHeader>
               <CardContent className="pb-4 pt-4 space-y-3">
                 <p>{msg.message}</p>
-                <div className={`bg-linear-to-br ${msg.bgColor} p-4 rounded-2xl border-2 border-white shadow-md`}>
+                <div className={`bg-linear-to-br bg-cyan-50 p-4 rounded-2xl border-2 border-white shadow-md`}>
                   <div className="flex items-start gap-3">
-                    <div className={`bg-linear-to-br ${msg.color} rounded-xl p-2 shrink-0 shadow-lg`}>
+                    <div className={`bg-linear-to-br bg-blue-400 rounded-xl p-2 shrink-0 shadow-lg`}>
                       <Music className="w-5 h-5 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
