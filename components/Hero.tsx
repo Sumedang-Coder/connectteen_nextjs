@@ -17,11 +17,11 @@ export function Hero() {
         </p>
         
         <div className="flex gap-4 justify-center flex-wrap mb-8">
-          <Button size="lg" className="gap-2 bg-white text-blue-600 hover:bg-blue-100 cursor-pointer shadow-xl">
+          <Button size="lg" className="gap-2 bg-white text-blue-600 lg:hover:bg-blue-100 active:bg-blue-100 cursor-pointer shadow-xl">
             <Sparkles className="w-5 h-5" />
             Ayo buat pesanmu!
           </Button>
-          <Button size="lg" variant="outline" className="gap-2 bg-blue-400 cursor-pointer backdrop-blur-sm border-2 border-white text-white hover:bg-blue-300 shadow-xl">
+          <Button size="lg" variant="outline" className="gap-2 bg-blue-400 cursor-pointer backdrop-blur-sm border-2 border-white text-white active:bg-blue-300 lg:hover:bg-blue-300 shadow-xl">
             <Users className="w-5 h-5" />
             Jelajahi komunitas
           </Button>

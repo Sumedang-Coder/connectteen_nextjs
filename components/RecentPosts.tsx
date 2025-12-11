@@ -75,7 +75,7 @@ const messages = [
 
 export function RecentPosts() {
   return (
-    <section className="py-16 px-6 bg-linear-to-b from-white via-blue-50 to-purple-50 relative overflow-hidden">
+    <section className="pb-16 px-6 bg-linear-to-b from-white via-blue-50 to-purple-50 relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 text-8xl opacity-20">🎨</div>
       <div className="absolute bottom-0 left-0 text-7xl opacity-20">🎪</div>
@@ -86,7 +86,7 @@ export function RecentPosts() {
           <p className="text-xl">Ayo lihat apa yang temanmu bagikan!</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-12 gap-6">
           {messages.map((msg) => (
             <Card key={msg.id} className="overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 border-4 border-white shadow-lg">
               <CardHeader className={`pb-3 bg-linear-to-br bg-cyan-50`}>
@@ -101,7 +101,7 @@ export function RecentPosts() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="pb-4 pt-4 space-y-3">
+              <CardContent className="pb-4 pt-4 flex flex-col h-full justify-between space-y-3">
                 <p>{msg.message}</p>
                 <div className={`bg-linear-to-br bg-cyan-50 p-4 rounded-2xl border-2 border-white shadow-md`}>
                   <div className="flex items-start gap-3">

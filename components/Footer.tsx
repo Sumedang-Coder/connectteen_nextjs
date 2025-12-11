@@ -20,7 +20,7 @@ export function Footer() {
 
           <div>
             <div className="mb-8">
-              <h3 className="mb-4">Tautan Cepat</h3>
+              <h3 className="mb-4">Quick Links</h3>
               <ul className="space-y-2 text-sm">
                 <li><a href="#" className="text-white/80 hover:text-white transition-colors hover:underline">Tentang Kami</a></li>
                 <li><a href="#" className="text-white/80 hover:text-white transition-colors hover:underline">Pedoman Komunitas</a></li>
@@ -30,7 +30,7 @@ export function Footer() {
             </div>
 
             <div>
-              <h3 className="mb-4">Sumber Daya</h3>
+              <h3 className="mb-4">Resources</h3>
               <ul className="space-y-2 text-sm">
                 <li><a href="#" className="text-white/80 hover:text-white transition-colors hover:underline">Blog</a></li>
                 <li><a href="#" className="text-white/80 hover:text-white transition-colors hover:underline">Acara</a></li>
@@ -41,7 +41,7 @@ export function Footer() {
           </div>
 
           <div>
-              <h3 className="mb-4">Tetap Terhubung 🌟</h3>
+              <h3 className="mb-4">Stay Connected 🌟</h3>
               <p className="text-white/80 text-sm mb-4">
                 Ikuti kami di media sosial untuk mendapatkan pembaruan dan sorotan komunitas
               </p>
@@ -71,10 +71,6 @@ export function Footer() {
           </p>
         </div>
       </div>
-
-      {/* Cute bottom decorations */}
-      <div className="absolute bottom-5 left-10 text-3xl">⭐</div>
-      <div className="absolute bottom-5 right-10 text-3xl">👾</div>
     </footer>
   );
 }

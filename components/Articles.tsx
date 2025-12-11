@@ -38,7 +38,7 @@ export function Articles() {
     <section className="py-16 px-6 bg-linear-to-b from-purple-50 via-pink-50 to-white relative overflow-hidden">
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <div className="flex items-center justify-between mb-12">
+        <div className="flex items-center px-12 justify-between mb-12">
           <div>
             <h2 className="text-transparent bg-clip-text bg-blue-500 drop-shadow-md">Artikel Terbaru 📚</h2>
           </div>
@@ -48,13 +48,11 @@ export function Articles() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 md:px-12 gap-6">
           {articles.map((article) => (
             <Card key={article.id} className="overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 border-4 border-white shadow-lg bg-white">
-              <div className={`h-3 bg-linear-to-r bg-blue-400`}></div>
+              <div className={`h-5 bg-linear-to-r bg-blue-400`}></div>
               <CardHeader>
-                {/* <div className="flex items-center bg-red-600 justify-between mb-4">
-                </div> */}
                 <AspectRatio ratio={4 / 3} className=" rounded-lg overflow-hidden">
                   <div className="w-full h-full flex items-center justify-center bg-gray-100">
                     <img
@@ -65,7 +63,7 @@ export function Articles() {
                 </AspectRatio>
                 <CardTitle className="mt-2">{article.title}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex flex-col h-full justify-between">
                 <p className="text-muted-foreground mb-4">{article.excerpt}</p>
                 <div className="flex justify-between items-center">
                   <Button variant="link" className={`p-0 gap-2 text-transparent bg-clip-text bg-linear-to-r bg-blue-400`}>

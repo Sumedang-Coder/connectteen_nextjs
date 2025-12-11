@@ -61,7 +61,7 @@ export function Events() {
           <h2 className="text-transparent bg-clip-text bg-blue-500 drop-shadow-md">Events yang akan datang! 🎉</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:px-12 gap-6">
           {events.map((event) => (
             <Card
               key={event.id}

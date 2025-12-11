@@ -32,7 +32,7 @@ export function Header() {
           <div className="flex items-center gap-2">
             <div className=" rounded-full shadow-lg">
               <a href="#">
-                <img src="/img/connectteen_icon.jpg" className="w-12 h-12 rounded-full text-white" />
+                <img src="/img/connectteen_icon.jpg" className="w-8 h-8 rounded-full text-white" />
               </a>
             </div>
             <a href="#">
