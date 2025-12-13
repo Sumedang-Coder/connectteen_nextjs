@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 
 export function Footer() {
   return (
-    <footer className="bg-linear-to-br from-blue-500  to-sky-500 text-white py-12 px-6 relative overflow-hidden">
+    <footer className="bg-linear-to-br from-cyan-600 to-blue-600 text-white py-12 px-6 relative overflow-hidden animate-fade-in">
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>

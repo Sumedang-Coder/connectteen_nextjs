@@ -75,7 +75,7 @@ const messages = [
 
 export function RecentPosts() {
   return (
-    <section className="pb-16 px-6 bg-linear-to-b from-white via-blue-50 to-purple-50 relative overflow-hidden">
+    <section className="pb-16 px-6 bg-linear-to-b from-white via-blue-50 to-purple-50 relative overflow-hidden animate-fade-in">
       {/* Decorative elements */}
       <div className="absolute top-0 right-0 text-8xl opacity-20">🎨</div>
       <div className="absolute bottom-0 left-0 text-7xl opacity-20">🎪</div>

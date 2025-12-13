@@ -35,10 +35,10 @@ const articles = [
 
 export function Articles() {
   return (
-    <section className="py-16 px-6 bg-linear-to-b from-purple-50 via-pink-50 to-white relative overflow-hidden">
+    <section className="py-16 px-6 bg-linear-to-b from-purple-50 via-pink-50 to-white relative overflow-hidden animate-fade-in">
 
       <div className="max-w-6xl mx-auto relative z-10">
-        <div className="flex items-center px-12 justify-between mb-12">
+        <div className="flex items-center lg:px-12 justify-between mb-12">
           <div>
             <h2 className="text-transparent bg-clip-text bg-blue-500 drop-shadow-md">Artikel Terbaru 📚</h2>
           </div>
