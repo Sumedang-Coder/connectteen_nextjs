@@ -113,15 +113,15 @@ export function ExplorePage() {
         : allMessages;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-cyan-50">
-            <div className="bg-gradient-to-br from-cyan-600 to-blue-600 text-white">
+        <div className="min-h-screen bg-linear-to-br bg-white">
+            <div className="bg-linear-to-br from-cyan-600 to-blue-600 text-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center animate-fade-in">
-                        <div>
-                            <h1 className="text-5xl mb-4">
+                        <div >
+                            <h2 className="text-4xl mb-4">
                                 Jelajahi Pesan
-                            </h1>
-                            <p className="text-xl text-cyan-50 mb-8">
+                            </h2>
+                            <p className="text-lg text-cyan-50 mb-8">
                                 Lihat apa yang sedang dibagikan teman-teman dan temukan ide untuk pesanmu selanjutnya
                             </p>
 
@@ -151,8 +151,8 @@ export function ExplorePage() {
 
             {/* CONTENT */}
             <div className="max-w-6xl mx-auto px-6 py-12">
-                <div className="mb-8 animate-fade-in md:px-12">
-                    <h2 className="text-3xl text-gray-900 mb-2">
+                <div className="mb-8 animate-fade-in md:px-15">
+                    <h2 className="text-2xl text-gray-900 mb-2">
                         {searchQuery ? `Hasil Pencarian (${filteredMessages.length})` : 'Semua Pesan'}
                     </h2>
                     <p className="text-lg text-gray-600">
@@ -163,41 +163,28 @@ export function ExplorePage() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-12 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-15 gap-6">
                     {filteredMessages.map((msg) => (
-                        <Card
-                            key={msg.id}
-                            className="overflow-hidden animate-fade-in hover:shadow-2xl transition-all hover:-translate-y-2 border-4 border-white shadow-lg"
-                        >
-                            {/* HEADER */}
-                            <CardHeader className="pb-3 bg-linear-to-br bg-cyan-50">
+                        <Card key={msg.id} className="overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 border-4 border-white shadow-lg">
+                            <CardHeader className={`pb-3 bg-linear-to-br bg-cyan-50`}>
                                 <div className="flex items-center gap-3">
                                     <Avatar className="border-3 border-white shadow-md">
-                                        <AvatarFallback className="bg-linear-to-br bg-blue-400 text-white">
-                                            {msg.from
-                                                .split(" ")
-                                                .map((n) => n[0])
-                                                .join("")}
+                                        <AvatarFallback className={`bg-linear-to-br bg-blue-400 text-white`}>
+                                            {msg.from.charAt(0)}
                                         </AvatarFallback>
                                     </Avatar>
-
                                     <div className="flex-1">
                                         <p className="font-medium">To: {msg.recipient}</p>
                                     </div>
                                 </div>
                             </CardHeader>
-
-                            {/* CONTENT */}
-                            <CardContent className="pb-4 pt-4 flex flex-col h-full justify-between space-y-3">
-                                <p className="text-gray-700">{msg.message}</p>
-
-                                {/* SONG */}
-                                <div className="bg-linear-to-br bg-cyan-50 p-4 rounded-2xl border-2 border-white shadow-md">
+                            <CardContent className="pb-4 flex flex-col h-full justify-between space-y-3">
+                                <p>{msg.message}</p>
+                                <div className={`bg-linear-to-br bg-cyan-50 mt-1 p-4 rounded-2xl border-2 border-white shadow-md`}>
                                     <div className="flex items-start gap-3">
-                                        <div className="bg-linear-to-br bg-blue-400 rounded-xl p-2 shrink-0 shadow-lg">
+                                        <div className={`bg-linear-to-br bg-blue-400 rounded-xl p-2 shrink-0 shadow-lg`}>
                                             <Music className="w-5 h-5 text-white" />
                                         </div>
-
                                         <div className="flex-1 min-w-0">
                                             <p className="font-medium truncate">{msg.song.title}</p>
                                             <p className="text-sm text-muted-foreground">{msg.song.artist}</p>

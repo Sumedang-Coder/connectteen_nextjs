@@ -10,7 +10,7 @@ const zenMaru = Zen_Maru_Gothic({
 
 export const metadata: Metadata = {
   title: "ConnectTeen Community",
-  description: "A vibrant platform for teens to connect, share, and grow together.",
+  description: "Platform komunitas untuk remaja Indonesia",
 };
 
 export default function RootLayout({
@@ -18,11 +18,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="id">
-      <body className={zenMaru.className}>
-        {children}
-      </body>
+ return (
+    <html lang="id" suppressHydrationWarning>
+      <body>{children}</body>
     </html>
   );
 }

@@ -61,7 +61,7 @@ export function Events() {
           <h2 className="text-transparent bg-clip-text bg-blue-500 drop-shadow-md">Events yang akan datang! 🎉</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 md:px-12 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:px-15 gap-6">
           {events.map((event) => (
             <Card
               key={event.id}
@@ -99,8 +99,8 @@ export function Events() {
       </div>
 
       {/* Cute decorative elements */}
-      <div className="absolute top-20 right-10 text-6xl animate-pulse hidden lg:block">🎊</div>
-      <div className="absolute bottom-20 left-10 text-5xl">🎈</div>
+      {/* <div className="absolute top-20 right-10 text-6xl animate-pulse hidden lg:block">🎊</div>
+      <div className="absolute bottom-20 left-10 text-5xl">🎈</div> */}
     </section>
   );
 }

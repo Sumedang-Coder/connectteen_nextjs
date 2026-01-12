@@ -5,6 +5,7 @@ import { Input } from "./ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import Image from "next/image";
 
 export function HistoryPage() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -24,90 +25,78 @@ export function HistoryPage() {
         setSearchQuery("");
     };
 
-    // Mock sent messages
-    const sentMessages = [
+    const allMessages = [
         {
             id: 1,
+            from: "Emma R.",
             recipient: "Sarah M.",
-            message: "Hey! Just discovered this amazing song, you have to listen to it! It reminds me of our trip last summer 🌅",
-            song: {
-                title: "Just The Way You Are",
-                artist: "Bruno Mars",
-                album: "Doo-Wops & Hooligans",
-            },
-            timestamp: "Today, 3:45 PM",
-            status: "delivered"
+            message: "This song literally describes exactly how I feel! Thank you for introducing me to it 💙",
+            song: { title: "Drivers License", artist: "Olivia Rodrigo", album: "SOUR" },
+            likes: 156,
+            comments: 23,
+            timestamp: "2 hours ago"
         },
         {
             id: 2,
+            from: "Michael T.",
             recipient: "Alex K.",
-            message: "This track has been on repeat all day! The energy is incredible 🔥",
-            song: {
-                title: "Bad Romance",
-                artist: "Lady Gaga",
-                album: "The Fame Monster",
-            },
-            timestamp: "Yesterday, 9:20 AM",
-            status: "read"
+            message: "Found this gem while scrolling and immediately thought of you. The vibes are immaculate! ✨",
+            song: { title: "Sunflower", artist: "Post Malone & Swae Lee", album: "Hollywood's Bleeding" },
+            likes: 142,
+            comments: 18,
+            timestamp: "5 hours ago"
         },
         {
             id: 3,
+            from: "Sophie L.",
             recipient: "Jordan P.",
-            message: "Found this while studying, thought you'd love it for your playlist!",
-            song: {
-                title: "Locked Out of Heaven",
-                artist: "Bruno Mars",
-                album: "Unorthodox Jukebox",
-            },
-            timestamp: "Dec 11, 2:15 PM",
-            status: "read"
+            message: "Can't stop listening to this! Every time it comes on I think about our summer adventures 🌊",
+            song: { title: "Good Days", artist: "SZA", album: "Good Days" },
+            likes: 138,
+            comments: 15,
+            timestamp: "8 hours ago"
         },
         {
             id: 4,
-            recipient: "Emma W.",
-            message: "This song is perfect for our road trip! Can't wait to blast it in the car 🚗",
-            song: {
-                title: "Levitating",
-                artist: "Dua Lipa",
-                album: "Future Nostalgia",
-            },
-            timestamp: "Dec 10, 5:30 PM",
-            status: "read"
+            from: "Chris B.",
+            recipient: "Taylor M.",
+            message: "This track has been on repeat all week! Perfect for our road trip playlist 🚗",
+            song: { title: "Blinding Lights", artist: "The Weeknd", album: "After Hours" },
+            likes: 124,
+            comments: 12,
+            timestamp: "1 day ago"
         },
         {
             id: 5,
-            recipient: "Michael T.",
-            message: "You absolutely need to hear this! It's been my anthem all week 🎵",
-            song: {
-                title: "Anti-Hero",
-                artist: "Taylor Swift",
-                album: "Midnights",
-            },
-            timestamp: "Dec 9, 8:15 PM",
-            status: "read"
+            from: "Maya P.",
+            recipient: "Olivia K.",
+            message: "You NEED to hear this right now. It's giving main character energy! 💫",
+            song: { title: "Anti-Hero", artist: "Taylor Swift", album: "Midnights" },
+            likes: 119,
+            comments: 14,
+            timestamp: "1 day ago"
         },
     ];
 
-    // Filter messages based on search query
     const filteredMessages = searchQuery
-        ? sentMessages.filter(
+        ? allMessages.filter(
             (msg) =>
                 msg.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                msg.recipient.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                msg.from.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 msg.song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 msg.song.artist.toLowerCase().includes(searchQuery.toLowerCase())
         )
-        : sentMessages;
+        : allMessages;
 
 
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-cyan-50 flex items-start justify-center pt-24 px-4">
+            <div className="min-h-screen bg-linear-to-br from-gray-50 to-cyan-50 flex items-start justify-center pt-24 px-4">
                 <div className="max-w-md w-full">
                     {/* Sign In Card */}
                     <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 animate-fade-in">
                         <div className="text-center mb-8">
-                            <div className="w-16 h-16 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <div className="w-16 h-16 bg-linear-to-br from-cyan-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Clock className="w-8 h-8 text-white" />
                             </div>
                             <h1 className="text-3xl text-gray-900 mb-3">
@@ -146,21 +135,21 @@ export function HistoryPage() {
                     </div>
 
                     {/* Feature Preview */}
-                    <div className="mt-8 bg-white rounded-xl animate-fade-in p-6 border border-gray-200">
+                    <div className="mt-8 mb-16 bg-white rounded-xl animate-fade-in p-6 border border-gray-200">
                         <h3 className="text-lg text-gray-900 mb-4">
                             Yang akan kamu lihat setelah masuk:
                         </h3>
                         <ul className="space-y-3 text-sm text-gray-600">
                             <li className="flex items-start gap-2">
-                                <SendIcon className="w-5 h-5 text-cyan-600 flex-shrink-0 mt-0.5" />
+                                <SendIcon className="w-5 h-5 text-cyan-600 shrink-0 mt-0.5" />
                                 <span>Semua pesan yang pernah kamu kirim ke teman</span>
                             </li>
                             <li className="flex items-start gap-2">
-                                <Inbox className="w-5 h-5 text-cyan-600 flex-shrink-0 mt-0.5" />
+                                <Inbox className="w-5 h-5 text-cyan-600 shrink-0 mt-0.5" />
                                 <span>Bisa mengelola semua pesan yang telah kamu kirim</span>
                             </li>
                             <li className="flex items-start gap-2">
-                                <Music className="w-5 h-5 text-cyan-600 flex-shrink-0 mt-0.5" />
+                                <Music className="w-5 h-5 text-cyan-600 shrink-0 mt-0.5" />
                                 <span>Detail lagu lengkap beserta waktu pengiriman</span>
                             </li>
                         </ul>
@@ -172,13 +161,13 @@ export function HistoryPage() {
 
     // If authenticated, show history
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-cyan-50">
+        <div className="min-h-screen bg-linear-to-br bg-white">
             {/* Header */}
-            <div className="bg-gradient-to-br from-cyan-600 to-blue-600 text-white">
+            <div className="bg-linear-to-br from-cyan-600 to-blue-600 text-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center animate-fade-in">
                         <div>
-                            <h1 className="text-5xl mb-4">
+                            <h1 className="text-4xl mb-2">
                                 History Pesan Kamu
                             </h1>
                             <p className="text-xl text-cyan-50 mb-8">
@@ -209,9 +198,13 @@ export function HistoryPage() {
                             </div>
 
                             {/* Image */}
-                            <img
+                            <Image
                                 src="/img/hero-history.jpg"
                                 alt="History Message"
+                                fill
+                                priority
+                                quality={80}
+                                sizes="100vw"
                                 className="w-full h-full object-cover"
                             />
                         </div>
@@ -224,17 +217,17 @@ export function HistoryPage() {
             {/* Main Content */}
             <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
                 <div className="space-y-6">
-                    <div className="animate-fade-in md:px-12">
-                        <h2 className="text-3xl text-gray-900 mb-2">
+                    <div className="animate-fade-in md:px-15">
+                        <h2 className="text-2xl text-gray-900 mb-2">
                             {searchQuery
                                 ? `Hasil Pencarian (${filteredMessages.length})`
                                 : 'Semua Pesan Terkirim'}
                         </h2>
 
-                        <p className="text-lg text-gray-600">
+                        <p className="text-md text-gray-600">
                             {searchQuery
                                 ? `Menampilkan pesan yang cocok dengan "${searchQuery}"`
-                                : `Kamu telah mengirim total ${sentMessages.length} pesan`
+                                : `Kamu telah mengirim total ${allMessages.length} pesan`
                             }
                         </p>
                     </div>
@@ -251,40 +244,28 @@ export function HistoryPage() {
 
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-12 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-15 gap-6">
                             {filteredMessages.map((msg) => (
-                                <Card
-                                    key={msg.id}
-                                    className="overflow-hidden animate-fade-in hover:shadow-2xl transition-all hover:-translate-y-2 border-4 border-white shadow-lg"
-                                >
-                                    {/* HEADER */}
-                                    <CardHeader className="pb-3 bg-linear-to-br bg-cyan-50">
+                                <Card key={msg.id} className="overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 border-4 border-white shadow-lg">
+                                    <CardHeader className={`pb-3 bg-linear-to-br bg-cyan-50`}>
                                         <div className="flex items-center gap-3">
                                             <Avatar className="border-3 border-white shadow-md">
-                                                <AvatarFallback className="bg-linear-to-br bg-blue-400 text-white">
-                                                    <User className="w-4 h-4" />
+                                                <AvatarFallback className={`bg-linear-to-br bg-blue-400 text-white`}>
+                                                    {msg.from.charAt(0)}
                                                 </AvatarFallback>
                                             </Avatar>
-
                                             <div className="flex-1">
                                                 <p className="font-medium">To: {msg.recipient}</p>
                                             </div>
                                         </div>
                                     </CardHeader>
-
-                                    {/* CONTENT */}
-                                    <CardContent className="pb-4 pt-4 flex flex-col h-full justify-between space-y-3">
-                                        <p className="text-gray-700 leading-relaxed">
-                                            {msg.message}
-                                        </p>
-
-                                        {/* SONG */}
-                                        <div className="bg-linear-to-br bg-cyan-50 p-4 rounded-2xl border-2 border-white shadow-md">
+                                    <CardContent className="pb-4 flex flex-col h-full justify-between space-y-3">
+                                        <p>{msg.message}</p>
+                                        <div className={`bg-linear-to-br bg-cyan-50 mt-1 p-4 rounded-2xl border-2 border-white shadow-md`}>
                                             <div className="flex items-start gap-3">
-                                                <div className="bg-linear-to-br bg-blue-400 rounded-xl p-2 shrink-0 shadow-lg">
+                                                <div className={`bg-linear-to-br bg-blue-400 rounded-xl p-2 shrink-0 shadow-lg`}>
                                                     <Music className="w-5 h-5 text-white" />
                                                 </div>
-
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-medium truncate">{msg.song.title}</p>
                                                     <p className="text-sm text-muted-foreground">{msg.song.artist}</p>
@@ -307,7 +288,7 @@ export function HistoryPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div className="text-center">
                             <div className="text-4xl text-cyan-600 mb-2">
-                                {sentMessages.length}
+                                {allMessages.length}
                             </div>
                             <div className="text-sm text-gray-600">
                                 Total Pesan Terkirim
@@ -315,7 +296,7 @@ export function HistoryPage() {
                         </div>
                         <div className="text-center">
                             <div className="text-4xl text-purple-600 mb-2">
-                                {sentMessages.length}
+                                {allMessages.length}
                             </div>
                             <div className="text-sm text-gray-600">
                                 Lagu yang Dibagikan

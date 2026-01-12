@@ -1,3 +1,4 @@
+'use client'
 import { useState } from "react";
 import {
   ArrowLeft,
@@ -65,8 +66,8 @@ export function ArticlesPage({ onBack, onViewArticle }: ArticlesPageProps) {
     : allArticles;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-cyan-50">
-      <div className="bg-gradient-to-br from-cyan-600 to-blue-600 text-white">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 to-cyan-50">
+      <div className="bg-linear-to-br from-cyan-600 to-blue-600 text-white">
         <div className="max-w-7xl animate-fade-in mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Button
             onClick={onBack}
