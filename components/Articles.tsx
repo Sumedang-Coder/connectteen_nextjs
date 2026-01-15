@@ -50,8 +50,8 @@ export function Articles() {
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="flex items-center  md:px-15 justify-between mb-12">
           <div>
-            <h2 className="text-transparent bg-clip-text bg-blue-500 drop-shadow-md">
-              Artikel Terbaru 📚
+            <h2 className="text-transparent text-3xl bg-clip-text bg-blue-500 drop-shadow-md">
+              Artikel Terbaru
             </h2>
           </div>
 
@@ -65,49 +65,47 @@ export function Articles() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-15 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 px-3 lg:grid-cols-3 md:px-15 gap-6">
           {articles.map((article) => (
             <Card
               key={article.id}
-              className="overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-white shadow-md bg-white"
-            >
-              <div className="h-2 bg-linear-to-r bg-blue-400" />
+              className="flex flex-col overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-white shadow-md bg-white">
+              <div className="h-1 bg-linear-to-r from-blue-400 to-blue-600" />
 
-              <CardHeader className="p-4">
-                <AspectRatio ratio={16 / 9} className="rounded-md overflow-hidden">
-                  <img
-                    src={article.image}
-                    alt={article.title}
-                    className="w-full h-full object-cover"
-                  />
-                </AspectRatio>
+              <AspectRatio ratio={16 / 9}>
+                <img
+                  src={article.image}
+                  alt={article.title}
+                  className="w-full h-full rounded-3xl p-2 object-cover"
+                />
+              </AspectRatio>
 
-                <CardTitle className="mt-2 text-base line-clamp-2">
+              <div className="flex-1 px-4 space-y-1">
+                <h3 className="text-sm font-semibold line-clamp-2">
                   {article.title}
-                </CardTitle>
-              </CardHeader>
+                </h3>
 
-              <CardContent className="p-4 pt-0">
-                <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
+                <p className="text-xs text-muted-foreground line-clamp-3">
                   {article.excerpt}
                 </p>
+              </div>
 
-                <div className="flex justify-between items-center">
-                  <Button
-                    variant="link"
-                    onClick={() => router.push(`/articles/${article.id}`)}
-                    className="p-0 gap-1 text-sm text-transparent bg-clip-text bg-linear-to-r bg-blue-400"
-                  >
-                    Baca
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
 
-                  <span className="text-xs text-muted-foreground flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded-full">
-                    <Clock className="w-3 h-3" />
-                    {article.readTime}
-                  </span>
-                </div>
-              </CardContent>
+              <div className="mt-auto flex justify-between items-center px-4 pb-4">
+                <Button
+                  variant="link"
+                  onClick={() => router.push(`/articles/${article.id}`)}
+                  className="p-0 pointer-cursor gap-1 text-sm text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-blue-600"
+                >
+                  Baca selengkapnya
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+
+                <span className="text-xs text-muted-foreground flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded-full">
+                  <Clock className="w-3 h-3" />
+                  {article.readTime}
+                </span>
+              </div>
             </Card>
           ))}
         </div>

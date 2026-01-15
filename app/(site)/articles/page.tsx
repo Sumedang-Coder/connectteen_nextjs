@@ -17,41 +17,48 @@ export default function ArticlesPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
 
-  const allArticles = [
-    {
-      id: "1",
-      title: "Membangun Pertemanan Online dengan Aman",
-      description:
-        "Pelajari cara membangun pertemanan bermakna di dunia digital dengan aman dan nyaman.",
-      readTime: "6 menit",
-      image:
-        "https://plus.unsplash.com/premium_photo-1661778823764-3580a0c86cb3?w=800",
-    },
-    {
-      id: "2",
-      title: "Mengelola Waktu Layar Secara Sehat",
-      description:
-        "Tips menjaga keseimbangan antara aktivitas online dan kehidupan nyata.",
-      readTime: "7 menit",
-      image:
-        "https://images.unsplash.com/photo-1758525747615-d409c9ad73d1?w=800",
-    },
-    {
-      id: "3",
-      title: "Menemukan Gaya Menulis Kreatifmu",
-      description:
-        "Panduan singkat untuk mengembangkan kreativitas melalui tulisan.",
-      readTime: "8 menit",
-      image:
-        "https://plus.unsplash.com/premium_photo-1684444605542-93725082d214?w=800",
-    },
-  ]
+  const articles = [
+  {
+    id: 1,
+    title: "Membangun teman secara online dengan aman",
+    excerpt:
+      "Belajar bagaimana membangun persahabatan yang bermakna di dunia digital dengan tips keamanan penting.",
+    category: "Komunitas",
+    readTime: "5 min",
+    image:
+      "https://plus.unsplash.com/premium_photo-1661778823764-3580a0c86cb3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dGVtYW4lMjBvbmxpbmV8ZW58MHx8MHx8fDA%3D",
+    color: "from-blue-400 to-cyan-400",
+  },
+  {
+    id: 2,
+    title: "Mengelola Waktu Layar (Screen Time) secara efektif",
+    excerpt:
+      "Temukan tips dan strategi untuk menyeimbangkan kehadiran online Anda dengan aktivitas dunia nyata dan kesejahteraan diri.",
+    category: "Kesehatan Mental",
+    readTime: "7 min",
+    image:
+      "https://images.unsplash.com/photo-1758525747615-d409c9ad73d1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVuZ2Vsb2xhYW4lMjBzY3JlZW4lMjB0aW1lfGVufDB8fDB8fHww",
+    color: "from-purple-400 to-pink-400",
+  },
+  {
+    id: 3,
+    title: "Memulai Perjalanan Menulis Kreatif",
+    excerpt:
+      "Jelajahi dunia menulis kreatif dengan panduan langkah demi langkah untuk mengasah keterampilan bercerita Anda.",
+    category: "Kreatif",
+    readTime: "6 min",
+    image:
+      "https://plus.unsplash.com/premium_photo-1684444605542-93725082d214?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8TWVtdWxhaSUyMFBlcmphbGFuYW4lMjBNZW51bGlzJTIwS3JlYXRpZnxlbnwwfHwwfHx8MA%3D%3D",
+    color: "from-orange-400 to-yellow-400",
+  },
+]
+  const allArticles = articles
 
   const filteredArticles = searchQuery
     ? allArticles.filter(
       (a) =>
         a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.description.toLowerCase().includes(searchQuery.toLowerCase())
+        a.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
     )
     : allArticles
 
@@ -123,48 +130,43 @@ export default function ArticlesPage() {
             {filteredArticles.map((article) => (
               <Card
                 key={article.id}
-                onClick={() => router.push(`/articles/${article.id}`)}
-                className="overflow-hidden animate-fade-in hover:shadow-2xl transition-all hover:-translate-y-2 border-4 border-white shadow-lg bg-white cursor-pointer"
-              >
-                <div className="h-6 bg-linear-to-r bg-blue-400" />
+                className="flex flex-col overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-white shadow-md bg-white">
+                <div className="h-1 bg-linear-to-r from-blue-400 to-blue-600" />
 
-                <CardHeader>
-                  <AspectRatio
-                    ratio={4 / 3}
-                    className="rounded-lg overflow-hidden"
-                  >
-                    <img
-                      src={article.image}
-                      alt={article.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </AspectRatio>
+                <AspectRatio ratio={16 / 9}>
+                  <img
+                    src={article.image}
+                    alt={article.title}
+                    className="w-full h-full rounded-3xl p-2 object-cover"
+                  />
+                </AspectRatio>
 
-                  <CardTitle className="mt-2">
+                <div className="flex-1 px-4 space-y-1">
+                  <h3 className="text-sm font-semibold line-clamp-2">
                     {article.title}
-                  </CardTitle>
-                </CardHeader>
+                  </h3>
 
-                <CardContent className="flex flex-col h-full justify-between">
-                  <p className="text-muted-foreground mb-4 line-clamp-2">
-                    {article.description}
+                  <p className="text-xs text-muted-foreground line-clamp-3">
+                    {article.excerpt}
                   </p>
+                </div>
 
-                  <div className="flex justify-between items-center">
-                    <Button
-                      variant="link"
-                      className="p-0 gap-2 text-transparent bg-clip-text bg-linear-to-r bg-blue-400"
-                    >
-                      Baca Selengkapnya
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
 
-                    <span className="text-sm text-muted-foreground flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full">
-                      <Clock className="w-3 h-3" />
-                      {article.readTime}
-                    </span>
-                  </div>
-                </CardContent>
+                <div className="mt-auto flex justify-between items-center px-4 pb-4">
+                  <Button
+                    variant="link"
+                    onClick={() => router.push(`/articles/${article.id}`)}
+                    className="p-0 pointer-cursor gap-1 text-sm text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-blue-600"
+                  >
+                    Baca selengkapnya
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+
+                  <span className="text-xs text-muted-foreground flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded-full">
+                    <Clock className="w-3 h-3" />
+                    {article.readTime}
+                  </span>
+                </div>
               </Card>
             ))}
           </div>

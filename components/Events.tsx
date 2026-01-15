@@ -58,7 +58,7 @@ export function Events() {
     <section className="py-16 px-6 bg-linear-to-b from-white via-yellow-50 to-orange-50 relative overflow-hidden animate-fade-in">
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-12">
-          <h2 className="text-transparent bg-clip-text bg-blue-500 drop-shadow-md">Events yang akan datang! 🎉</h2>
+          <h2 className="text-transparent text-3xl bg-clip-text bg-blue-500 drop-shadow-md">Events yang akan datang!</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 md:px-15 gap-6">

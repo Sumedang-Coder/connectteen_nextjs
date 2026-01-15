@@ -75,18 +75,19 @@ const messages = [
 
 export function RecentPosts() {
   return (
-    <section className="pb-16 px-6 bg-linear-to-b bg-white relative overflow-hidden animate-fade-in">
+    <section className=" relative px-6 pt-5 pb-16 bg-linear-to-b from-white/20 to-white animate-fade-in">
+
       {/* Decorative elements */}
       {/* <div className="absolute top-0 right-0 text-8xl opacity-20">🎨</div>
       <div className="absolute bottom-0 left-0 text-7xl opacity-20">🎪</div> */}
       
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-12">
-          <h2 className="mb-4 text-transparent bg-clip-text bg-blue-500 drop-shadow-md">Pesan Terbaru 💌</h2>
-          <p className="text-md">Ayo lihat apa yang temanmu bagikan!</p>
+          <h2 className="mb-4 text-transparent text-3xl bg-clip-text bg-blue-500 drop-shadow-md">Pesan Terbaru</h2>
+          <p className="text-md text-slate-800 font-semibold drop-shadow-md">Ayo lihat apa yang temanmu bagikan!</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-15 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 px-3 lg:grid-cols-3 md:px-15 gap-6">
           {messages.map((msg) => (
             <Card key={msg.id} className="overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 border-4 border-white shadow-lg">
               <CardHeader className={`pb-3 bg-linear-to-br bg-cyan-50`}>

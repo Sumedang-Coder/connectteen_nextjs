@@ -163,7 +163,7 @@ export function ExplorePage() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-15 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 px-3 lg:grid-cols-3 md:px-15 gap-6">
                     {filteredMessages.map((msg) => (
                         <Card key={msg.id} className="overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2 border-4 border-white shadow-lg">
                             <CardHeader className={`pb-3 bg-linear-to-br bg-cyan-50`}>

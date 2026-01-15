@@ -14,8 +14,9 @@ export default function Auth({ onClick }: AuthProps) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
   return (
-    <div className={`min-h-screen pt-40 flex items-start justify-center bg-gradient-to-br from-gray-50 to-cyan-50 px-10
+    <div className={`min-h-screen pt-32 flex items-start justify-center bg-linear-to-br from-gray-50 to-cyan-50 px-10
     transition-all duration-500 ease-out
     ${mounted ? "opacity-100 translate-0" : "opacity-0 -translate-y-6"}`}>
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-8 flex flex-col gap-6">
@@ -34,8 +35,8 @@ export default function Auth({ onClick }: AuthProps) {
           </p>
         </div>
 
+        <a href="https://connectteen-server.vercel.app/api/auth/google">
         <button
-          onClick={onClick}
           className="
             w-full flex items-center justify-center gap-3
             bg-white border border-gray-300
@@ -49,6 +50,7 @@ export default function Auth({ onClick }: AuthProps) {
           <FcGoogle className="text-2xl" />
           Sign in with Google
         </button>
+        </a>
       </div>
     </div>
   );
