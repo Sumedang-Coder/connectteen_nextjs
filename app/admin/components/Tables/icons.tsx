@@ -29,3 +29,18 @@ export function DownloadIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function EditIcon(props: IconProps) {
+  return (
+    <svg
+      width={20}
+      height={20}
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      {...props}
+    >
+      <path d="M13.586 2.586a2 2 0 012.828 2.828l-8.25 8.25a1 1 0 01-.465.263l-3.25.813a.625.625 0 01-.758-.758l.813-3.25a1 1 0 01.263-.465l8.25-8.25z" />
+      <path d="M3.125 16.875a.625.625 0 000 1.25h13.75a.625.625 0 000-1.25H3.125z" />
+    </svg>
+  );
+}

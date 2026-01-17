@@ -33,11 +33,7 @@ const buttonVariants = cva(
   },
 );
 
-type ButtonProps = HTMLAttributes<HTMLButtonElement> &
-  VariantProps<typeof buttonVariants> & {
-    label: string;
-    icon?: React.ReactNode;
-  };
+type ButtonProps = HTMLAttributes<HTMLButtonElement> & VariantProps<typeof buttonVariants> & { label: string; icon?: React.ReactNode; type?: "button" | "submit" | "reset"; };
 
 export function Button({
   label,
