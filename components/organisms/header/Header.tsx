@@ -140,8 +140,8 @@ export function Header() {
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={() => {
-                    logout();
+                onClick={() => {
+                  logout();
                     setShowLogoutModal(false);
                   }}
                   className="px-4"

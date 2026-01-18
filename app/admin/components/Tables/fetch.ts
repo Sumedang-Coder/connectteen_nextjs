@@ -72,6 +72,29 @@ export async function getInvoiceTableData() {
   ];
 }
 
+export async function getAdminData() {
+  // Fake delay
+  await new Promise((resolve) => setTimeout(resolve, 1400));
+
+  return [
+    {
+      name: "Upin",
+      email:"Admin@gmail.com",
+      role: "admin",
+    },
+    {
+      name: "Mail",
+      email:"mail@gmail.com",
+      role: "admin",
+    },
+    {
+      name: "Jarjit Singh",
+      email:"jarjit@gmail.com",
+      role: "admin",
+    },
+  ];
+}
+
 export async function getTopChannels() {
   // Fake delay
   await new Promise((resolve) => setTimeout(resolve, 1500));

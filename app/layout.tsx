@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Zen_Maru_Gothic } from "next/font/google";
+import { Toaster } from "sonner";
+import AuthProvider from "./provider/AuthProvider";
 
 const zenMaru = Zen_Maru_Gothic({
   subsets: ["latin"],
@@ -19,9 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id" suppressHydrationWarning className={zenMaru.className}>
       <body>
-        {children}
+        {/* AuthProvider membungkus konten aplikasi */}
+        <AuthProvider>{children}</AuthProvider>
+
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   );
