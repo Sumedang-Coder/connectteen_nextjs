@@ -1,41 +1,32 @@
-"use client";
+"use client"
 
-import { useEffect } from "react";
-import axios from "axios";
-import { useAuthStore } from "@/app/store/useAuthStore";
-import Loader from "@/components/Loader";
+import { useEffect } from "react"
+import axios from "axios"
+import { useAuthStore } from "@/app/store/useAuthStore"
 
 export default function AuthProvider({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  const setUser = useAuthStore((s) => s.setUser);
-  const loading = useAuthStore((s) => s.loading);
+  const setUser = useAuthStore((s) => s.setUser)
 
   useEffect(() => {
-    const fetchMe = () => {
-      axios
-        .get("https://connectteen-server.vercel.app/api/auth/me", {
-          withCredentials: true,
-        })
-        .then((res) => {
-          if (res.data.success) {
-            setUser(res.data.user);
-          }
-        })
-        .catch((err) => {
-          console.log("AUTH PROVIDER ERROR:", err);
-          setUser(null);
-        });
-    };
+    axios
+      .get("https://connectteen-server.vercel.app/api/auth/me", {
+        withCredentials: true,
+      })
+      .then((res) => {
+        if (res.data?.user) {
+          setUser(res.data.user)
+        } else {
+          setUser(null)
+        }
+      })
+      .catch(() => {
+        setUser(null)
+      })
+  }, [setUser])
 
-    fetchMe();
-  }, [setUser]);
-
-  if (loading) {
-    return <Loader size="md" fullScreen={true} />;
-  }
-
-  return <>{children}</>;
+  return <>{children}</>
 }

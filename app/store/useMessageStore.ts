@@ -2,10 +2,9 @@ import { create } from "zustand";
 import api from "@/lib/axios";
 
 interface Message {
-  id?: number;
+  id: number;
   recipient_name: string;
   message: string;
-
   song_id: string;
   song_name: string;
   song_artist: string;
@@ -17,7 +16,7 @@ interface Message {
 
 interface MessageState {
   messages: Message[];
-  allMessages: Message[]; 
+  allMessages: Message[];
   myMessages: Message[];
   selectedMessage: Message | null;
 
@@ -26,6 +25,7 @@ interface MessageState {
   fetchAllMessages: (search?: string) => Promise<void>;
   fetchMyMessages: () => Promise<void>;
   fetchMessageById: (id: number | string) => Promise<void>;
+  deleteMessage: (id: number | string) => Promise<void>;
 }
 
 export const useMessageStore = create<MessageState>((set) => ({
@@ -69,12 +69,19 @@ export const useMessageStore = create<MessageState>((set) => ({
 
   fetchMyMessages: async () => {
     try {
-      const res = await api.get("/messages/me");
-      set({ myMessages: res.data });
+      const res = await api.get("/messages/me")
+
+      set({
+        myMessages: Array.isArray(res.data.data)
+          ? res.data.data
+          : [],
+      })
     } catch (err) {
-      console.error("Failed to fetch my messages:", err);
+      console.error("Failed to fetch my messages:", err)
+      set({ myMessages: [] })
     }
   },
+
 
   fetchMessageById: async (id) => {
     try {
@@ -84,5 +91,19 @@ export const useMessageStore = create<MessageState>((set) => ({
       console.error("Failed to fetch message detail:", err);
       set({ selectedMessage: null });
     }
-  }
-}));
+  },
+
+  deleteMessage: async (id) => {
+    try {
+      await api.delete(`/messages/${id}`)
+
+      set((state) => ({
+        myMessages: state.myMessages.filter((m) => m.id !== id),
+      }))
+    } catch (err) {
+      console.error("Failed to delete message:", err)
+      throw err
+    }
+  },
+
+}))
