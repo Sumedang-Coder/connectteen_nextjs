@@ -48,7 +48,7 @@ export function Hero() {
         <div className="flex">
 
           {slides.map((slide, i) => (
-            <div key={i} className="relative flex flex-col justify-start items-center min-w-full min-h-[600px] bg-white">
+            <div key={i} className="relative flex flex-col justify-start items-center min-w-full min-h-[607px] bg-white">
 
               <Image
                 src={slide.image}
@@ -57,9 +57,11 @@ export function Hero() {
                 priority={i === 0}
                 sizes="100vw"
                 className="object-cover"
+                quality={100}
+                unoptimized
               />
 
-              <div className="relative bg-black/20 inset-0 z-10 flex items-center md:items-start md:pt-36 justify-center min-w-full min-h-[600px]">
+              <div className="relative bg-black/20 inset-0 z-10 flex items-center md:items-start md:pt-36 justify-center min-w-full min-h-[607px]">
                 <div className="text-center text-white px-6 max-w-5xl">
                   <div className="flex justify-center mb-6">
                     <Image
@@ -108,7 +110,7 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-white via-white/20 to-transparent" />
+      {/* <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-white/80 via-white/40 to-transparent" /> */}
     </section>
   )
 }

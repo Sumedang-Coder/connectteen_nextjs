@@ -56,7 +56,7 @@ export function Header() {
           </div>
 
           {/* DESKTOP NAV */}
-          <nav className="absolute left-1/2 transform -translate-x-1/2 md:flex items-center gap-6">
+          <nav className="absolute left-1/2 transform -translate-x-1/2 md:flex hidden items-center gap-6">
             <span onClick={() => handleNavClick("/")} className={`cursor-pointer font-medium ${isActive("/")}`}>Home</span>
             <span onClick={() => handleNavClick("/send")} className={`cursor-pointer font-medium ${isActive("/send")}`}>Send</span>
             <span onClick={() => handleNavClick("/explore")} className={`cursor-pointer font-medium ${isActive("/explore")}`}>Explore</span>

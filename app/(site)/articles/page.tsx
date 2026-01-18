@@ -18,40 +18,40 @@ export default function ArticlesPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   const articles = [
-  {
-    id: 1,
-    title: "Membangun teman secara online dengan aman",
-    excerpt:
-      "Belajar bagaimana membangun persahabatan yang bermakna di dunia digital dengan tips keamanan penting.",
-    category: "Komunitas",
-    readTime: "5 min",
-    image:
-      "https://plus.unsplash.com/premium_photo-1661778823764-3580a0c86cb3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dGVtYW4lMjBvbmxpbmV8ZW58MHx8MHx8fDA%3D",
-    color: "from-blue-400 to-cyan-400",
-  },
-  {
-    id: 2,
-    title: "Mengelola Waktu Layar (Screen Time) secara efektif",
-    excerpt:
-      "Temukan tips dan strategi untuk menyeimbangkan kehadiran online Anda dengan aktivitas dunia nyata dan kesejahteraan diri.",
-    category: "Kesehatan Mental",
-    readTime: "7 min",
-    image:
-      "https://images.unsplash.com/photo-1758525747615-d409c9ad73d1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVuZ2Vsb2xhYW4lMjBzY3JlZW4lMjB0aW1lfGVufDB8fDB8fHww",
-    color: "from-purple-400 to-pink-400",
-  },
-  {
-    id: 3,
-    title: "Memulai Perjalanan Menulis Kreatif",
-    excerpt:
-      "Jelajahi dunia menulis kreatif dengan panduan langkah demi langkah untuk mengasah keterampilan bercerita Anda.",
-    category: "Kreatif",
-    readTime: "6 min",
-    image:
-      "https://plus.unsplash.com/premium_photo-1684444605542-93725082d214?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8TWVtdWxhaSUyMFBlcmphbGFuYW4lMjBNZW51bGlzJTIwS3JlYXRpZnxlbnwwfHwwfHx8MA%3D%3D",
-    color: "from-orange-400 to-yellow-400",
-  },
-]
+    {
+      id: 1,
+      title: "Membangun teman secara online dengan aman",
+      excerpt:
+        "Belajar bagaimana membangun persahabatan yang bermakna di dunia digital dengan tips keamanan penting.",
+      category: "Komunitas",
+      readTime: "5 min",
+      image:
+        "https://plus.unsplash.com/premium_photo-1661778823764-3580a0c86cb3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dGVtYW4lMjBvbmxpbmV8ZW58MHx8MHx8fDA%3D",
+      color: "from-blue-400 to-cyan-400",
+    },
+    {
+      id: 2,
+      title: "Mengelola Waktu Layar (Screen Time) secara efektif",
+      excerpt:
+        "Temukan tips dan strategi untuk menyeimbangkan kehadiran online Anda dengan aktivitas dunia nyata dan kesejahteraan diri.",
+      category: "Kesehatan Mental",
+      readTime: "7 min",
+      image:
+        "https://images.unsplash.com/photo-1758525747615-d409c9ad73d1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVuZ2Vsb2xhYW4lMjBzY3JlZW4lMjB0aW1lfGVufDB8fDB8fHww",
+      color: "from-purple-400 to-pink-400",
+    },
+    {
+      id: 3,
+      title: "Memulai Perjalanan Menulis Kreatif",
+      excerpt:
+        "Jelajahi dunia menulis kreatif dengan panduan langkah demi langkah untuk mengasah keterampilan bercerita Anda.",
+      category: "Kreatif",
+      readTime: "6 min",
+      image:
+        "https://plus.unsplash.com/premium_photo-1684444605542-93725082d214?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8TWVtdWxhaSUyMFBlcmphbGFuYW4lMjBNZW51bGlzJTIwS3JlYXRpZnxlbnwwfHwwfHx8MA%3D%3D",
+      color: "from-orange-400 to-yellow-400",
+    },
+  ]
   const allArticles = articles
 
   const filteredArticles = searchQuery
@@ -68,12 +68,13 @@ export default function ArticlesPage() {
       <div className="bg-linear-to-br from-cyan-600 to-blue-600 text-white">
         <div className="max-w-7xl animate-fade-in mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <Button
-            variant="ghost"
             onClick={() => router.back()}
-            className="text-white cursor-pointer hover:bg-white/10 mb-8 -ml-2"
+            className="group inline-flex items-center mb-4 gap-2 rounded-full bg-white/70 backdrop-blur px-5 py-2.5 text-gray-800 font-medium shadow-lg  transition-all duration-300 hover:bg-white hover:shadow-xl active:scale-95"
           >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Kembali ke Beranda
+            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-linear-to-br from-cyan-500 to-blue-500 text-white transition-transform group-hover:-translate-x-1">
+              <ArrowLeft size={16} />
+            </span>
+            <span>Kembali</span>
           </Button>
 
           <div className="mb-8">
