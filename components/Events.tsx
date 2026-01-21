@@ -82,8 +82,8 @@ export function Events() {
                       setLoadingId(null);
                     }}
                     className={`mt-auto w-full text-white ${event.is_registered
-                        ? "bg-red-500 hover:bg-red-600"
-                        : "bg-linear-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500"
+                        ? "bg-red-500 hover:bg-red-600" // jika true → Batalkan Pendaftaran
+                        : "bg-linear-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500" // jika false → Daftar Sekarang
                       }`}
                   >
                     {isLoading
@@ -92,6 +92,8 @@ export function Events() {
                         ? "Batalkan Pendaftaran"
                         : "Daftar Sekarang"}
                   </Button>
+
+
                 </CardContent>
               </Card>
             );

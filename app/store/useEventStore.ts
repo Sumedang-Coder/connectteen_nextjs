@@ -50,17 +50,24 @@ export const useEventStore = create<EventState>((set, get) => ({
   loading: false,
   error: null,
 
-  fetchEvents: async () => {
-    try {
-      set({ loading: true, error: null });
-      const res = await api.get("/events");
-      set({ events: res.data.data || [] });
-    } catch (err: any) {
-      set({ error: err?.response?.data?.message || "Fetch events failed" });
-    } finally {
-      set({ loading: false });
-    }
-  },
+ fetchEvents: async () => {
+  try {
+    set({ loading: true, error: null });
+    const res = await api.get("/events");
+    // pastikan state memakai isRegistered dari backend
+    set({
+      events: res.data.data.map((e: any) => ({
+        ...e,
+        is_registered: e.isRegistered, // ini harus sinkron
+      })),
+    });
+  } catch (err: any) {
+    set({ error: err?.response?.data?.message || "Fetch events failed" });
+  } finally {
+    set({ loading: false });
+  }
+},
+
 
   fetchEventById: async (id) => {
     try {
@@ -104,7 +111,7 @@ export const useEventStore = create<EventState>((set, get) => ({
             : e
         ),
       });
-
+console.log("Toggle response:", res.data);
       toast.success(DataRegis);
     } catch (err: any) {
       const message = err?.response?.data?.message || "Aksi gagal";
