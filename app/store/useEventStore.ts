@@ -88,27 +88,24 @@ export const useEventStore = create<EventState>((set, get) => ({
         return;
       }
 
-const isRegistered = res.data.isRegistered;
+      // Ambil data backend
+      const eventData = res.data.data;
+      const DataRegis = res.data.message;
 
       set({
-  events: get().events.map((e) =>
-    e.id === eventId
-      ? {
-          ...e,
-          is_registered: isRegistered,
-          registrants_count:
-            res.data.registrants_count !== undefined
-              ? res.data.registrants_count
-              : e.registrants_count,
-        }
-      : e
-  ),
-});
+        events: get().events.map((e) =>
+          e.id === eventId
+            ? {
+              ...e,
+              is_registered: eventData.isRegistered,
+              registrants_count:
+                eventData.registrants_count ?? e.registrants_count,
+            }
+            : e
+        ),
+      });
 
-
-      toast.success(
-        isRegistered ? "Berhasil daftar event 🎉" : "Pendaftaran dibatalkan"
-      );
+      toast.success(DataRegis);
     } catch (err: any) {
       const message = err?.response?.data?.message || "Aksi gagal";
       set({ error: message });
@@ -117,6 +114,7 @@ const isRegistered = res.data.isRegistered;
       set({ loading: false });
     }
   },
+
 
 
   createEvent: async (formData) => {
@@ -151,7 +149,7 @@ const isRegistered = res.data.isRegistered;
           e.id === id
             ? {
               ...e,
-              ...res.data.data, 
+              ...res.data.data,
             }
             : e
         ),
