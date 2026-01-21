@@ -15,13 +15,26 @@ export default function MessageDetailPage() {
 
   const { selectedMessage, fetchMessageById } = useMessageStore();
 
-  useEffect(() => {
-    if (id) fetchMessageById(id as string);
-  }, [id, fetchMessageById]);
+useEffect(() => {
+  if (id) fetchMessageById(id as string)
 
-  if (!selectedMessage) {
-    return null
+  return () => {
+    useMessageStore.setState({ selectedMessage: null })
   }
+}, [id, fetchMessageById])
+
+if (!selectedMessage) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-cyan-100 via-blue-100 to-white">
+      <div className="animate-pulse text-center space-y-4">
+        <div className="h-10 w-10 mx-auto rounded-full bg-blue-300" />
+        <p className="text-blue-600 font-medium">Memuat pesan...</p>
+      </div>
+    </div>
+  )
+}
+
+
 
   const avatarLetter =
     selectedMessage.recipient_name?.charAt(0).toUpperCase() || "?";
@@ -29,7 +42,7 @@ export default function MessageDetailPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-cyan-100 via-blue-100 to-white px-4 py-12">
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
 
         {/* Back Button */}
         <Button
@@ -68,11 +81,13 @@ export default function MessageDetailPage() {
             {selectedMessage.song_id && (
               <div className="rounded-2xl flex flex-col h-full items-center justify-center p-4 overflow-hidden border border-cyan-200 shadow-md bg-white">
                 <iframe
+                  key={selectedMessage.song_id}
                   src={`https://open.spotify.com/embed/track/${selectedMessage.song_id}`}
                   className="w-full h-40"
                   allow="encrypted-media"
                   loading="lazy"
                 />
+
               </div>
             )}
 

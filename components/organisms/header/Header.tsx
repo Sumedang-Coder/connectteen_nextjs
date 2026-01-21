@@ -6,6 +6,35 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/app/store/useAuthStore";
 
+function Avatar({ name, src, className }: { name: string; src?: string; className?: string }) {
+  const [imgSrc, setImgSrc] = useState(src);
+
+  const initials = name
+    .split(" ")
+    .map(n => n[0])
+    .join("")
+    .toUpperCase();
+
+  const bgColors = ["bg-blue-400", "bg-green-400", "bg-red-400", "bg-yellow-400", "bg-purple-400"];
+  const colorIndex = name.charCodeAt(0) % bgColors.length;
+  const bgColor = bgColors[colorIndex];
+
+  return imgSrc ? (
+    <img
+      src={imgSrc}
+      alt={name}
+      className={className}
+      onError={() => setImgSrc("")} 
+    />
+  ) : (
+    <div
+      className={`${bgColor} ${className} flex items-center justify-center text-white font-semibold`}
+    >
+      {initials}
+    </div>
+  );
+}
+
 export function Header() {
   const router = useRouter();
   const pathname = usePathname();
@@ -67,7 +96,7 @@ export function Header() {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-2">
-                <img src={user.avatarUrl} alt={user.name} className="w-8 h-8 rounded-full" />
+                <Avatar name={user.name} src={user.avatarUrl} className="w-8 h-8 rounded-full" />
                 <span className="font-medium">{user.name}</span>
                 <Button
                   variant="ghost"
@@ -77,10 +106,9 @@ export function Header() {
                 >
                   <LogOut className="w-5 h-5 text-red-500" />
                 </Button>
-
               </div>
             ) : (
-              <Button onClick={() => router.push("/signin")} variant="ghost" className="hover:bg-blue-100">
+              <Button onClick={() => router.push("/signin")} variant="ghost" className="hover:bg-blue-100 font-bold">
                 Sign In
               </Button>
             )}
@@ -103,7 +131,7 @@ export function Header() {
             <div className="pt-2">
               {user ? (
                 <div className="flex items-center gap-2">
-                  <img src={user.avatarUrl} alt={user.name} className="w-8 h-8 rounded-full" />
+                  <Avatar name={user.name} src={user.avatarUrl} className="w-8 h-8 rounded-full" />
                   <span className="font-medium">{user.name}</span>
                   <Button
                     variant="ghost"
@@ -113,10 +141,9 @@ export function Header() {
                   >
                     <LogOut className="w-5 h-5 text-red-500" />
                   </Button>
-
                 </div>
               ) : (
-                <Button onClick={() => router.push("/signin")} variant="ghost" className="w-full hover:bg-blue-100">
+                <Button onClick={() => router.push("/signin")} variant="ghost" className="w-full font-bold hover:bg-blue-100">
                   Sign In
                 </Button>
               )}
@@ -124,6 +151,7 @@ export function Header() {
           </div>
         </nav>
 
+        {/* LOGOUT MODAL */}
         {showLogoutModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 min-h-screen animate-fade-in duration-100">
             <div className="bg-white rounded-xl shadow-lg p-6 w-80 flex flex-col gap-4">
@@ -140,8 +168,8 @@ export function Header() {
                 </Button>
                 <Button
                   variant="destructive"
-                onClick={() => {
-                  logout();
+                  onClick={() => {
+                    logout();
                     setShowLogoutModal(false);
                   }}
                   className="px-4"
@@ -152,7 +180,6 @@ export function Header() {
             </div>
           </div>
         )}
-
       </div>
     </header>
   );

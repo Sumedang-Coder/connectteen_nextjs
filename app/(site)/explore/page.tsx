@@ -31,7 +31,7 @@ export default function ExplorePage() {
     <div className="min-h-screen bg-white">
       {/* HERO */}
       <div className="bg-linear-to-br from-cyan-600 to-blue-600 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-16 grid lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-6 py-16 grid lg:grid-cols-2 gap-12 animate-fade-in items-center">
           <div>
             <h2 className="text-4xl mb-4">Jelajahi Pesan</h2>
             <p className="text-cyan-50 mb-8">
@@ -63,7 +63,7 @@ export default function ExplorePage() {
       </div>
 
       {/* CONTENT */}
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-6xl mx-auto px-6 py-12 animate-fade-in">
         <h2 className="text-2xl mb-6">Semua Pesan</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

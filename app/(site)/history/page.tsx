@@ -63,19 +63,11 @@ export default function HistoryPage() {
   }, [isAuthenticated, router])
 
 
-  if (loadingData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500">
-        Memuat history...
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-white">
       {/* HERO */}
       <div className="bg-linear-to-br from-cyan-600 to-blue-600 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-14 grid lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl animate-fade-in mx-auto px-6 py-14 grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="text-4xl mb-2">
               History Pesan {user?.name}
@@ -94,23 +86,23 @@ export default function HistoryPage() {
               />
             </div>
           </div>
-
-          <div className="relative h-80 rounded-xl overflow-hidden shadow-2xl">
+           <div className="relative h-80 rounded-xl  hidden md:block overflow-hidden shadow-2xl">
 
             <Image
-              src="/img/hero-history.jpg"
+              src="/img/hero2.jpg"
               alt="History"
               fill
               priority
               className="object-cover"
             />
           </div>
+
         </div>
       </div>
 
       {/* CONTENT */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="mb-6">
+        <div className="mb-6 animate-fade-in">
           <h2 className="text-2xl mb-1">
             {searchQuery
               ? `Hasil Pencarian (${filteredMessages.length})`
@@ -122,11 +114,11 @@ export default function HistoryPage() {
         </div>
 
         {filteredMessages.length === 0 ? (
-          <div className="text-center py-16 text-gray-500">
+          <div className="text-center py-16 animate-fade-in text-gray-500">
             Tidak ada pesan yang cocok
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 animate-fade-in md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredMessages.map((msg) => (
 
               <Card

@@ -16,7 +16,7 @@ export default function Auth({ onClick }: AuthProps) {
   }, []);
 
   return (
-    <div className={`min-h-screen pt-32 flex items-start justify-center bg-linear-to-br from-gray-50 to-cyan-50 px-10
+    <div className={`min-h-screen pt-32 flex items-start justify-center bg-linear-to-br from-cyan-100 via-blue-100 to-white px-10
     transition-all duration-500 ease-out
     ${mounted ? "opacity-100 translate-0" : "opacity-0 -translate-y-6"}`}>
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-8 flex flex-col gap-6">

@@ -27,16 +27,32 @@ export const NAV_DATA = [
         items: [],
       },
       {
+        title: "Table Article",
+        url: "/admin/components/Tables/articles-table",
+        icon: Icons.Table,
+        items: [],
+      },
+      {
+        title: "Table Events",
+        url: "/admin/components/Tables/events-table",
+        icon: Icons.Table,
+        items: [],
+      },
+      {
         title: "Forms",
         icon: Icons.Alphabet,
         items: [
           {
-            title: "Form Elements",
-            url: "/admin/page/forms/form-elements",
+            title: "Send Article",
+            url: "/admin/page/forms/sending-article",
           },
           {
             title: "Form Layout",
             url: "/admin/page/forms/form-layout",
+          },
+          {
+            title: "Send Event",
+            url: "/admin/page/forms/sending-event",
           },
         ],
       },

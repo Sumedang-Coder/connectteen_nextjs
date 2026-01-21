@@ -24,21 +24,6 @@ export function RecentPosts() {
     load();
   }, [fetchMessages]);
 
-  if (loading) {
-    return (
-      <div className="py-12 text-center text-gray-500">
-        Loading messages...
-      </div>
-    );
-  }
-
-  if (!messages || messages.length === 0) {
-    return (
-      <p className="text-center text-gray-500">
-        Belum ada pesan terbaru.
-      </p>
-    );
-  }
 
   return (
     <section className="relative px-6 pt-10 pb-16 bg-linear-to-b from-white/20 to-white animate-fade-in">

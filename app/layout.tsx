@@ -11,8 +11,8 @@ const zenMaru = Zen_Maru_Gothic({
 });
 
 export const metadata: Metadata = {
-  title: "ConnectTeen Community",
-  description: "Platform komunitas untuk remaja Indonesia",
+  title: "Connectteen",
+  description: "Kita terhubung untuk menginspirasi. Sebuah komunitas bagi remaja untuk berbagi cerita, belajar, dan tumbuh bersama.",
 };
 
 export default function RootLayout({
@@ -23,7 +23,6 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning className={zenMaru.className}>
       <body>
-        {/* AuthProvider membungkus konten aplikasi */}
         <AuthProvider>{children}</AuthProvider>
 
         <Toaster richColors position="top-center" />

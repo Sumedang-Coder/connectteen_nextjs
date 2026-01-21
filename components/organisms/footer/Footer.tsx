@@ -1,5 +1,6 @@
 import { Mail, Facebook, Twitter, Instagram, Heart } from "lucide-react";
 import { Button } from "../../ui/button";
+import Image from "next/image";
 
 export function Footer() {
   return (
@@ -7,12 +8,19 @@ export function Footer() {
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="animate-fade-in">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="bg-white/20 backdrop-blur-lg rounded-full border-2 border-white/40">
-                <img src="img/connectteen_icon.jpg" className="w-9 h-9 rounded-full" />
+            <div className="flex items-center gap-2 mb-4"> 
+              <div className="bg-white/20 backdrop-blur-lg rounded-full border-2 border-white/40 p-0.5">
+                <Image
+                  src="/img/connectteen_icon.jpg"
+                  alt="ConnectTeen Logo"
+                  width={36}
+                  height={36}
+                  className="rounded-full"
+                />
               </div>
               <span className="text-xl">ConnectTeen</span>
             </div>
+
             <p className="text-white/80 text-sm">
               Membangun komunitas yang aman dan suportif bagi para remaja untuk terhubung dan tumbuh bersama. 💙
             </p>
@@ -41,10 +49,10 @@ export function Footer() {
           </div>
 
           <div className="animate-fade-in">
-              <h3 className="mb-4">Stay Connected 🌟</h3>
-              <p className="text-white/80 text-sm mb-4">
-                Ikuti kami di media sosial untuk mendapatkan pembaruan dan sorotan komunitas
-              </p>
+            <h3 className="mb-4">Stay Connected 🌟</h3>
+            <p className="text-white/80 text-sm mb-4">
+              Ikuti kami di media sosial untuk mendapatkan pembaruan dan sorotan komunitas
+            </p>
             <div className="flex gap-2">
               <Button variant="ghost" size="icon" className="hover:bg-white/20 border-2 border-white/30">
                 <Facebook className="w-5 h-5" />
@@ -67,7 +75,7 @@ export function Footer() {
             Made with <Heart className="w-4 h-4 text-red-300 fill-red-300" />
           </p>
           <p>
-            for our teen community © 2025 ConnectTeen
+            for our teen community © 2026 ConnectTeen
           </p>
         </div>
       </div>

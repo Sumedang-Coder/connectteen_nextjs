@@ -116,7 +116,7 @@ setEditingUser(user)
               <TableCell>
                 <div
                   className={cn(
-                    "max-w-fit bg-[#219653]/[0.08] rounded-full px-3.5 py-1 text-sm font-medium text-[#219653]",
+                    "max-w-fit bg-[#219653]/8 rounded-full px-3.5 py-1 text-sm font-medium text-[#219653]",
                   )}
                 >
                   {item.role}

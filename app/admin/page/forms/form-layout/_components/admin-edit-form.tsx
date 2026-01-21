@@ -54,7 +54,7 @@ setLoading(true)
   }
 
   return (
-    <ShowcaseSection title="Admin Edit Form" className="!p-6.5">
+    <ShowcaseSection title="Admin Edit Form" className="p-6.5!">
       <form onSubmit={handleSubmit}>
         <InputGroup
           label="Name"
