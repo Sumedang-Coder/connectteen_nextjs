@@ -61,7 +61,9 @@ export function Footer() {
                 <Twitter className="w-5 h-5" />
               </Button>
               <Button variant="ghost" size="icon" className="hover:bg-white/20 border-2 border-white/30">
-                <Instagram className="w-5 h-5" />
+                <a href="https://www.instagram.com/connect.teen_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==">
+                  <Instagram className="w-5 h-5" />
+                </a>
               </Button>
               <Button variant="ghost" size="icon" className="hover:bg-white/20 border-2 border-white/30">
                 <Mail className="w-5 h-5" />

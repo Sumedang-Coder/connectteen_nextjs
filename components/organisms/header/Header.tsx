@@ -102,13 +102,13 @@ export function Header() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowLogoutModal(true)}
-                  className="hover:bg-red-100"
+                  className="hover:bg-red-100 cursor-pointer"
                 >
                   <LogOut className="w-5 h-5 text-red-500" />
                 </Button>
               </div>
             ) : (
-              <Button onClick={() => router.push("/signin")} variant="ghost" className="hover:bg-blue-100 font-bold">
+              <Button onClick={() => router.push("/signin")} variant="ghost" className="hover:bg-blue-100 cursor-pointer font-bold">
                 Sign In
               </Button>
             )}

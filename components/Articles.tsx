@@ -17,6 +17,9 @@ export function Articles() {
     fetchArticles({ limit: 3 })
   }, [])
 
+  if (loading) {
+    return <Loader size="md" fullScreen/>
+  }
 
   return (
     <section className="py-14 px-6 bg-gray-50 relative overflow-hidden animate-fade-in">
@@ -41,8 +44,9 @@ export function Articles() {
         <div className="grid grid-cols-1 md:grid-cols-2 px-3 lg:grid-cols-3 md:px-15 gap-6">
           {articles.map((article: Article) => (
             <Card
+            onClick={() => router.push(`/articles/${article.id}`)}
               key={article.id}
-              className="flex flex-col overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-white shadow-md bg-white"
+              className="flex flex-col cursor-pointer overflow-hidden hover:shadow-xl transition-all hover:-translate-y-1 border-2 border-white shadow-md bg-white"
             >
               <div className="h-1 bg-linear-to-r from-blue-400 to-blue-600" />
 
@@ -50,16 +54,16 @@ export function Articles() {
                 <img
                   src={article.image_url || "/placeholder.jpg"}
                   alt={article.title}
-                  className="w-full h-full rounded-3xl p-2 object-cover"
+                  className="w-full h-full rounded-3xl px-2 object-cover"
                 />
               </AspectRatio>
 
               <div className="flex-1 px-4 space-y-1">
-                <h3 className="text-sm font-semibold line-clamp-2">
+                <h3 className="text-md font-semibold line-clamp-2">
                   {article.title}
                 </h3>
 
-                <p className="text-xs text-muted-foreground line-clamp-3">
+                <p className="text-sm text-muted-foreground line-clamp-3">
                   {article.description}
                 </p>
               </div>
@@ -67,7 +71,6 @@ export function Articles() {
               <div className="mt-auto flex justify-between items-center px-4 pb-4">
                 <Button
                   variant="link"
-                  onClick={() => router.push(`/articles/${article.id}`)}
                   className="p-0 pointer-cursor gap-1 text-sm text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-blue-600"
                 >
                   Baca selengkapnya

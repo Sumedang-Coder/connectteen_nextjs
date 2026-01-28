@@ -54,11 +54,10 @@ export const useEventStore = create<EventState>((set, get) => ({
   try {
     set({ loading: true, error: null });
     const res = await api.get("/events");
-    // pastikan state memakai isRegistered dari backend
     set({
       events: res.data.data.map((e: any) => ({
         ...e,
-        is_registered: e.isRegistered, // ini harus sinkron
+        is_registered: e.isRegistered,
       })),
     });
   } catch (err: any) {
@@ -95,7 +94,6 @@ export const useEventStore = create<EventState>((set, get) => ({
         return;
       }
 
-      // Ambil data backend
       const eventData = res.data.data;
       const DataRegis = res.data.message;
 
@@ -111,7 +109,6 @@ export const useEventStore = create<EventState>((set, get) => ({
             : e
         ),
       });
-console.log("Toggle response:", res.data);
       toast.success(DataRegis);
     } catch (err: any) {
       const message = err?.response?.data?.message || "Aksi gagal";

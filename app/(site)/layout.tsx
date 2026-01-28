@@ -10,7 +10,7 @@ const zenMaru = Zen_Maru_Gothic({
 });
 
 export const metadata: Metadata = {
-  title: "ConnectTeen Community",
+  title: "Connectteen",
   description: "Platform komunitas untuk remaja Indonesia",
 };
 

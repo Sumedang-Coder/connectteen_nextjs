@@ -106,16 +106,16 @@ export default function ArticlesPage() {
                   <img
                     src={article.image_url || "/placeholder.jpg"}
                     alt={article.title}
-                    className="w-full h-full rounded-3xl p-2 object-cover"
+                    className="w-full h-full rounded-3xl px-2 object-cover"
                   />
                 </AspectRatio>
 
                 <div className="flex-1 px-4 space-y-1">
-                  <h3 className="text-sm font-semibold line-clamp-2">
+                  <h3 className="text-md font-semibold line-clamp-2">
                     {article.title}
                   </h3>
 
-                  <p className="text-xs text-muted-foreground line-clamp-3">
+                  <p className="text-sm text-muted-foreground line-clamp-3">
                     {article.description}
                   </p>
                 </div>

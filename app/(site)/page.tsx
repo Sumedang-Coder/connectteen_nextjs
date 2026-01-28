@@ -6,6 +6,7 @@ import { RecentPosts } from "@/components/RecentPosts";
 import { Articles } from "@/components/Articles";
 import { Events } from "@/components/Events";
 import { useAuthStore } from "@/app/store/useAuthStore";
+import Loader from "@/components/Loader";
 
 export default function HomePage() {
   useEffect(() => {

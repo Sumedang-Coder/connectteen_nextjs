@@ -54,7 +54,7 @@ export default function ArticleDetailPage() {
 
         <Button
           onClick={() => router.back()}
-          className="absolute top-6 left-6 group inline-flex items-center mb-4 gap-2 rounded-full bg-white/70 backdrop-blur px-5 py-2.5 text-gray-800 font-medium shadow-lg transition-all duration-300 hover:bg-white hover:shadow-xl active:scale-95"
+          className="absolute cursor-pointer top-6 left-6 group inline-flex items-center mb-4 gap-2 rounded-full bg-white/70 backdrop-blur px-5 py-2.5 text-gray-800 font-medium shadow-lg transition-all duration-300 hover:bg-white hover:shadow-xl active:scale-95"
         >
           <span className="flex items-center justify-center w-8 h-8 rounded-full bg-linear-to-br from-cyan-500 to-blue-500 text-white transition-transform group-hover:-translate-x-1">
             <ArrowLeft size={16} />
@@ -65,9 +65,11 @@ export default function ArticleDetailPage() {
 
       {/* CONTENT */}
       <div className="max-w-4xl mx-auto px-6 md:px-0 py-12 text-justify prose prose-lg prose-slate dark:prose-invert">
+        <div className="bg-white p-6 rounded-lg shadow-lg">
         {article.description.split("\n").map((line, i) => (
           <p key={i}>{line}</p>
         ))}
+        </div>
       </div>
 
     </div>

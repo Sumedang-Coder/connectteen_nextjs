@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "./ui/card";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { useMessageStore } from "@/app/store/useMessageStore";
 import { useRouter } from "next/navigation";
+import Loader from "./Loader";
 
 export function RecentPosts() {
   const [loading, setLoading] = useState(true);
@@ -23,6 +24,10 @@ export function RecentPosts() {
     };
     load();
   }, [fetchMessages]);
+
+  if (loading) {
+    return <Loader size="md" fullScreen/>;
+  }
 
 
   return (
