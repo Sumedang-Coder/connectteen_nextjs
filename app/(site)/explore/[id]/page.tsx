@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMessageStore } from "@/app/store/useMessageStore";
+import Loader from "@/components/Loader";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -24,17 +25,8 @@ useEffect(() => {
 }, [id, fetchMessageById])
 
 if (!selectedMessage) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-cyan-100 via-blue-100 to-white">
-      <div className="animate-pulse text-center space-y-4">
-        <div className="h-10 w-10 mx-auto rounded-full bg-blue-300" />
-        <p className="text-blue-600 font-medium">Memuat pesan...</p>
-      </div>
-    </div>
-  )
+  return <Loader size="sm" fullScreen/>
 }
-
-
 
   const avatarLetter =
     selectedMessage.recipient_name?.charAt(0).toUpperCase() || "?";

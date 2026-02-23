@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../globals.css";
 import { Zen_Maru_Gothic } from "next/font/google";
 import { SiteLayout } from "@/components/templates/site-layout";
+import NextTopLoader from "nextjs-toploader";
 
 const zenMaru = Zen_Maru_Gothic({
   subsets: ["latin"],
@@ -10,17 +11,21 @@ const zenMaru = Zen_Maru_Gothic({
 });
 
 export const metadata: Metadata = {
-  title: "Connectteen",
-  description: "Platform komunitas untuk remaja Indonesia",
+  title: "ConnectTeen",
+  description: "Kita terhubung untuk menginspirasi. Sebuah komunitas bagi remaja untuk berbagi cerita, belajar, dan tumbuh bersama.",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>)
- {
-  return <SiteLayout>
-          {children}
-    </SiteLayout>;
+}>) {
+  return (
+    <>
+      <NextTopLoader />
+      <SiteLayout>
+        {children}
+      </SiteLayout>
+    </>
+  );
 }
