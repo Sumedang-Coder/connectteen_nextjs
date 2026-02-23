@@ -17,7 +17,7 @@ export default function AboutUs() {
                 <div className="mx-52">
                 <h1 className="text-4xl font-bold text-center mt-10">ConnectTeen</h1>
                 <p className="text-center mt-4 mx-4">
-                    Kita terhubung untuk menginspirasi
+                    Kita terhubung untuk menginspirasi tetew
                 </p>
                 </div>
             </div>
