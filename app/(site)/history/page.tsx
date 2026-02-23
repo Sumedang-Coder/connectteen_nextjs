@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Music, LogOut, Search, Trash2 } from "lucide-react"
+import Loader from "@/components/Loader"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
@@ -49,18 +50,22 @@ export default function HistoryPage() {
     : myMessages
 
   if (loadingAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500">
-        Memuat sesi...
-      </div>
-    )
+    return <Loader size="sm" fullScreen />
   }
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated) return
+
+    fetchMyMessages().finally(() => setLoadingData(false))
+  }, [isAuthenticated, fetchMyMessages])
+
+  useEffect(() => {
+    if (!loadingAuth && !isAuthenticated) {
       router.replace('/signin')
     }
-  }, [isAuthenticated, router])
+  }, [loadingAuth, isAuthenticated, router])
+
+
 
 
   return (
@@ -86,7 +91,7 @@ export default function HistoryPage() {
               />
             </div>
           </div>
-           <div className="relative h-80 rounded-xl  hidden md:block overflow-hidden shadow-2xl">
+          <div className="relative h-80 rounded-xl  hidden md:block overflow-hidden shadow-2xl">
 
             <Image
               src="/img/hero2.jpg"
