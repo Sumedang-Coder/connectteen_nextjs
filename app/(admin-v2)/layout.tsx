@@ -66,6 +66,13 @@ export default function AdminV2Layout({
   const { user, logout } = useAuthStore();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isFabOpen, setIsFabOpen] = useState(false);
+
+  // Close FAB and Sidebar when route changes
+  useEffect(() => {
+    setIsFabOpen(false);
+    setIsSidebarOpen(false);
+  }, [pathname]);
 
   const handleLogout = async () => {
     await logout();
@@ -221,12 +228,30 @@ export default function AdminV2Layout({
       )}
 
       {/* Floating Action Button (Matches Dashboard Design) */}
-      {(pathname === "/dashboard" || pathname === "/manage-articles" || pathname === "/manage-events") && (
-        <div className="fixed bottom-8 right-8 z-50 group">
-          <button className="flex items-center justify-center w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg shadow-blue-500/40 hover:bg-blue-700 hover:scale-105 transition-all duration-200">
+      {pathname === "/dashboard" && (
+        <div className="fixed bottom-8 right-8 z-50">
+          {/* Backdrop for FAB to close on click outside (mobile friendly) */}
+          {isFabOpen && (
+            <div
+              className="fixed inset-0 z-[-1]"
+              onClick={() => setIsFabOpen(false)}
+            />
+          )}
+
+          <button
+            onClick={() => setIsFabOpen(!isFabOpen)}
+            className={`flex items-center justify-center w-14 h-14 text-white rounded-full shadow-lg shadow-blue-500/40 hover:scale-105 transition-all duration-200 ${isFabOpen ? 'bg-slate-800 rotate-45' : 'bg-blue-600'
+              }`}
+          >
             <Plus size={28} />
           </button>
-          <div className="absolute bottom-16 right-0 flex flex-col items-end gap-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 translate-y-2 group-hover:translate-y-0">
+
+          <div
+            className={`absolute bottom-16 right-0 flex flex-col items-end gap-2 transition-all duration-200 ${isFabOpen
+              ? "opacity-100 translate-y-0 pointer-events-auto"
+              : "opacity-0 translate-y-2 pointer-events-none"
+              }`}
+          >
             <Link
               href="/create-event"
               className="flex items-center gap-2 px-4 py-2 bg-white text-slate-700 text-sm font-medium rounded-lg shadow-lg border border-slate-200 hover:bg-slate-50 whitespace-nowrap"

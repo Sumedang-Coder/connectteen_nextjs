@@ -11,6 +11,9 @@ export interface Event {
   description: string;
   location: string;
   date: string;
+  quota: number;
+  status: "open" | "full" | "closed";
+  visibility: "public" | "private";
   image_url?: string;
   registrants_count?: number;
   is_registered?: boolean;
@@ -33,7 +36,13 @@ interface EventState {
   loading: boolean;
   error: string | null;
 
-  fetchEvents: () => Promise<void>;
+  pagination: {
+    totalEvents: number;
+    totalPages: number;
+    currentPage: number;
+    limit: number;
+  };
+  fetchEvents: (params?: { limit?: number; search?: string; page?: number; sort?: string }) => Promise<void>;
   fetchEventById: (id: string) => Promise<void>;
   toggleRegisterEvent: (eventId: string) => Promise<void>;
   createEvent: (formData: FormData) => Promise<boolean>;
@@ -44,40 +53,28 @@ interface EventState {
 
 
 export const useEventStore = create<EventState>((set, get) => ({
-  events: [
-    {
-      id: "1",
-      event_title: "Youth Empowerment Summit 2026",
-      description: "A full-day event dedicated to empowering the next generation of leaders with workshops and networking.",
-      location: "Jakarta Convention Center",
-      date: "2026-05-15",
-      image_url: "https://images.unsplash.com/photo-1540575861501-7ad0582371f3?q=80&w=2070&auto=format&fit=crop",
-      registrants_count: 156
-    },
-    {
-      id: "2",
-      event_title: "Tech For Good Hackathon",
-      description: "Join us for a 48-hour challenge to build solutions for local community problems.",
-      location: "Online / Virtual",
-      date: "2026-06-20",
-      image_url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=2070&auto=format&fit=crop",
-      registrants_count: 89
-    }
-  ],
+  events: [],
   event: null,
   registrants: [],
-  loading: false,
+  loading: true,
   error: null,
+  pagination: {
+    totalEvents: 0,
+    totalPages: 0,
+    currentPage: 1,
+    limit: 10,
+  },
 
-  fetchEvents: async () => {
+  fetchEvents: async (params) => {
     try {
       set({ loading: true, error: null });
-      const res = await api.get("/events");
+      const res = await api.get("/events", { params });
       set({
         events: res.data.data.map((e: any) => ({
           ...e,
           is_registered: e.isRegistered,
         })),
+        pagination: res.data.pagination || get().pagination
       });
     } catch (err: any) {
       set({ error: err?.response?.data?.message || "Fetch events failed" });

@@ -1,169 +1,188 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useState } from "react";
 import {
     Search,
     Trash2,
     Music,
     Mail,
-    UserX,
     ChevronRight,
-    Eye
+    Eye,
+    ChevronLeft,
+    ArrowUpDown,
+    Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-
-// Local dummy data for visualization
-const DUMMY_MESSAGES = [
-    {
-        id: "1",
-        recipient_name: "Admin",
-        message: "This is a secret message from a mysterious supporter. Keep up the great work and the community summit was amazing!",
-        song_id: "spotify:track:4cOdK97xlZST91Zyd6P1iB",
-        song_name: "Starboy",
-        song_artist: "The Weeknd",
-        song_image: "https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258cf7ac552",
-        created_at: new Date().toISOString()
-    },
-    {
-        id: "2",
-        recipient_name: "Moderator",
-        message: "I really appreciated the technical workshop last week. Can we do more sessions on React and Zustand?",
-        song_id: "",
-        song_name: "",
-        song_artist: "",
-        song_image: "",
-        created_at: new Date(Date.now() - 3600000).toISOString()
-    },
-    {
-        id: "3",
-        recipient_name: "Community",
-        message: "Anonymous feedback: The new event registration flow is much smoother now. Kudos to the dev team!",
-        song_id: "spotify:track:1799B7z6p3YFMTg38py76C",
-        song_name: "Sunflower",
-        song_artist: "Post Malone",
-        song_image: "https://i.scdn.co/image/ab67616d0000b273e351368686e584f183707248",
-        created_at: new Date(Date.now() - 86400000).toISOString()
-    }
-];
+import PaginationComponent from "@/components/PaginationComponent";
+import { useMessageStore } from "@/app/store/useMessageStore";
 
 export default function SecretMessagesPage() {
     const [searchTerm, setSearchTerm] = useState("");
-    const allMessages = DUMMY_MESSAGES;
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [sortBy, setSortBy] = useState("-createdAt");
+    const [currentPage, setCurrentPage] = useState(1);
 
-    const handleDelete = async (title: string) => {
+    const { allMessages, loading, pagination, fetchAllMessages, deleteMessage } = useMessageStore();
+
+    // Debounce search term
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchTerm);
+            setCurrentPage(1); // Reset to first page on search
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    // Fetch messages on criteria change
+    useEffect(() => {
+        fetchAllMessages({
+            search: debouncedSearch,
+            sort: sortBy,
+            page: currentPage,
+            limit: 10
+        });
+    }, [debouncedSearch, sortBy, currentPage, fetchAllMessages]);
+
+    const handleDelete = async (id: string) => {
         if (confirm(`Are you sure you want to delete this secret message?`)) {
-            toast.success("Visualization: Message deletion simulated.");
+            toast.promise(deleteMessage(id), {
+                loading: 'Deleting message...',
+                success: 'Message deleted successfully',
+                error: 'Failed to delete message'
+            });
         }
     };
 
-    const filteredMessages = allMessages.filter(msg =>
-        msg.recipient_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        msg.message?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
     return (
-        <div className="flex flex-col h-full overflow-hidden bg-[#f6f7f8] font-display selection:bg-blue-500/20 selection:text-blue-500">
+        <div className="flex flex-col h-full overflow-hidden bg-[#f6f7f8] font-display selection:bg-blue-500/20 selection:text-blue-500 relative">
+            {/* Minimalist Loading Overlay */}
+            {loading && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-[2px] transition-all duration-300">
+                    <div className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-white shadow-xl border border-slate-100">
+                        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                        <span className="text-sm font-bold text-slate-600 tracking-tight">Updating Inbox...</span>
+                    </div>
+                </div>
+            )}
+
             <main className="flex-1 overflow-y-auto px-4 py-8 lg:px-12 lg:py-10">
                 <div className="mx-auto max-w-5xl">
                     {/* Header Section */}
                     <header className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                         <div>
-                            <h2 className="text-3xl font-black tracking-tight text-slate-900 md:text-4xl">Secret Messages</h2>
-                            <p className="mt-2 text-slate-500">View and manage confidential admin communications securely.</p>
+                            <h2 className="text-3xl font-black tracking-tight text-slate-900 md:text-4xl text-transparent bg-clip-text bg-gradient-to-br from-slate-900 to-slate-600">Admin Private Inbox</h2>
+                            <p className="mt-2 text-slate-500 font-medium">Access confidential communications sent directly to you.</p>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <span className="text-sm font-medium text-slate-500">Sort by:</span>
-                            <select className="rounded-lg border-slate-200 bg-white py-2 pl-3 pr-10 text-sm font-medium text-slate-700 focus:border-blue-500 focus:ring-blue-500 transition-colors cursor-pointer">
-                                <option>Newest First</option>
-                                <option>Oldest First</option>
-                                <option>Unread</option>
+                        <div className="flex items-center gap-3 bg-white p-1.5 rounded-xl shadow-sm border border-slate-200/60">
+                            <span className="pl-2 text-xs font-bold uppercase tracking-wider text-slate-400">Sort by</span>
+                            <div className="h-4 w-px bg-slate-200"></div>
+                            <select
+                                value={sortBy}
+                                onChange={(e) => {
+                                    setSortBy(e.target.value);
+                                    setCurrentPage(1);
+                                }}
+                                className="border-none bg-transparent py-1.5 pl-2 pr-8 text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer appearance-none"
+                            >
+                                <option value="-createdAt">Newest First</option>
+                                <option value="createdAt">Oldest First</option>
                             </select>
+                            <ArrowUpDown size={14} className="mr-2 text-slate-400" />
                         </div>
                     </header>
 
                     {/* Search Bar */}
-                    <div className="mb-8 rounded-xl bg-white p-2 shadow-sm ring-1 ring-slate-200/60">
+                    <div className="mb-8 group focus-within:ring-2 focus-within:ring-blue-500/20 transition-all rounded-2xl bg-white p-2 shadow-sm border border-slate-200/60">
                         <div className="relative flex w-full items-center">
-                            <Search className="absolute left-4 text-slate-400" size={20} />
+                            <Search className="absolute left-4 text-slate-400 transition-colors group-focus-within:text-blue-500" size={20} />
                             <input
                                 type="text"
-                                placeholder="Search by sender or content..."
+                                placeholder="Search by message content..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="h-12 w-full rounded-lg border-none bg-transparent pl-12 pr-4 text-slate-900 placeholder-slate-400 focus:ring-0"
+                                className="h-12 w-full rounded-xl border-none bg-transparent pl-12 pr-4 text-slate-900 placeholder-slate-400 focus:ring-0 font-medium"
                             />
-                            <button className="mr-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700">Search</button>
+                            {searchTerm && (
+                                <button
+                                    onClick={() => setSearchTerm("")}
+                                    className="mr-2 px-3 py-1 text-xs font-bold text-slate-400 hover:text-slate-600 uppercase tracking-wider transition-colors"
+                                >
+                                    Clear
+                                </button>
+                            )}
                         </div>
                     </div>
 
                     {/* Messages List */}
                     <div className="flex flex-col gap-4">
-                        {filteredMessages.length === 0 ? (
-                            <div className="bg-white p-12 rounded-xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
-                                <Mail className="text-slate-200 mb-4" size={48} />
-                                <p className="text-slate-400 font-medium">No secret messages found.</p>
-                            </div>
-                        ) : filteredMessages.map((msg, index) => (
-                            <div key={msg.id} className="relative">
+                        {allMessages.length === 0 ? (
+                            !loading && (
+                                <div className="bg-white p-20 rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-center shadow-inner bg-slate-50/30">
+                                    <div className="h-20 w-20 rounded-full bg-slate-100 flex items-center justify-center mb-6">
+                                        <Mail className="text-slate-300" size={32} />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-slate-900 mb-2">No messages found</h3>
+                                    <p className="text-slate-400 font-medium max-w-xs mx-auto">Try adjusting your search or filters to find what you're looking for.</p>
+                                </div>
+                            )
+                        ) : allMessages.map((msg, index) => (
+                            <div key={msg.id} className="relative group">
                                 <Link
                                     href={`/secret-messages/${msg.id}`}
-                                    className="group relative flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 transition-all hover:border-blue-500/30 hover:shadow-md md:flex-row md:items-center"
+                                    className="relative flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/5 md:flex-row md:items-center overflow-hidden"
                                 >
-                                    {/* Simulated Unread Indicator for the first item */}
-                                    {index === 0 && (
-                                        <div className="absolute right-5 top-5 h-2.5 w-2.5 rounded-full bg-blue-500 ring-4 ring-blue-500/20"></div>
-                                    )}
+                                    {/* Glass reflection effect */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/0 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
 
                                     {/* Avatar area */}
-                                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
-                                        <div className="h-full w-full bg-slate-200 rounded-full flex items-center justify-center text-slate-400 font-bold text-lg">
-                                            ?
+                                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-slate-100 flex items-center justify-center border border-slate-200 group-hover:border-blue-200 group-hover:bg-blue-50 transition-colors">
+                                        <div className="h-full w-full flex items-center justify-center text-slate-400 group-hover:text-blue-500 font-black text-2xl transition-colors">
+                                            {msg.recipient_name?.charAt(0).toUpperCase() || "?"}
                                         </div>
                                     </div>
 
                                     {/* Content area */}
-                                    <div className="flex flex-1 flex-col gap-1 pr-8">
-                                        <div className="flex flex-wrap items-baseline gap-2">
-                                            <h3 className="text-base font-bold text-slate-900">
-                                                Anonymous User <span className="font-normal text-sm text-slate-500">to</span> @{msg.recipient_name}
+                                    <div className="flex flex-1 flex-col gap-1.5 pr-10">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h3 className="text-base font-black text-slate-900">
+                                                <span className="text-slate-400 font-bold text-sm uppercase tracking-wide mr-1 italic">Private Message</span>
                                             </h3>
-                                            {index === 0 && (
-                                                <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-bold">New</span>
-                                            )}
-                                            <span className="text-xs text-slate-400">
-                                                • {msg.created_at ? format(new Date(msg.created_at), "MMM d, h:mm a") : "Just now"}
+                                            <div className="h-1 w-1 rounded-full bg-slate-300 mx-1"></div>
+                                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                                {msg.created_at ? format(new Date(msg.created_at), "MMM d, yyyy") : "Recently"}
                                             </span>
                                         </div>
 
-                                        {/* Song attachment specifically displayed if present */}
-                                        {(msg.song_name || msg.song_id) && (
-                                            <div className="flex items-center gap-2 mt-1 mb-1">
-                                                <Music size={14} className="text-blue-500" />
-                                                <span className="text-xs font-semibold text-slate-700">Attached Song:</span>
-                                                <span className="text-xs text-slate-600 italic">"{msg.song_name || "Unknown Track"}"</span>
+                                        {(msg.song_name || msg.song_artist) && (
+                                            <div className="flex items-center gap-2 py-1 px-2 rounded-lg bg-indigo-50/50 border border-indigo-100/50 w-fit">
+                                                <Music size={12} className="text-indigo-500" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600/70">Attachment:</span>
+                                                <span className="text-xs font-bold text-indigo-700 truncate max-w-[200px]">
+                                                    {msg.song_name} • {msg.song_artist}
+                                                </span>
                                             </div>
                                         )}
 
-                                        <p className="line-clamp-2 text-sm text-slate-600 leading-relaxed">{msg.message}</p>
+                                        <p className="line-clamp-2 text-sm text-slate-600 leading-relaxed font-medium mt-1">
+                                            {msg.message}
+                                        </p>
                                     </div>
 
-                                    {/* Action icons */}
-                                    <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity pr-2">
-                                        <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
-                                            <Eye size={18} />
-                                        </div>
+                                    {/* View indicator */}
+                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center justify-center h-10 w-10 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                                        <ChevronRight size={20} />
                                     </div>
                                 </Link>
 
-                                {/* Delete button kept separate to avoid nested link issues */}
+                                {/* Delete button */}
                                 <button
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        handleDelete(msg.recipient_name);
+                                        handleDelete(msg.id);
                                     }}
-                                    className="absolute right-14 top-1/2 -translate-y-1/2 p-2 rounded-lg text-slate-300 hover:text-rose-600 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                    className="absolute right-20 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center rounded-xl text-slate-300 hover:text-white hover:bg-rose-600 opacity-0 group-hover:opacity-100 transition-all z-20 shadow-sm border border-transparent hover:border-rose-500"
                                     title="Delete Message"
                                 >
                                     <Trash2 size={18} />
@@ -173,19 +192,22 @@ export default function SecretMessagesPage() {
                     </div>
 
                     {/* Pagination */}
-                    {filteredMessages.length > 0 && (
-                        <div className="mt-8 flex items-center justify-between border-t border-slate-200 pt-6">
-                            <p className="text-sm text-slate-500 font-medium">
-                                Showing <span className="font-bold text-slate-900">1-{filteredMessages.length}</span> of <span className="font-bold text-slate-900">{allMessages.length}</span> messages
-                            </p>
-                            <div className="flex gap-2">
-                                <button className="flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-400 hover:bg-slate-50 disabled:opacity-50" disabled>
-                                    Previous
-                                </button>
-                                <button className="flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition-colors shadow-sm">
-                                    Next
-                                </button>
+                    {allMessages.length > 0 && (
+                        <div className="mt-12 flex flex-col items-center justify-between gap-6 border-t border-slate-200/60 pt-8 sm:flex-row">
+                            <div className="flex flex-col gap-1">
+                                <p className="text-sm text-slate-500 font-bold">
+                                    Total Messages: <span className="text-slate-900 border-b-2 border-blue-500/20">{pagination.totalMessages}</span>
+                                </p>
+                                <p className="text-[10px] uppercase tracking-widest font-black text-slate-400">
+                                    Page {pagination.currentPage} of {pagination.totalPages}
+                                </p>
                             </div>
+                            <PaginationComponent
+                                currentPage={pagination.currentPage}
+                                totalPages={pagination.totalPages}
+                                onPageChange={setCurrentPage}
+                                activeColor="slate"
+                            />
                         </div>
                     )}
                 </div>

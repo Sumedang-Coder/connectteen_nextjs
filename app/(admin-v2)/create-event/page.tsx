@@ -18,6 +18,7 @@ import {
     ChevronRight,
     User,
     Globe,
+    Lock,
     Plus
 } from "lucide-react";
 import { useEventStore } from "@/app/store/useEventStore";
@@ -35,6 +36,9 @@ function EventEditorContent() {
     const [description, setDescription] = useState("");
     const [location, setLocation] = useState("");
     const [date, setDate] = useState("");
+    const [quota, setQuota] = useState<number>(0);
+    const [status, setStatus] = useState<"open" | "closed">("open");
+    const [visibility, setVisibility] = useState<"public" | "private">("public");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,6 +54,9 @@ function EventEditorContent() {
             setEventTitle(event.event_title);
             setDescription(event.description);
             setLocation(event.location);
+            setQuota(event.quota || 0);
+            setStatus(event.status === "closed" ? "closed" : "open");
+            setVisibility(event.visibility || "public");
             // Format date for input[type="datetime-local"]
             if (event.date) {
                 const d = new Date(event.date);
@@ -83,6 +90,9 @@ function EventEditorContent() {
         formData.append("description", description);
         formData.append("location", location);
         formData.append("date", date);
+        formData.append("quota", quota.toString());
+        formData.append("status", status);
+        formData.append("visibility", visibility);
         if (imageFile) {
             formData.append("image", imageFile);
         }
@@ -245,18 +255,57 @@ function EventEditorContent() {
                             </div>
 
                             {/* Event Settings Card */}
-                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-4">
-                                <div className="flex items-center gap-2 text-slate-900 font-bold">
-                                    <Globe size={18} className="text-indigo-600" />
-                                    <span>Publishing</span>
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-5">
+                                <div className="flex items-center gap-2 text-slate-900 font-bold mb-1">
+                                    <Layout size={18} className="text-indigo-600" />
+                                    <span>Event Settings</span>
                                 </div>
-                                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                    <span className="text-xs font-bold uppercase text-slate-500 tracking-wider">Status</span>
-                                    <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[10px] font-black rounded-lg uppercase">Draft</span>
+
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Registration Quota</label>
+                                    <div className="relative">
+                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            placeholder="Unlimited = 0"
+                                            value={quota}
+                                            onChange={(e) => setQuota(parseInt(e.target.value) || 0)}
+                                            className="w-full pl-9 pr-3 py-2 bg-slate-50 border-none rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-indigo-600 font-medium"
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-slate-400">Set to 0 for unlimited participants.</p>
                                 </div>
-                                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                    <span className="text-xs font-bold uppercase text-slate-500 tracking-wider">Visibility</span>
-                                    <span className="text-xs font-bold text-slate-900 flex items-center gap-1 uppercase tracking-wider">Public <ChevronRight size={12} /></span>
+
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Manual Status</label>
+                                    <select
+                                        value={status}
+                                        onChange={(e) => setStatus(e.target.value as "open" | "closed")}
+                                        className="w-full px-3 py-2 bg-slate-50 border-none rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-indigo-600 font-medium appearance-none"
+                                    >
+                                        <option value="open">Open for Registration</option>
+                                        <option value="closed">Closed / Disabled</option>
+                                    </select>
+                                </div>
+
+                                <div className="mt-2 pt-4 border-t border-slate-100">
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Visibility</label>
+                                        <div className="relative">
+                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                                                {visibility === "public" ? <Globe size={14} /> : <Lock size={14} />}
+                                            </div>
+                                            <select
+                                                value={visibility}
+                                                onChange={(e) => setVisibility(e.target.value as "public" | "private")}
+                                                className="w-full pl-9 pr-3 py-2 bg-slate-50 border-none rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-indigo-600 font-medium appearance-none"
+                                            >
+                                                <option value="public">Public (Visible to everyone)</option>
+                                                <option value="private">Private (Hidden from feed)</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

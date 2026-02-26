@@ -17,56 +17,61 @@ import {
     Users,
     ChevronLeft,
     ChevronRight as ChevronRightIcon,
-    Eye
+    Eye,
+    Globe as GlobeIcon,
+    Lock as LockIcon
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { useEventStore } from "@/app/store/useEventStore";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import PaginationComponent from "@/components/PaginationComponent";
 
-// Local dummy data for visualization
-const DUMMY_EVENTS = [
-    {
-        id: "1",
-        event_title: "Youth Empowerment Summit 2026",
-        description: "A full-day event dedicated to empowering the next generation of leaders with workshops, keynote speakers, and networking sessions.",
-        location: "Jakarta Convention Center",
-        date: "2026-05-15",
-        image_url: "https://images.unsplash.com/photo-1540575861501-7ad0582371f3?q=80&w=2070&auto=format&fit=crop",
-        registrants_count: 156
-    },
-    {
-        id: "2",
-        event_title: "Tech For Good Hackathon",
-        description: "Join us for a 48-hour challenge to build digital solutions for local community problems. Prizes and mentorship included.",
-        location: "Online / Virtual",
-        date: "2026-06-20",
-        image_url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=2070&auto=format&fit=crop",
-        registrants_count: 89
-    },
-    {
-        id: "3",
-        event_title: "Mental Health Webinar: Managing Stress",
-        description: "A professional-led session on practical techniques for managing daily stress and improving emotional resilience.",
-        location: "Zoom Video Network",
-        date: "2026-07-05",
-        image_url: "https://images.unsplash.com/photo-1576091160550-217359f4e9f8?q=80&w=2070&auto=format&fit=crop",
-        registrants_count: 245
-    }
-];
 
 export default function ManageEventsPage() {
     const [searchTerm, setSearchTerm] = useState("");
-    const events = DUMMY_EVENTS;
+    const [sortBy, setSortBy] = useState("-createdAt");
+    const router = useRouter();
+    const { events, fetchEvents, deleteEvent, loading, pagination } = useEventStore();
 
-    const handleDelete = async (title: string) => {
-        if (confirm(`Are you sure you want to delete "${title}"?`)) {
-            toast.success("Visualization: Event deletion simulated.");
-        }
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            fetchEvents({
+                search: searchTerm,
+                sort: sortBy,
+                page: 1,
+                limit: 10
+            });
+        }, 500);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm, sortBy, fetchEvents]);
+
+    const handlePageChange = (page: number) => {
+        fetchEvents({
+            search: searchTerm,
+            sort: sortBy,
+            page: page,
+            limit: 10
+        });
     };
 
-    const filteredEvents = events.filter(event =>
-        event.event_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.location.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleSortChange = () => {
+        const newSort = sortBy === "-createdAt" ? "createdAt" : "-createdAt";
+        setSortBy(newSort);
+    };
+
+    const handleDelete = async (id: string, title: string) => {
+        if (confirm(`Are you sure you want to delete "${title}"?`)) {
+            const success = await deleteEvent(id);
+            if (success) {
+                toast.success("Event deleted successfully.");
+            } else {
+                toast.error("Failed to delete event.");
+            }
+        }
+    };
 
     return (
         <div className="flex flex-col h-full overflow-hidden bg-slate-50">
@@ -90,8 +95,15 @@ export default function ManageEventsPage() {
             </header>
 
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto p-6 lg:p-10">
-                <div className="max-w-7xl mx-auto flex flex-col gap-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 relative">
+                {/* Loading Overlay */}
+                {loading && (
+                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-50/20 backdrop-blur-[1px]">
+                        <div className="w-8 h-8 border-2 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                    </div>
+                )}
+
+                <div className={`max-w-7xl mx-auto flex flex-col gap-6 h-full transition-opacity duration-300 ${loading ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
                     {/* Page Header */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
@@ -120,19 +132,92 @@ export default function ManageEventsPage() {
                             />
                         </div>
                         <div className="flex items-center gap-3">
-                            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-all">
-                                <Filter size={16} />
-                                <span>Filters</span>
-                            </button>
-                            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-all">
+                            <button
+                                onClick={handleSortChange}
+                                className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-all text-slate-700"
+                            >
                                 <ArrowUpDown size={16} />
-                                <span>Sort</span>
+                                <span>{sortBy === "-createdAt" ? "Newest First" : "Oldest First"}</span>
                             </button>
                         </div>
                     </div>
 
-                    {/* Table Section */}
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    {/* Mobile Card View (Visible on Mobile) */}
+                    <div className="grid grid-cols-1 gap-4 md:hidden">
+                        {events.length === 0 ? (
+                            <div className="bg-white p-10 rounded-xl border border-slate-200 text-center text-slate-400">
+                                No events found.
+                            </div>
+                        ) : events.map((event) => (
+                            <div key={event.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-4">
+                                <div className="flex gap-4">
+                                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200">
+                                        {event.image_url ? (
+                                            <img src={event.image_url} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full text-indigo-500 flex items-center justify-center">
+                                                <CalendarIcon size={24} />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col flex-1 min-w-0">
+                                        <span className="text-sm font-bold text-slate-900 line-clamp-1">{event.event_title}</span>
+                                        <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium mt-1">
+                                            <MapPin size={10} className="text-indigo-500" />
+                                            <span className="truncate">{event.location}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5">
+                                            <CalendarIcon size={10} />
+                                            <span>{event.date ? format(new Date(event.date), "MMM d, yyyy") : "TBA"}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            {event.status === "open" ? (
+                                                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black border border-emerald-200 bg-emerald-50 text-emerald-700 uppercase tracking-tighter">Open</span>
+                                            ) : event.status === "full" ? (
+                                                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black border border-amber-200 bg-amber-50 text-amber-700 uppercase tracking-tighter">Full</span>
+                                            ) : (
+                                                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black border border-rose-200 bg-rose-50 text-rose-700 uppercase tracking-tighter">Closed</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-black text-slate-900 tracking-tighter uppercase whitespace-nowrap">
+                                            {event.registrants_count || 0} / {event.quota > 0 ? event.quota : "∞"}
+                                        </span>
+                                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter flex items-center gap-1 mt-0.5">
+                                            {event.visibility === "public" ? <GlobeIcon size={8} /> : <LockIcon size={8} />}
+                                            {event.visibility}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Link
+                                            href={`/event-registrants/${event.id}`}
+                                            className="p-2 text-slate-500 bg-slate-50 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                                        >
+                                            <Users size={18} />
+                                        </Link>
+                                        <Link
+                                            href={`/create-event?edit=${event.id}`}
+                                            className="p-2 text-slate-500 bg-slate-50 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                        >
+                                            <Edit size={18} />
+                                        </Link>
+                                        <button
+                                            onClick={() => handleDelete(event.id, event.event_title)}
+                                            className="p-2 text-slate-500 bg-slate-50 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Desktop Table Section (Hidden on Mobile) */}
+                    <div className="hidden md:flex bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-col min-h-0">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
@@ -141,20 +226,21 @@ export default function ManageEventsPage() {
                                         <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Venue & Date</th>
                                         <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">Registrants</th>
                                         <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Status</th>
+                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Visibility</th>
                                         <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-200">
-                                    {filteredEvents.length === 0 ? (
+                                    {events.length === 0 ? (
                                         <tr>
-                                            <td colSpan={5} className="px-6 py-10 text-center text-slate-400">No events found.</td>
+                                            <td colSpan={6} className="px-6 py-10 text-center text-slate-400">No events found.</td>
                                         </tr>
-                                    ) : filteredEvents.map((event) => (
+                                    ) : events.map((event) => (
                                         <tr key={event.id} className="group hover:bg-slate-50 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-4">
                                                     {event.image_url ? (
-                                                        <img src={event.image_url} alt="" className="w-12 h-12 rounded-lg object-cover" />
+                                                        <img src={event.image_url} alt="" className="w-12 h-12 rounded-lg object-cover bg-slate-100 border border-slate-200" />
                                                     ) : (
                                                         <div className="w-12 h-12 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center">
                                                             <CalendarIcon size={20} />
@@ -162,7 +248,7 @@ export default function ManageEventsPage() {
                                                     )}
                                                     <div className="flex flex-col">
                                                         <span className="text-sm font-bold text-slate-900">{event.event_title}</span>
-                                                        <span className="text-xs text-slate-500 line-clamp-1">{event.description.substring(0, 50)}...</span>
+                                                        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">ID: {event.id.slice(-6)}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -174,21 +260,50 @@ export default function ManageEventsPage() {
                                                     </div>
                                                     <div className="flex items-center gap-1.5 text-xs text-slate-400">
                                                         <CalendarIcon size={12} />
-                                                        <span>{format(new Date(event.date), "MMM dd, yyyy")}</span>
+                                                        <span>{event.date ? format(new Date(event.date), "MMM dd, yyyy") : "TBA"}</span>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-center">
                                                 <div className="inline-flex flex-col items-center">
-                                                    <span className="text-sm font-bold text-slate-900">{event.registrants_count || 0}</span>
-                                                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">People</span>
+                                                    <span className="text-sm font-bold text-slate-900">
+                                                        {event.registrants_count || 0} / {event.quota > 0 ? event.quota : "∞"}
+                                                    </span>
+                                                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                                                        {event.quota > 0 ? "Quota Filled" : "Unlimited"}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-emerald-200 bg-emerald-50 text-emerald-700">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                                    Active
-                                                </span>
+                                                {event.status === "open" ? (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-emerald-200 bg-emerald-50 text-emerald-700">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                                        Open
+                                                    </span>
+                                                ) : event.status === "full" ? (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-amber-200 bg-amber-50 text-amber-700">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                                        Full
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-rose-200 bg-rose-50 text-rose-700">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                                                        Closed
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {event.visibility === "public" ? (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-indigo-200 bg-indigo-50 text-indigo-700">
+                                                        <GlobeIcon size={12} />
+                                                        Public
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-slate-200 bg-slate-50 text-slate-700">
+                                                        <LockIcon size={12} />
+                                                        Private
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
@@ -206,7 +321,7 @@ export default function ManageEventsPage() {
                                                         <Edit size={18} />
                                                     </Link>
                                                     <button
-                                                        onClick={() => handleDelete(event.event_title)}
+                                                        onClick={() => handleDelete(event.id, event.event_title)}
                                                         className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-rose-600 transition-colors"
                                                     >
                                                         <Trash2 size={18} />
@@ -219,24 +334,36 @@ export default function ManageEventsPage() {
                             </table>
                         </div>
 
-                        {/* Pagination Placeholder */}
-                        {filteredEvents.length > 0 && (
-                            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50/50">
+                        {/* Pagination Section (Integrated with Table for Desktop) */}
+                        {pagination.totalPages > 1 && (
+                            <div className="mt-auto flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50/50">
                                 <span className="text-sm text-slate-500">
-                                    Showing <span className="font-medium text-slate-900">1</span> to <span className="font-medium text-slate-900">{filteredEvents.length}</span> of <span className="font-medium text-slate-900">{events.length}</span> results
+                                    Showing <span className="font-medium text-slate-900">{((pagination.currentPage - 1) * pagination.limit) + 1}</span> to <span className="font-medium text-slate-900">{Math.min(pagination.currentPage * pagination.limit, pagination.totalEvents)}</span> of <span className="font-medium text-slate-900">{pagination.totalEvents}</span> results
                                 </span>
-                                <div className="flex items-center gap-2">
-                                    <button disabled className="p-2 rounded-lg text-slate-400 cursor-not-allowed">
-                                        <ChevronLeft size={18} />
-                                    </button>
-                                    <button className="h-8 w-8 flex items-center justify-center rounded-lg bg-indigo-600 text-white text-sm font-medium">1</button>
-                                    <button className="p-2 rounded-lg text-slate-400 cursor-not-allowed">
-                                        <ChevronRightIcon size={18} />
-                                    </button>
-                                </div>
+                                <PaginationComponent
+                                    currentPage={pagination.currentPage}
+                                    totalPages={pagination.totalPages}
+                                    onPageChange={handlePageChange}
+                                    activeColor="indigo"
+                                />
                             </div>
                         )}
                     </div>
+
+                    {/* Mobile Pagination View (Visible on Mobile) */}
+                    {pagination.totalPages > 1 && (
+                        <div className="flex flex-col items-center gap-4 pt-2 pb-8 md:hidden">
+                            <span className="text-xs text-slate-500 font-medium">
+                                Page <span className="text-slate-900">{pagination.currentPage}</span> of <span className="text-slate-900">{pagination.totalPages}</span>
+                            </span>
+                            <PaginationComponent
+                                currentPage={pagination.currentPage}
+                                totalPages={pagination.totalPages}
+                                onPageChange={handlePageChange}
+                                activeColor="indigo"
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

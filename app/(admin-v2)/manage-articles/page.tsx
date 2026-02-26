@@ -10,6 +10,7 @@ import {
     HelpCircle,
     Edit,
     Trash2,
+    Eye,
     ChevronLeft,
     ChevronRight as ChevronRightIcon,
     Filter,
@@ -17,46 +18,57 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { useArticleStore } from "@/app/store/useArticleStore";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import PaginationComponent from "@/components/PaginationComponent";
 
-// Local dummy data for visualization
-const DUMMY_ARTICLES = [
-    {
-        id: "1",
-        title: "Mental Health Awareness in Adolescents",
-        description: "Discussing the importance of mental health support for teenagers in today's digital age. This article explores common challenges and how communities can provide better safety nets.",
-        image_url: "https://images.unsplash.com/photo-1516062423079-7ca13cdc7f5a?q=80&w=2083&auto=format&fit=crop",
-        created_at: new Date().toISOString()
-    },
-    {
-        id: "2",
-        title: "The Future of Community Engagement",
-        description: "Exploring new ways for communities to connect and thrive through technology and shared values. We look into digital town halls and collaborative platforms.",
-        image_url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=2064&auto=format&fit=crop",
-        created_at: new Date(Date.now() - 86400000).toISOString()
-    },
-    {
-        id: "3",
-        title: "Building Resilience Through Voluntarism",
-        description: "How giving back to your local neighborhood can improve personal well-being and strengthen social bonds.",
-        image_url: "https://images.unsplash.com/photo-1559024094-4a1e4495c3c1?q=80&w=2070&auto=format&fit=crop",
-        created_at: new Date(Date.now() - 172800000).toISOString()
-    }
-];
 
 export default function ManageArticlesPage() {
     const [searchTerm, setSearchTerm] = useState("");
-    const articles = DUMMY_ARTICLES;
+    const [sortBy, setSortBy] = useState("-createdAt");
+    const router = useRouter();
+    const { articles, fetchArticles, deleteArticle, loading, pagination } = useArticleStore();
 
-    const handleDelete = async (title: string) => {
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            fetchArticles({
+                search: searchTerm,
+                sort: sortBy,
+                page: 1,
+                limit: 10
+            });
+        }, 500);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm, sortBy, fetchArticles]);
+
+    const handlePageChange = (page: number) => {
+        fetchArticles({
+            search: searchTerm,
+            sort: sortBy,
+            page: page,
+            limit: 10
+        });
+    };
+
+    const handleSortChange = () => {
+        const newSort = sortBy === "-createdAt" ? "createdAt" : "-createdAt";
+        setSortBy(newSort);
+    };
+
+    const handleDelete = async (id: string, title: string) => {
         if (confirm(`Are you sure you want to delete "${title}"?`)) {
-            toast.success("Visualization: Article deletion simulated.");
+            const success = await deleteArticle(id);
+            if (success) {
+                toast.success("Article deleted successfully.");
+            } else {
+                toast.error("Failed to delete article.");
+            }
         }
     };
 
-    const filteredArticles = articles.filter(article =>
-        article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        article.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredArticles = articles;
 
     return (
         <div className="flex flex-col h-full overflow-hidden bg-slate-50">
@@ -80,8 +92,15 @@ export default function ManageArticlesPage() {
             </header>
 
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto p-6 lg:p-10">
-                <div className="max-w-7xl mx-auto flex flex-col gap-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 relative">
+                {/* Loading Overlay */}
+                {loading && (
+                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-50/20 backdrop-blur-[1px]">
+                        <div className="w-8 h-8 border-2 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
+                    </div>
+                )}
+
+                <div className={`max-w-7xl mx-auto flex flex-col gap-6 h-full transition-opacity duration-300 ${loading ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
                     {/* Page Header */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
@@ -110,62 +129,105 @@ export default function ManageArticlesPage() {
                             />
                         </div>
                         <div className="flex items-center gap-3">
-                            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-all">
-                                <Filter size={16} />
-                                <span>Filters</span>
-                            </button>
-                            <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-all">
+                            <button
+                                onClick={handleSortChange}
+                                className="flex items-center gap-2 px-4 py-2 text-sm font-medium border border-slate-200 rounded-lg hover:bg-slate-50 transition-all text-slate-700"
+                            >
                                 <ArrowUpDown size={16} />
-                                <span>Sort</span>
+                                <span>{sortBy === "-createdAt" ? "Newest First" : "Oldest First"}</span>
                             </button>
                         </div>
                     </div>
 
-                    {/* Table Section */}
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    {/* Mobile Card View (Visible on Mobile) */}
+                    <div className="grid grid-cols-1 gap-4 md:hidden">
+                        {articles.length === 0 ? (
+                            <div className="bg-white p-10 rounded-xl border border-slate-200 text-center text-slate-400">
+                                No articles found.
+                            </div>
+                        ) : articles.map((article) => (
+                            <div key={article.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-4">
+                                <div className="flex gap-4">
+                                    <div className="w-24 h-16 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200">
+                                        <img src={article.image_url} alt="" className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="flex flex-col flex-1 min-w-0">
+                                        <span className="text-sm font-bold text-slate-900 line-clamp-2">{article.title}</span>
+                                        <span className="text-[10px] text-slate-400 font-medium uppercase mt-1">
+                                            {article.created_at ? format(new Date(article.created_at), "MMM d, yyyy") : "N/A"}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: {article.id.slice(-6)}</span>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => router.push(`/write-article?edit=${article.id}`)}
+                                            className="p-2 text-slate-500 bg-slate-50 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                        >
+                                            <Eye size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(article.id, article.title)}
+                                            className="p-2 text-slate-500 bg-slate-50 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Desktop Table Section (Hidden on Mobile) */}
+                    <div className="hidden md:flex bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-col min-h-0">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="border-b border-slate-200 bg-slate-50/50">
                                         <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Article Title</th>
                                         <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Date Published</th>
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Status</th>
                                         <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-200">
-                                    {filteredArticles.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={4} className="px-6 py-10 text-center text-slate-400">No articles found.</td>
+                                    {articles.length === 0 ? (
+                                        <tr key="no-articles">
+                                            <td colSpan={3} className="px-6 py-10 text-center text-slate-400">No articles found.</td>
                                         </tr>
-                                    ) : filteredArticles.map((article) => (
+                                    ) : articles.map((article) => (
                                         <tr key={article.id} className="group hover:bg-slate-50 transition-colors">
                                             <td className="px-6 py-4">
-                                                <div className="flex flex-col">
-                                                    <span className="text-sm font-medium text-slate-900">{article.title}</span>
-                                                    <span className="text-xs text-slate-500 line-clamp-1">{article.description}...</span>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-16 h-10 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200">
+                                                        <img
+                                                            src={article.image_url}
+                                                            alt={article.title}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-bold text-slate-900 line-clamp-1">{article.title}</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider text-nowrap">ID: {article.id.slice(-6)}</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-slate-500">
-                                                {article.created_at ? format(new Date(article.created_at), "MMM dd, yyyy") : "N/A"}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border border-blue-200 bg-blue-50 text-blue-700">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                                                    Published
-                                                </span>
+                                            <td className="px-6 py-4 text-sm text-slate-500 font-medium">
+                                                {article.created_at ? format(new Date(article.created_at), "MMM d, yyyy") : "N/A"}
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <Link
-                                                        href={`/write-article?edit=${article.id}`}
-                                                        className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-colors"
-                                                    >
-                                                        <Edit size={18} />
-                                                    </Link>
                                                     <button
-                                                        onClick={() => handleDelete(article.title)}
-                                                        className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-rose-600 transition-colors"
+                                                        onClick={() => router.push(`/write-article?edit=${article.id}`)}
+                                                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                                    >
+                                                        <Eye size={18} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(article.id, article.title)}
+                                                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
                                                     >
                                                         <Trash2 size={18} />
                                                     </button>
@@ -177,24 +239,36 @@ export default function ManageArticlesPage() {
                             </table>
                         </div>
 
-                        {/* Pagination Placeholder */}
-                        {filteredArticles.length > 0 && (
-                            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50/50">
+                        {/* Pagination Section (Integrated with Table for Desktop) */}
+                        {pagination.totalPages > 1 && (
+                            <div className="mt-auto flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50/50">
                                 <span className="text-sm text-slate-500">
-                                    Showing <span className="font-medium text-slate-900">1</span> to <span className="font-medium text-slate-900">{filteredArticles.length}</span> of <span className="font-medium text-slate-900">{articles.length}</span> results
+                                    Showing <span className="font-medium text-slate-900">{((pagination.currentPage - 1) * pagination.limit) + 1}</span> to <span className="font-medium text-slate-900">{Math.min(pagination.currentPage * pagination.limit, pagination.totalArticles)}</span> of <span className="font-medium text-slate-900">{pagination.totalArticles}</span> results
                                 </span>
-                                <div className="flex items-center gap-2">
-                                    <button disabled className="p-2 rounded-lg text-slate-400 cursor-not-allowed">
-                                        <ChevronLeft size={18} />
-                                    </button>
-                                    <button className="h-8 w-8 flex items-center justify-center rounded-lg bg-blue-600 text-white text-sm font-medium">1</button>
-                                    <button className="p-2 rounded-lg text-slate-400 cursor-not-allowed">
-                                        <ChevronRightIcon size={18} />
-                                    </button>
-                                </div>
+                                <PaginationComponent
+                                    currentPage={pagination.currentPage}
+                                    totalPages={pagination.totalPages}
+                                    onPageChange={handlePageChange}
+                                    activeColor="blue"
+                                />
                             </div>
                         )}
                     </div>
+
+                    {/* Mobile Pagination View (Visible on Mobile) */}
+                    {pagination.totalPages > 1 && (
+                        <div className="flex flex-col items-center gap-4 pt-2 pb-8 md:hidden">
+                            <span className="text-xs text-slate-500 font-medium">
+                                Page <span className="text-slate-900">{pagination.currentPage}</span> of <span className="text-slate-900">{pagination.totalPages}</span>
+                            </span>
+                            <PaginationComponent
+                                currentPage={pagination.currentPage}
+                                totalPages={pagination.totalPages}
+                                onPageChange={handlePageChange}
+                                activeColor="blue"
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

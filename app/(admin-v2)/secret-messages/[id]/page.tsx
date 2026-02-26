@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect, useMemo } from "react";
 import {
     ChevronLeft,
     Music,
@@ -9,176 +10,212 @@ import {
     User,
     Mail,
     Shield,
-    MessageCircle
+    MessageCircle,
+    Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-
-// Local dummy data for visualization
-const DUMMY_MESSAGES = [
-    {
-        id: "1",
-        recipient_name: "Admin",
-        message: "This is a secret message from a mysterious supporter. Keep up the great work and the community summit was amazing! I really hope we can do this every year. The energy was incredible and the speakers were so inspiring.",
-        song_id: "spotify:track:4cOdK97xlZST91Zyd6P1iB",
-        song_name: "Starboy",
-        song_artist: "The Weeknd",
-        song_image: "https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258cf7ac552",
-        created_at: new Date().toISOString()
-    },
-    {
-        id: "2",
-        recipient_name: "Moderator",
-        message: "I really appreciated the technical workshop last week. Can we do more sessions on React and Zustand? It would be great to dive deeper into performance optimization and testing strategies.",
-        song_id: "",
-        song_name: "",
-        song_artist: "",
-        song_image: "",
-        created_at: new Date(Date.now() - 3600000).toISOString()
-    },
-    {
-        id: "3",
-        recipient_name: "Community",
-        message: "Anonymous feedback: The new event registration flow is much smoother now. Kudos to the dev team! We've seen a significant drop in support tickets related to event signups since the update.",
-        song_id: "spotify:track:1799B7z6p3YFMTg38py76C",
-        song_name: "Sunflower",
-        song_artist: "Post Malone",
-        song_image: "https://i.scdn.co/image/ab67616d0000b273e351368686e584f183707248",
-        created_at: new Date(Date.now() - 86400000).toISOString()
-    }
-];
+import { useMessageStore } from "@/app/store/useMessageStore";
 
 export default function SecretMessageDetailPage() {
     const { id } = useParams();
     const router = useRouter();
+    const { selectedMessage: message, loading, fetchMessageById, deleteMessage } = useMessageStore();
 
-    // Find the message by ID from our dummy data
-    const message = DUMMY_MESSAGES.find(m => m.id === id) || DUMMY_MESSAGES[0];
+    const spotifyTrackId = useMemo(() => {
+        if (!message?.song_id) return null;
+        if (message.song_id.includes(":track:")) {
+            return message.song_id.split(":").pop();
+        }
+        // If it's just the ID
+        if (message.song_id.length > 15) return message.song_id;
+        return null;
+    }, [message?.song_id]);
 
-    const handleDelete = () => {
+    useEffect(() => {
+        if (id) {
+            fetchMessageById(id as string);
+        }
+    }, [id, fetchMessageById]);
+
+    const handleDelete = async () => {
         if (confirm("Are you sure you want to delete this secret message?")) {
-            toast.success("Visualization: Message deletion simulated.");
-            router.push("/secret-messages");
+            try {
+                await deleteMessage(id as string);
+                toast.success("Message deleted successfully");
+                router.push("/secret-messages");
+            } catch (err) {
+                toast.error("Failed to delete message");
+            }
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full bg-slate-50 gap-4">
+                <div className="relative">
+                    <div className="w-16 h-16 border-4 border-blue-100 rounded-full animate-spin border-t-blue-600"></div>
+                    <Loader2 className="absolute inset-0 m-auto h-6 w-6 text-blue-600 animate-spin" />
+                </div>
+                <p className="text-sm font-bold text-slate-500 animate-pulse uppercase tracking-[0.2em]">Intercepting Data...</p>
+            </div>
+        );
+    }
+
+    if (!message) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full bg-slate-50 p-6 text-center">
+                <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6 text-slate-300">
+                    <Mail size={40} />
+                </div>
+                <h2 className="text-xl font-black text-slate-900 mb-2">Message Not Found</h2>
+                <p className="text-slate-500 mb-8 max-w-xs">The message you are looking for may have been deleted or moved.</p>
+                <button
+                    onClick={() => router.push("/secret-messages")}
+                    className="px-6 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all shadow-sm active:scale-95"
+                >
+                    Return to Inbox
+                </button>
+            </div>
+        );
+    }
+
     return (
-        <div className="flex flex-col h-full overflow-hidden bg-slate-50">
+        <div className="flex flex-col h-full overflow-hidden bg-slate-50 font-display">
             {/* Top Navigation Bar */}
-            <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0">
+            <header className="h-20 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0 shadow-sm z-10">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => router.push("/secret-messages")}
-                        className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors"
+                        className="group flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900 transition-all px-3 py-2 rounded-xl hover:bg-slate-50"
                     >
-                        <ChevronLeft size={18} />
+                        <ChevronLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
                         <span>Back to Inbox</span>
                     </button>
+                    <div className="h-4 w-px bg-slate-200"></div>
+                    <span className="text-xs font-black text-slate-300 uppercase tracking-widest hidden sm:block">Detail View</span>
                 </div>
                 <div className="flex items-center gap-3">
                     <button
                         onClick={handleDelete}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-rose-600 bg-rose-50 border border-rose-100 rounded-lg hover:bg-rose-100 transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-black text-rose-600 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-all shadow-sm active:scale-95"
                     >
                         <Trash2 size={16} />
-                        <span>Delete Message</span>
+                        <span>Delete Permanent</span>
                     </button>
                 </div>
             </header>
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto p-6 lg:p-10">
-                <div className="max-w-4xl mx-auto flex flex-col gap-8">
+            <div className="flex-1 overflow-y-auto p-6 lg:p-12 selection:bg-blue-500/10 selection:text-blue-600">
+                <div className="max-w-4xl mx-auto flex flex-col gap-10">
 
                     {/* Message Header Card */}
-                    <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="flex items-center gap-5">
-                            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 border border-slate-200">
-                                <User size={32} />
+                    <div className="relative overflow-hidden bg-white rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/40 border border-slate-200/60 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 opacity-50"></div>
+
+                        <div className="relative flex items-center gap-6">
+                            <div className="w-20 h-20 rounded-3xl bg-slate-900 flex items-center justify-center text-white shadow-lg shadow-slate-900/20 transform -rotate-3 hover:rotate-0 transition-transform duration-500">
+                                <span className="text-3xl font-black">{message.recipient_name?.charAt(0).toUpperCase() || "?"}</span>
                             </div>
                             <div>
-                                <h1 className="text-2xl font-black text-slate-900 tracking-tight">Anonymous Message</h1>
-                                <div className="flex items-center gap-2 text-slate-500 mt-1">
-                                    <Mail size={16} />
-                                    <span className="text-sm font-medium">To: @{message.recipient_name}</span>
+                                <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none">Admin Private Message</h1>
+                                <div className="flex items-center gap-2 text-slate-400 mt-2">
+                                    <div className="px-2 py-0.5 rounded-md bg-blue-50 text-[10px] font-black uppercase tracking-widest text-blue-600 border border-blue-100">Secure Transmission</div>
+                                    <span className="text-sm font-bold text-slate-600 italic">Personnel Only</span>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex flex-col items-start md:items-end gap-1">
+
+                        <div className="relative flex flex-col items-start md:items-end gap-1 bg-slate-50 p-4 rounded-2xl border border-slate-100 min-w-[180px]">
                             <div className="flex items-center gap-2 text-slate-400">
-                                <Calendar size={16} />
-                                <span className="text-xs font-bold uppercase tracking-wider">Received At</span>
+                                <Calendar size={14} className="text-blue-500" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Received</span>
                             </div>
-                            <span className="text-sm font-bold text-slate-900">
-                                {format(new Date(message.created_at), "PPPP 'at' p")}
+                            <span className="text-sm font-black text-slate-900">
+                                {message.created_at ? format(new Date(message.created_at), "MMM dd, yyyy") : "TBA"}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400">
+                                {message.created_at ? format(new Date(message.created_at), "h:mm a") : ""}
                             </span>
                         </div>
                     </div>
 
                     {/* Main Content Card */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div className="p-8 border-b border-slate-100">
-                            <div className="flex items-center gap-2 mb-6">
-                                <MessageCircle className="text-blue-500" size={20} />
-                                <h3 className="text-sm font-black uppercase text-slate-400 tracking-[0.2em]">Message Content</h3>
+                    <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-200/60 overflow-hidden">
+                        <div className="p-10 lg:p-12 border-b border-slate-100">
+                            <div className="flex items-center gap-3 mb-8">
+                                <div className="h-8 w-8 rounded-xl bg-blue-50 flex items-center justify-center">
+                                    <MessageCircle className="text-blue-600" size={18} />
+                                </div>
+                                <h3 className="text-xs font-black uppercase text-slate-400 tracking-[0.3em]">Direct Communication</h3>
                             </div>
-                            <p className="text-lg text-slate-700 leading-relaxed font-medium">
-                                {message.message}
+                            <p className="text-xl text-slate-700 leading-relaxed font-semibold italic">
+                                "{message.message}"
                             </p>
                         </div>
 
                         {/* Song Attachment (Conditional) */}
                         {message.song_name && (
-                            <div className="p-8 bg-blue-50/50">
-                                <div className="flex items-center gap-2 mb-6">
-                                    <Music className="text-blue-600" size={20} />
-                                    <h3 className="text-sm font-black uppercase text-blue-400 tracking-[0.2em]">Music Attachment</h3>
-                                </div>
-                                <div className="flex items-center gap-5 bg-white p-4 rounded-xl border border-blue-100 shadow-sm transition-transform hover:scale-[1.01]">
-                                    {message.song_image ? (
-                                        <img src={message.song_image} alt={message.song_name} className="w-20 h-20 rounded-lg object-cover shadow-sm" />
-                                    ) : (
-                                        <div className="w-20 h-20 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 border border-blue-200">
-                                            <Music size={32} />
+                            <div className="p-10 lg:p-12 bg-gradient-to-br from-indigo-50/50 to-blue-50/50 relative overflow-hidden">
+                                {/* Decorative elements */}
+                                <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl"></div>
+                                <div className="absolute -left-20 -top-20 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl"></div>
+
+                                <div className="relative flex items-center justify-between gap-3 mb-8">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-8 w-8 rounded-xl bg-indigo-100 flex items-center justify-center shadow-sm">
+                                            <Music className="text-indigo-600" size={18} />
                                         </div>
-                                    )}
-                                    <div className="flex flex-col gap-1">
-                                        <h4 className="text-lg font-black text-slate-900 leading-tight">{message.song_name}</h4>
-                                        <p className="text-slate-500 font-medium">{message.song_artist}</p>
-                                        <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase tracking-wider">
-                                            Spotify Track
-                                        </div>
+                                        <h3 className="text-xs font-black uppercase text-indigo-400 tracking-[0.3em]">Audio Environment</h3>
+                                    </div>
+                                    <div className="px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full border border-indigo-100 text-[10px] font-black text-indigo-600 uppercase tracking-widest hidden sm:block">
+                                        Interactive Player
                                     </div>
                                 </div>
+
+                                {spotifyTrackId ? (
+                                    <div className="relative group p-1 bg-white rounded-3xl shadow-2xl shadow-indigo-200/50 border border-indigo-100 transform hover:scale-[1.01] transition-all duration-500">
+                                        <iframe
+                                            src={`https://open.spotify.com/embed/track/${spotifyTrackId}?utm_source=generator&theme=0`}
+                                            width="100%"
+                                            height="152"
+                                            frameBorder="0"
+                                            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                                            loading="lazy"
+                                            className="rounded-2xl"
+                                        ></iframe>
+                                    </div>
+                                ) : (
+                                    <div className="group flex items-center gap-6 bg-white p-6 rounded-3xl border border-indigo-100 shadow-md transition-all hover:shadow-xl hover:-translate-y-1">
+                                        {message.song_image ? (
+                                            <div className="relative shrink-0">
+                                                <img src={message.song_image} alt={message.song_name} className="w-24 h-24 rounded-2xl object-cover shadow-lg group-hover:scale-105 transition-transform duration-500" />
+                                                <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-slate-100 border-4 border-white flex items-center justify-center">
+                                                    <Music size={12} className="text-slate-400" />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="w-24 h-24 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-500 border border-indigo-100 shrink-0">
+                                                <Music size={40} />
+                                            </div>
+                                        )}
+                                        <div className="flex flex-1 flex-col gap-1.5 min-w-0">
+                                            <h4 className="text-xl font-black text-slate-900 leading-tight truncate">{message.song_name}</h4>
+                                            <p className="text-slate-500 font-bold">{message.song_artist}</p>
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-black uppercase tracking-wider border border-slate-200">
+                                                    Manual Link Required
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
-                        {/* Security Stamp */}
-                        <div className="px-8 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-slate-400">
-                                <Shield size={14} />
-                                <span className="text-[10px] font-bold uppercase tracking-widest leading-none">Confidential Communication</span>
-                            </div>
-                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">#{message.id.toString().padStart(6, '0')}</span>
-                        </div>
                     </div>
 
-                    {/* Meta Info */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
-                        <div className="bg-slate-100/50 p-6 rounded-2xl border border-slate-200 border-dashed">
-                            <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Technical metadata</h4>
-                            <div className="flex flex-col gap-2">
-                                <div className="flex justify-between">
-                                    <span className="text-xs font-medium text-slate-500">Platform ID</span>
-                                    <span className="text-xs font-mono text-slate-900">EXT-MSG-{message.id}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-xs font-medium text-slate-500">Encryption</span>
-                                    <span className="text-xs font-mono text-slate-900">AES-256-GCM (Simulated)</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

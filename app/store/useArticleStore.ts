@@ -15,34 +15,31 @@ interface ArticleState {
   article: Article | null;
   loading: boolean;
   error: string | null;
+  pagination: {
+    totalArticles: number;
+    totalPages: number;
+    currentPage: number;
+    limit: number;
+  };
 
   createArticle: (formData: FormData) => Promise<boolean>;
-  fetchArticles: (params?: { limit?: number; search?: string }) => Promise<void>;
+  fetchArticles: (params?: { limit?: number; search?: string; page?: number; sort?: string }) => Promise<void>;
   fetchArticleById: (id: string) => Promise<void>;
   updateArticle: (id: string, data: FormData) => Promise<boolean>;
   deleteArticle: (id: string) => Promise<boolean>;
 }
 
 export const useArticleStore = create<ArticleState>((set, get) => ({
-  articles: [
-    {
-      id: "1",
-      title: "Mental Health Awareness in Adolescents",
-      description: "Discussing the importance of mental health support for teenagers in today's digital age...",
-      image_url: "https://images.unsplash.com/photo-1516062423079-7ca13cdc7f5a?q=80&w=2083&auto=format&fit=crop",
-      created_at: new Date().toISOString()
-    },
-    {
-      id: "2",
-      title: "The Future of Community Engagement",
-      description: "Exploring new ways for communities to connect and thrive through technology and shared values...",
-      image_url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=2064&auto=format&fit=crop",
-      created_at: new Date(Date.now() - 86400000).toISOString()
-    }
-  ],
+  articles: [],
   article: null,
-  loading: false,
+  loading: true,
   error: null,
+  pagination: {
+    totalArticles: 0,
+    totalPages: 0,
+    currentPage: 1,
+    limit: 10,
+  },
 
   createArticle: async (formData) => {
     try {
@@ -67,7 +64,10 @@ export const useArticleStore = create<ArticleState>((set, get) => ({
     try {
       set({ loading: true, error: null });
       const res = await api.get("/articles", { params });
-      set({ articles: res.data.data || [] });
+      set({
+        articles: res.data.data || [],
+        pagination: res.data.pagination || get().pagination
+      });
     } catch (err: any) {
       set({ error: err?.response?.data?.message || "Fetch articles failed" });
     } finally {
