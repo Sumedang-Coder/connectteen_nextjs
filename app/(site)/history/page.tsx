@@ -36,7 +36,7 @@ export default function HistoryPage() {
 
   const handleLogin = () => {
     window.location.href =
-      "https://connectteen-server.vercel.app/api/auth/google"
+      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/auth/google`
   }
 
   const filteredMessages = searchQuery

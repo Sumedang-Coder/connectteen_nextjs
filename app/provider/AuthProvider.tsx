@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import axios from "axios"
+import api from "@/lib/axios"
 import { useAuthStore } from "@/app/store/useAuthStore"
 
 export default function AuthProvider({
@@ -12,10 +12,8 @@ export default function AuthProvider({
   const setUser = useAuthStore((s) => s.setUser)
 
   useEffect(() => {
-    axios
-      .get("https://connectteen-server.vercel.app/api/auth/me", {
-        withCredentials: true,
-      })
+    api
+      .get("/auth/me")
       .then((res) => {
         if (res.data?.user) {
           setUser(res.data.user)

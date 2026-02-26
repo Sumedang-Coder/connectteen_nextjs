@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import api from "@/lib/axios";
 
 interface AuthState {
   user: any | null;
@@ -26,22 +27,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       set({ loading: true });
 
-      const res = await fetch(
-        "https://connectteen-server.vercel.app/api/auth/guest/login",
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error("Guest login failed");
-      }
-
-      const data = await res.json();
+      const res = await api.post("/auth/guest/login");
+      const data = res.data;
 
       set({
         user: data.user,
@@ -56,13 +43,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     try {
-      await fetch(
-        "https://connectteen-server.vercel.app/api/auth/logout",
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
+      await api.post("/auth/logout");
 
       set({
         user: null,

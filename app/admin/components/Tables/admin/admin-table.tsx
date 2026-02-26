@@ -12,7 +12,8 @@ import { cn } from "@/app/admin/lib/utils";
 import { getAdminData } from "../fetch";
 import { EditIcon, PreviewIcon } from "../icons";
 import { useEffect, useState } from "react";
-import axios, { AxiosError } from "axios";
+import api from "@/lib/axios";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { User, usersStore } from "@/app/store/users";
 import Loader from "@/components/Loader";
@@ -23,66 +24,66 @@ export function AdminTable() {
 
   const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
-  const [editingUser, setEditingUser] = useState<User|null>(null)
+  const [editingUser, setEditingUser] = useState<User | null>(null)
 
-  const {users,removeUser, updateUser, setUsers} = usersStore()
+  const { users, removeUser, updateUser, setUsers } = usersStore()
 
   useEffect(() => {
     (async () => {
       setLoading(true)
       try {
-      const res = await axios.get('https://connectteen-server.vercel.app/api/admin',{withCredentials:true})
-      const data = res.data
-      setUsers(data.data)
-    } catch (err) {
-       const error = err as AxiosError<any>;
-      
-          toast.error(
-            error.response?.data?.message ||
-            error.message ||
-            "Terjadi kesalahan, silakan coba lagi"
-          );
-    } finally {
-    setLoading(false);
-  }
+        const res = await api.get('/admin')
+        const data = res.data
+        setUsers(data.data)
+      } catch (err) {
+        const error = err as AxiosError<any>;
+
+        toast.error(
+          error.response?.data?.message ||
+          error.message ||
+          "Terjadi kesalahan, silakan coba lagi"
+        );
+      } finally {
+        setLoading(false);
+      }
     })()
   }, [])
 
   const handleDelete = async (id: string) => {
-   try {
-    setLoading(true);
-      const res = await axios.delete(`https://connectteen-server.vercel.app/api/admin/${id}`,{withCredentials:true})
+    try {
+      setLoading(true);
+      const res = await api.delete(`/admin/${id}`)
       const data = res.data
       removeUser(id)
       toast.success(data.message)
     } catch (err) {
-       const error = err as AxiosError<any>;
-      
-          toast.error(
-            error.response?.data?.message ||
-            error.message ||
-            "Terjadi kesalahan, silakan coba lagi"
-          );
+      const error = err as AxiosError<any>;
+
+      toast.error(
+        error.response?.data?.message ||
+        error.message ||
+        "Terjadi kesalahan, silakan coba lagi"
+      );
     } finally {
-    setLoading(false);
-  }
+      setLoading(false);
+    }
   }
 
   const handleEdit = (user: User) => {
     setShowModal(!showModal)
-setEditingUser(user)
+    setEditingUser(user)
   }
 
-  if(loading) return <Loader size="sm" />
+  if (loading) return <Loader size="sm" />
 
   return (
     <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
-      <div 
-        className={`fixed inset-0 z-9999 bg-black/50 backdrop-blur-sm flex justify-center items-center p-4 ${showModal ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} duration-300`} 
+      <div
+        className={`fixed inset-0 z-9999 bg-black/50 backdrop-blur-sm flex justify-center items-center p-4 ${showModal ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"} duration-300`}
         onClick={() => setShowModal(false)}
       >
-        <div 
-          className="w-full max-w-lg bg-white rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[90vh]" 
+        <div
+          className="w-full max-w-lg bg-white rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Area Scrollable */}

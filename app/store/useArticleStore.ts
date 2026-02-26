@@ -24,7 +24,22 @@ interface ArticleState {
 }
 
 export const useArticleStore = create<ArticleState>((set, get) => ({
-  articles: [],
+  articles: [
+    {
+      id: "1",
+      title: "Mental Health Awareness in Adolescents",
+      description: "Discussing the importance of mental health support for teenagers in today's digital age...",
+      image_url: "https://images.unsplash.com/photo-1516062423079-7ca13cdc7f5a?q=80&w=2083&auto=format&fit=crop",
+      created_at: new Date().toISOString()
+    },
+    {
+      id: "2",
+      title: "The Future of Community Engagement",
+      description: "Exploring new ways for communities to connect and thrive through technology and shared values...",
+      image_url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=2064&auto=format&fit=crop",
+      created_at: new Date(Date.now() - 86400000).toISOString()
+    }
+  ],
   article: null,
   loading: false,
   error: null,

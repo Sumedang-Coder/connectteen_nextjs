@@ -30,7 +30,28 @@ interface MessageState {
 
 export const useMessageStore = create<MessageState>((set) => ({
   messages: [],
-  allMessages: [],
+  allMessages: [
+    {
+      id: 1,
+      recipient_name: "Admin",
+      message: "This is a secret message from a mysterious supporter. Keep up the great work!",
+      song_id: "spotify:track:4cOdK97xlZST91Zyd6P1iB",
+      song_name: "Starboy",
+      song_artist: "The Weeknd",
+      song_image: "https://i.scdn.co/image/ab67616d0000b2734718e2b124f79258cf7ac552",
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 2,
+      recipient_name: "Moderator",
+      message: "Thanks for organizing the summit, it was very impactful for the youth.",
+      song_id: "",
+      song_name: "",
+      song_artist: "",
+      song_image: "",
+      created_at: new Date(Date.now() - 3600000).toISOString()
+    }
+  ],
   myMessages: [],
   selectedMessage: null,
 

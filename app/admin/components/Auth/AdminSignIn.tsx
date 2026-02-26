@@ -2,19 +2,20 @@
 import { EmailIcon, PasswordIcon } from "@/app/admin/assets/icons";
 import React, { useState } from "react";
 import InputGroup from "@/app/admin/components/FormElements/InputGroup";
-import axios, { AxiosError } from "axios";
+import api from "@/lib/axios";
+import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { useRouter } from "next/navigation";
 
 export default function AdminSignIn() {
   const [data, setData] = useState({
-    email:"",
+    email: "",
     password: "",
   });
 
-  const {isAuthenticated, setUser} = useAuthStore()
-  
+  const { isAuthenticated, setUser } = useAuthStore()
+
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -27,48 +28,42 @@ export default function AdminSignIn() {
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // optional: validasi sederhana
-  if (!data.email || !data.password) {
-    toast.error("Email dan password wajib diisi");
-    return;
-  }
+    // optional: validasi sederhana
+    if (!data.email || !data.password) {
+      toast.error("Email dan password wajib diisi");
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    const res = await axios.post(
-      "https://connectteen-server.vercel.app/api/auth/admin/login",
-      data,
-      {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    try {
+      const res = await api.post(
+        "/auth/admin/login",
+        data
+      );
 
-    const responseData = res.data;
+      const responseData = res.data;
 
-    toast.success(responseData.message || "Login berhasil");
+      toast.success(responseData.message || "Login berhasil");
 
-    setUser(responseData.user)
+      setUser(responseData.user)
 
-    router.push('/admin/page')
+      router.push('/admin/page')
 
-  } catch (err) {
-    const error = err as AxiosError<any>;
+    } catch (err) {
+      const error = err as AxiosError<any>;
 
-    toast.error(
-      error.response?.data?.message ||
-      error.message ||
-      "Terjadi kesalahan, silakan coba lagi"
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+      toast.error(
+        error.response?.data?.message ||
+        error.message ||
+        "Terjadi kesalahan, silakan coba lagi"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit}>

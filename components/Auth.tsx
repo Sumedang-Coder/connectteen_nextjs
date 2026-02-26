@@ -43,7 +43,7 @@ export default function Auth({ onClick }: AuthProps) {
         </div>
 
         {/* Google Login */}
-        <a href="https://connectteen-server.vercel.app/api/auth/google">
+        <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/auth/google`}>
           <button
             className="
               w-full flex items-center justify-center gap-3
