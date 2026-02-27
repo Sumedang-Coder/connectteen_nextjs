@@ -102,7 +102,7 @@ export default function AdminV2Layout({
               </div>
               <div className="flex flex-col">
                 <h1 className="text-slate-900 text-base font-semibold leading-tight">Admin Panel</h1>
-                <p className="text-slate-500 text-xs font-normal">Community Manager</p>
+                <p className="text-slate-500 text-xs font-normal capitalize">{user?.role?.replace('_', ' ') || 'Administrator'}</p>
               </div>
             </div>
 
@@ -132,12 +132,14 @@ export default function AdminV2Layout({
                 badge={38}
                 active={pathname === "/secret-messages"}
               />
-              <SidebarItem
-                href="/manage-admins"
-                icon={<Shield size={20} />}
-                label="Manage Admins"
-                active={pathname === "/manage-admins"}
-              />
+              {user?.role === "super_admin" && (
+                <SidebarItem
+                  href="/manage-admins"
+                  icon={<Shield size={20} />}
+                  label="Manage Admins"
+                  active={pathname === "/manage-admins"}
+                />
+              )}
             </nav>
           </div>
 
@@ -208,12 +210,14 @@ export default function AdminV2Layout({
                   badge={38}
                   active={pathname === "/secret-messages"}
                 />
-                <SidebarItem
-                  href="/manage-admins"
-                  icon={<Shield size={20} />}
-                  label="Manage Admins"
-                  active={pathname === "/manage-admins"}
-                />
+                {user?.role === "super_admin" && (
+                  <SidebarItem
+                    href="/manage-admins"
+                    icon={<Shield size={20} />}
+                    label="Manage Admins"
+                    active={pathname === "/manage-admins"}
+                  />
+                )}
               </nav>
             </div>
             <button
@@ -228,7 +232,7 @@ export default function AdminV2Layout({
       )}
 
       {/* Floating Action Button (Matches Dashboard Design) */}
-      {pathname === "/dashboard" && (
+      {pathname === "/dashboard" && user?.role !== "viewer" && (
         <div className="fixed bottom-8 right-8 z-50">
           {/* Backdrop for FAB to close on click outside (mobile friendly) */}
           {isFabOpen && (

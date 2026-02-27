@@ -17,12 +17,14 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import PaginationComponent from "@/components/PaginationComponent";
 import { useMessageStore } from "@/app/store/useMessageStore";
+import { useAuthStore } from "@/app/store/useAuthStore";
 
 export default function SecretMessagesPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [sortBy, setSortBy] = useState("-createdAt");
     const [currentPage, setCurrentPage] = useState(1);
+    const { user } = useAuthStore();
 
     const { allMessages, loading, pagination, fetchAllMessages, deleteMessage } = useMessageStore();
 
@@ -177,16 +179,18 @@ export default function SecretMessagesPage() {
                                 </Link>
 
                                 {/* Delete button */}
-                                <button
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        handleDelete(msg.id);
-                                    }}
-                                    className="absolute right-20 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center rounded-xl text-slate-300 hover:text-white hover:bg-rose-600 opacity-0 group-hover:opacity-100 transition-all z-20 shadow-sm border border-transparent hover:border-rose-500"
-                                    title="Delete Message"
-                                >
-                                    <Trash2 size={18} />
-                                </button>
+                                {user?.role !== "viewer" && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handleDelete(msg.id);
+                                        }}
+                                        className="absolute right-20 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center rounded-xl text-slate-300 hover:text-white hover:bg-rose-600 opacity-0 group-hover:opacity-100 transition-all z-20 shadow-sm border border-transparent hover:border-rose-500"
+                                        title="Delete Message"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                )}
                             </div>
                         ))}
                     </div>

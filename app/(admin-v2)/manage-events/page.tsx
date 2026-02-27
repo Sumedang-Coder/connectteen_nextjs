@@ -24,6 +24,7 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useEventStore } from "@/app/store/useEventStore";
+import { useAuthStore } from "@/app/store/useAuthStore";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import PaginationComponent from "@/components/PaginationComponent";
@@ -34,6 +35,9 @@ export default function ManageEventsPage() {
     const [sortBy, setSortBy] = useState("-createdAt");
     const router = useRouter();
     const { events, fetchEvents, deleteEvent, loading, pagination } = useEventStore();
+    const { user } = useAuthStore();
+
+    const isViewer = user?.role === "viewer";
 
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
@@ -85,12 +89,6 @@ export default function ManageEventsPage() {
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <button className="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors">
-                        <Bell size={20} />
-                    </button>
-                    <button className="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors">
-                        <HelpCircle size={20} />
-                    </button>
                 </div>
             </header>
 
@@ -110,13 +108,15 @@ export default function ManageEventsPage() {
                             <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Events</h2>
                             <p className="text-slate-500 mt-1">Organize and track your community gatherings.</p>
                         </div>
-                        <Link
-                            href="/create-event"
-                            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm shadow-indigo-500/30"
-                        >
-                            <Plus size={20} />
-                            <span>Create Event</span>
-                        </Link>
+                        {!isViewer && (
+                            <Link
+                                href="/create-event"
+                                className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm shadow-indigo-500/30"
+                            >
+                                <Plus size={20} />
+                                <span>Create Event</span>
+                            </Link>
+                        )}
                     </div>
 
                     {/* Filters & Search */}
@@ -195,21 +195,28 @@ export default function ManageEventsPage() {
                                         <Link
                                             href={`/event-registrants/${event.id}`}
                                             className="p-2 text-slate-500 bg-slate-50 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                                            title="View Registrants"
                                         >
                                             <Users size={18} />
                                         </Link>
-                                        <Link
-                                            href={`/create-event?edit=${event.id}`}
-                                            className="p-2 text-slate-500 bg-slate-50 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                        >
-                                            <Edit size={18} />
-                                        </Link>
-                                        <button
-                                            onClick={() => handleDelete(event.id, event.event_title)}
-                                            className="p-2 text-slate-500 bg-slate-50 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
+                                        {!isViewer && (
+                                            <>
+                                                <Link
+                                                    href={`/create-event?edit=${event.id}`}
+                                                    className="p-2 text-slate-500 bg-slate-50 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                                    title="Edit Event"
+                                                >
+                                                    <Edit size={18} />
+                                                </Link>
+                                                <button
+                                                    onClick={() => handleDelete(event.id, event.event_title)}
+                                                    className="p-2 text-slate-500 bg-slate-50 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                                    title="Delete Event"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -314,18 +321,24 @@ export default function ManageEventsPage() {
                                                     >
                                                         <Users size={18} />
                                                     </Link>
-                                                    <Link
-                                                        href={`/create-event?edit=${event.id}`}
-                                                        className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-colors"
-                                                    >
-                                                        <Edit size={18} />
-                                                    </Link>
-                                                    <button
-                                                        onClick={() => handleDelete(event.id, event.event_title)}
-                                                        className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-rose-600 transition-colors"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
+                                                    {!isViewer && (
+                                                        <>
+                                                            <Link
+                                                                href={`/create-event?edit=${event.id}`}
+                                                                title="Edit Event"
+                                                                className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-colors"
+                                                            >
+                                                                <Edit size={18} />
+                                                            </Link>
+                                                            <button
+                                                                onClick={() => handleDelete(event.id, event.event_title)}
+                                                                title="Delete Event"
+                                                                className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-rose-600 transition-colors"
+                                                            >
+                                                                <Trash2 size={18} />
+                                                            </button>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

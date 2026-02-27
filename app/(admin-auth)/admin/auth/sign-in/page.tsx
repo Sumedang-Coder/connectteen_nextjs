@@ -12,7 +12,8 @@ export default function Page() {
   useEffect(() => {
     // Jalankan redirect jika loading sudah selesai dan user sudah login
     if (!loading && isAuthenticated) {
-      if (user?.role === "admin") {
+      const adminRoles = ["super_admin", "content_editor", "viewer", "admin"]; // Including legacy "admin"
+      if (user && adminRoles.includes(user.role)) {
         router.replace("/admin/page");
       } else {
         router.replace("/");

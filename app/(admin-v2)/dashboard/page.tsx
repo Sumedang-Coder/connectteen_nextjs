@@ -22,7 +22,7 @@ export default function DashboardPage() {
         {
             label: "Total Messages",
             value: stats.messages.toLocaleString(),
-            subtext: "Secret Messages in storage",
+            subtext: "Confidential communications received",
             icon: <MessageSquare className="text-blue-600" size={24} />,
             bg: "bg-blue-50",
             accent: "text-blue-600",
@@ -31,7 +31,7 @@ export default function DashboardPage() {
         {
             label: "Total Events",
             value: stats.events.toLocaleString(),
-            subtext: "Active & Published projects",
+            subtext: "Community gatherings & activities",
             icon: <Calendar className="text-indigo-600" size={24} />,
             bg: "bg-indigo-50",
             accent: "text-indigo-600",
@@ -40,7 +40,7 @@ export default function DashboardPage() {
         {
             label: "Total Users",
             value: stats.users.toLocaleString(),
-            subtext: "Registered active members",
+            subtext: "Registered and active members",
             icon: <Users className="text-emerald-600" size={24} />,
             bg: "bg-emerald-50",
             accent: "text-emerald-600",
@@ -49,7 +49,7 @@ export default function DashboardPage() {
         {
             label: "Total Articles",
             value: stats.articles.toLocaleString(),
-            subtext: "Published community insights",
+            subtext: "Published educational insights",
             icon: <FileText className="text-rose-600" size={24} />,
             bg: "bg-rose-50",
             accent: "text-rose-600",

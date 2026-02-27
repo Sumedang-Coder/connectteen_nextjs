@@ -16,11 +16,14 @@ import {
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useMessageStore } from "@/app/store/useMessageStore";
+import { useAuthStore } from "@/app/store/useAuthStore";
 
 export default function SecretMessageDetailPage() {
     const { id } = useParams();
     const router = useRouter();
     const { selectedMessage: message, loading, fetchMessageById, deleteMessage } = useMessageStore();
+    const { user } = useAuthStore();
+    const isViewer = user?.role === "viewer";
 
     const spotifyTrackId = useMemo(() => {
         if (!message?.song_id) return null;
@@ -96,13 +99,15 @@ export default function SecretMessageDetailPage() {
                     <span className="text-xs font-black text-slate-300 uppercase tracking-widest hidden sm:block">Detail View</span>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={handleDelete}
-                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-black text-rose-600 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-all shadow-sm active:scale-95"
-                    >
-                        <Trash2 size={16} />
-                        <span>Delete Permanent</span>
-                    </button>
+                    {!isViewer && (
+                        <button
+                            onClick={handleDelete}
+                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-black text-rose-600 bg-rose-50 border border-rose-100 rounded-xl hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-all shadow-sm active:scale-95"
+                        >
+                            <Trash2 size={16} />
+                            <span>Delete Permanent</span>
+                        </button>
+                    )}
                 </div>
             </header>
 

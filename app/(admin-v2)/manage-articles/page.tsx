@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useArticleStore } from "@/app/store/useArticleStore";
+import { useAuthStore } from "@/app/store/useAuthStore";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import PaginationComponent from "@/components/PaginationComponent";
@@ -29,6 +30,9 @@ export default function ManageArticlesPage() {
     const [sortBy, setSortBy] = useState("-createdAt");
     const router = useRouter();
     const { articles, fetchArticles, deleteArticle, loading, pagination } = useArticleStore();
+    const { user } = useAuthStore();
+
+    const isViewer = user?.role === "viewer";
 
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
@@ -82,12 +86,6 @@ export default function ManageArticlesPage() {
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <button className="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors">
-                        <Bell size={20} />
-                    </button>
-                    <button className="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition-colors">
-                        <HelpCircle size={20} />
-                    </button>
                 </div>
             </header>
 
@@ -107,13 +105,15 @@ export default function ManageArticlesPage() {
                             <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Articles</h2>
                             <p className="text-slate-500 mt-1">Manage, edit, and publish your community content.</p>
                         </div>
-                        <Link
-                            href="/write-article"
-                            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm shadow-blue-500/30"
-                        >
-                            <Plus size={20} />
-                            <span>Write Article</span>
-                        </Link>
+                        {!isViewer && (
+                            <Link
+                                href="/write-article"
+                                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm shadow-blue-500/30"
+                            >
+                                <Plus size={20} />
+                                <span>Write Article</span>
+                            </Link>
+                        )}
                     </div>
 
                     {/* Filters & Search */}
@@ -158,21 +158,27 @@ export default function ManageArticlesPage() {
                                         </span>
                                     </div>
                                 </div>
-                                <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                                <div className={`flex items-center ${isViewer ? 'justify-end' : 'justify-between'} pt-3 border-t border-slate-100`}>
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: {article.id.slice(-6)}</span>
                                     <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => router.push(`/write-article?edit=${article.id}`)}
-                                            className="p-2 text-slate-500 bg-slate-50 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                        >
-                                            <Eye size={18} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(article.id, article.title)}
-                                            className="p-2 text-slate-500 bg-slate-50 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
+                                        {!isViewer && (
+                                            <>
+                                                <button
+                                                    onClick={() => router.push(`/write-article?edit=${article.id}`)}
+                                                    className="p-2 text-slate-500 bg-slate-50 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                                    title="Edit Article"
+                                                >
+                                                    <Edit size={18} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(article.id, article.title)}
+                                                    className="p-2 text-slate-500 bg-slate-50 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                                    title="Delete Article"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -187,13 +193,13 @@ export default function ManageArticlesPage() {
                                     <tr className="border-b border-slate-200 bg-slate-50/50">
                                         <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Article Title</th>
                                         <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Date Published</th>
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Actions</th>
+                                        {!isViewer && <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Actions</th>}
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-200">
                                     {articles.length === 0 ? (
                                         <tr key="no-articles">
-                                            <td colSpan={3} className="px-6 py-10 text-center text-slate-400">No articles found.</td>
+                                            <td colSpan={isViewer ? 2 : 3} className="px-6 py-10 text-center text-slate-400">No articles found.</td>
                                         </tr>
                                     ) : articles.map((article) => (
                                         <tr key={article.id} className="group hover:bg-slate-50 transition-colors">
@@ -217,22 +223,26 @@ export default function ManageArticlesPage() {
                                             <td className="px-6 py-4 text-sm text-slate-500 font-medium">
                                                 {article.created_at ? format(new Date(article.created_at), "MMM d, yyyy") : "N/A"}
                                             </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <button
-                                                        onClick={() => router.push(`/write-article?edit=${article.id}`)}
-                                                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                                    >
-                                                        <Eye size={18} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(article.id, article.title)}
-                                                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                </div>
-                                            </td>
+                                            {!isViewer && (
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <button
+                                                            onClick={() => router.push(`/write-article?edit=${article.id}`)}
+                                                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                                            title="Edit Article"
+                                                        >
+                                                            <Edit size={18} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(article.id, article.title)}
+                                                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                                            title="Delete Article"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>
