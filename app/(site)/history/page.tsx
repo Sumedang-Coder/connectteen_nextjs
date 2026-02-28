@@ -26,7 +26,7 @@ export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null)
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isAuthenticated) return
