@@ -25,7 +25,8 @@ import { toast } from "sonner";
 const ROLE_DISPLAY = {
     super_admin: "Super Admin",
     content_editor: "Content Editor",
-    viewer: "Viewer"
+    viewer: "Viewer",
+    user: "User"
 };
 
 export default function ManageAdminsPage() {
@@ -248,6 +249,7 @@ export default function ManageAdminsPage() {
                                     >
                                         <option value="content_editor">Content Editor</option>
                                         <option value="viewer">Viewer</option>
+                                        <option value="user">User</option>
                                         <option value="super_admin">Super Admin</option>
                                     </select>
                                 </div>

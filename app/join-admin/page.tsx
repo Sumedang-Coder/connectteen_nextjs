@@ -4,7 +4,8 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import { toast } from "sonner";
-import { Shield, Lock, User, ArrowRight, Loader2 } from "lucide-react";
+import { Shield, Lock, User, ArrowRight, Loader2, ShieldCheck, ChevronLeft, EyeOff, Eye } from "lucide-react";
+import Link from "next/link";
 
 function JoinAdminContent() {
     const searchParams = useSearchParams();
@@ -14,6 +15,7 @@ function JoinAdminContent() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [isValid, setIsValid] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [adminData, setAdminData] = useState<{ email: string; role: string } | null>(null);
     const [formData, setFormData] = useState({
         name: "",
@@ -72,26 +74,32 @@ function JoinAdminContent() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
-                <Loader2 className="animate-spin text-slate-400" size={40} />
+            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
+                <div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+                <p className="text-slate-500 font-medium animate-pulse">Verifying invitation...</p>
             </div>
         );
     }
 
     if (!isValid) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-                <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-                    <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <Lock size={32} />
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-display relative overflow-hidden">
+                <div className="absolute top-0 right-0 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-rose-100/50 rounded-full blur-[120px] z-0" />
+
+                <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-white p-10 text-center z-10">
+                    <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-inner">
+                        <Lock size={36} />
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-900">Invalid or Expired Link</h2>
-                    <p className="text-slate-500 mt-2">This invitation link is no longer valid. Please contact your administrator for a new invite.</p>
+                    <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-3">Link Expired</h2>
+                    <p className="text-slate-500 text-sm font-medium leading-relaxed mb-10">
+                        This invitation link is invalid or has expired. Please request a new invite from your administrator.
+                    </p>
                     <button
                         onClick={() => router.push("/")}
-                        className="mt-8 w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-all"
+                        className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-950/10 flex items-center justify-center gap-2 group"
                     >
-                        Back to Home
+                        <ChevronLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+                        <span>Return to Platform</span>
                     </button>
                 </div>
             </div>
@@ -99,87 +107,149 @@ function JoinAdminContent() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-inter">
-            <div className="max-w-md w-full">
-                {/* Logo or Brand */}
-                <div className="flex items-center justify-center gap-2 mb-8">
-                    <div className="bg-slate-900 p-2 rounded-lg">
-                        <Shield className="text-white" size={24} />
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 md:p-10 font-display relative overflow-hidden">
+            {/* Background Decorative Blurs */}
+            <div className="absolute top-0 right-0 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-[120px] z-0" />
+            <div className="absolute bottom-0 left-0 translate-x-1/2 translate-y-1/2 w-[500px] h-[500px] bg-indigo-100/50 rounded-full blur-[120px] z-0" />
+
+            <div className="w-full max-w-5xl bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-white flex overflow-hidden min-h-[600px] z-10">
+                {/* Left Side: Visual Area */}
+                <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative overflow-hidden">
+                    <div
+                        className="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-60"
+                        style={{ backgroundImage: "url('/img/admin_auth_bg_v2.png')" }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
+
+                    <div className="relative z-10 mt-auto p-12">
+                        <div className="flex items-center gap-2 mb-6">
+                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                <ShieldCheck className="text-white" size={18} />
+                            </div>
+                            <span className="text-xs font-black text-white uppercase tracking-widest">ConnectTeen Admin</span>
+                        </div>
+                        <h2 className="text-4xl font-black text-white leading-tight tracking-tight mb-4 text-balance">
+                            Join the <br />Administrative Team.
+                        </h2>
+                        <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-xs">
+                            Complete your registration to start managing the ConnectTeen community ecosystem.
+                        </p>
                     </div>
-                    <h1 className="text-xl font-black text-slate-900 tracking-tighter uppercase">ConnectTeen</h1>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-xl overflow-hidden shadow-slate-200/50 border border-slate-100">
-                    <div className="p-8 border-b border-slate-50 bg-slate-50/50">
-                        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Activate Admin Access</h2>
-                        <p className="text-slate-500 text-sm mt-1">Invitation for <span className="font-bold text-slate-900">{adminData?.email}</span></p>
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-900 text-white rounded-full text-[10px] font-black uppercase tracking-wider mt-3">
-                            Role: {adminData?.role.replace("_", " ")}
+                {/* Right Side: Form Area */}
+                <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-16">
+                    <div className="w-full max-w-sm">
+                        {/* Compact Logo */}
+                        <div className="flex items-center gap-3 mb-10">
+                            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/20">
+                                <ShieldCheck className="text-white" size={24} />
+                            </div>
+                            <h1 className="text-2xl font-black text-slate-900 tracking-tighter">ConnectTeen</h1>
+                        </div>
+
+                        <div className="mb-8">
+                            <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-2">Create Account</h2>
+                            <p className="text-slate-500 text-sm font-medium">Invitation for: <span className="text-blue-600 font-bold">{adminData?.email}</span></p>
+                            <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-md text-[10px] font-black uppercase tracking-widest border border-blue-100">
+                                Role: {adminData?.role?.replace("_", " ")}
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="space-y-1.5">
+                                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+                                    Full Name
+                                </label>
+                                <div className="relative group">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                                        <User size={18} />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        placeholder="Enter your full name"
+                                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 transition-all text-sm"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+                                    Set Password
+                                </label>
+                                <div className="relative group">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                                        <Lock size={18} />
+                                    </div>
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        required
+                                        minLength={8}
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        placeholder="Min. 8 characters"
+                                        className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 transition-all text-sm"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+                                    Confirm Password
+                                </label>
+                                <div className="relative group">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                                        <Lock size={18} />
+                                    </div>
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        required
+                                        value={formData.confirmPassword}
+                                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                        placeholder="Repeat password"
+                                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 transition-all text-sm"
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={submitting}
+                                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-950/10 flex items-center justify-center gap-2 group disabled:opacity-50 mt-2"
+                            >
+                                {submitting ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    <>
+                                        <span>Activate Account</span>
+                                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                    </>
+                                )}
+                            </button>
+                        </form>
+
+                        <div className="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+                            <Link
+                                href="/"
+                                className="inline-flex items-center gap-2 text-[11px] font-bold text-slate-400 hover:text-slate-900 transition-colors group"
+                            >
+                                <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                                <span>Platform Home</span>
+                            </Link>
+                            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">&copy; 2026 CTEEN</span>
                         </div>
                     </div>
-
-                    <form onSubmit={handleSubmit} className="p-8 flex flex-col gap-5">
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                <User size={14} /> Full Name
-                            </label>
-                            <input
-                                type="text"
-                                required
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                placeholder="Your full name"
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-900 outline-none transition-all"
-                            />
-                        </div>
-
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                <Lock size={14} /> Password
-                            </label>
-                            <input
-                                type="password"
-                                required
-                                minLength={8}
-                                value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                placeholder="Min. 8 characters"
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-900 outline-none transition-all"
-                            />
-                        </div>
-
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                <Lock size={14} /> Confirm Password
-                            </label>
-                            <input
-                                type="password"
-                                required
-                                value={formData.confirmPassword}
-                                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                placeholder="Repeat password"
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-slate-900 outline-none transition-all"
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={submitting}
-                            className="w-full mt-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-slate-900/10 disabled:opacity-50"
-                        >
-                            {submitting ? "Activating..." : (
-                                <>
-                                    <span>Activate My Account</span>
-                                    <ArrowRight size={18} />
-                                </>
-                            )}
-                        </button>
-                    </form>
                 </div>
-
-                <p className="text-center text-slate-400 text-xs mt-8">
-                    Safe & Secure Administrative Activation &bull; ConnectTeen Portal
-                </p>
             </div>
         </div>
     );
@@ -187,7 +257,12 @@ function JoinAdminContent() {
 
 export default function JoinAdminPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50"><Loader2 className="animate-spin text-slate-400" size={40} /></div>}>
+        <Suspense fallback={
+            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
+                <div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+                <p className="text-slate-500 font-medium animate-pulse">Loading portal...</p>
+            </div>
+        }>
             <JoinAdminContent />
         </Suspense>
     );

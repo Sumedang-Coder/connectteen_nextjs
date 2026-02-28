@@ -63,10 +63,31 @@ export default function AdminV2Layout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { user, logout } = useAuthStore();
+  const { user, loading, logout } = useAuthStore();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFabOpen, setIsFabOpen] = useState(false);
+
+  // Authentication & Authorization Guard (Decoupled from Secret)
+  useEffect(() => {
+    if (!loading) {
+      const ADMIN_ROLES = ["super_admin", "content_editor", "viewer"];
+
+      if (pathname === "/signin-admin") {
+        // If on signin page but already logged in as admin, go to dashboard
+        if (user && ADMIN_ROLES.includes(user.role)) {
+          router.push("/dashboard");
+        }
+      } else {
+        // If on protected page but no user or not admin
+        if (!user) {
+          router.push("/signin-admin");
+        } else if (!ADMIN_ROLES.includes(user.role)) {
+          router.push("/");
+        }
+      }
+    }
+  }, [user, loading, router, pathname]);
 
   // Close FAB and Sidebar when route changes
   useEffect(() => {
@@ -79,8 +100,27 @@ export default function AdminV2Layout({
     router.push("/signin-admin");
   };
 
-  // If this is the signin page, don't show sidebar/header
-  if (pathname === "/signin-admin") {
+  // Handle loading state to prevent flash of unauthenticated content
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
+        <div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+        <p className="text-slate-500 font-medium animate-pulse">Verifying access...</p>
+      </div>
+    );
+  }
+
+  // Prevent rendering if not authorized and not on auth page
+  const isAuthPage = pathname === "/signin-admin";
+  const isAdmin = user && ["super_admin", "content_editor", "viewer"].includes(user.role);
+
+  if (!isAuthPage && !isAdmin) {
+    return null;
+  }
+
+  // If this is the signin page, show it without layout
+  if (isAuthPage) {
+    if (isAdmin) return null; // Already redirecting in useEffect
     return <div className={inter.className}>{children}</div>;
   }
 
@@ -129,7 +169,6 @@ export default function AdminV2Layout({
                 href="/secret-messages"
                 icon={<Lock size={20} />}
                 label="Secret Messages"
-                badge={38}
                 active={pathname === "/secret-messages"}
               />
               {user?.role === "super_admin" && (
@@ -207,7 +246,6 @@ export default function AdminV2Layout({
                   href="/secret-messages"
                   icon={<Lock size={20} />}
                   label="Secret Messages"
-                  badge={38}
                   active={pathname === "/secret-messages"}
                 />
                 {user?.role === "super_admin" && (

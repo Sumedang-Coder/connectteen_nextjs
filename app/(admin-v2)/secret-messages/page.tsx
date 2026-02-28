@@ -118,63 +118,44 @@ export default function SecretMessagesPage() {
                     </div>
 
                     {/* Messages List */}
-                    <div className="flex flex-col gap-4">
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                         {allMessages.length === 0 ? (
                             !loading && (
-                                <div className="bg-white p-20 rounded-2xl border border-dashed border-slate-200 flex flex-col items-center justify-center text-center shadow-inner bg-slate-50/30">
-                                    <div className="h-20 w-20 rounded-full bg-slate-100 flex items-center justify-center mb-6">
-                                        <Mail className="text-slate-300" size={32} />
-                                    </div>
+                                <div className="p-20 flex flex-col items-center justify-center text-center bg-slate-50/30">
+                                    <Mail className="text-slate-300 mb-4" size={32} />
                                     <h3 className="text-lg font-bold text-slate-900 mb-2">No messages found</h3>
-                                    <p className="text-slate-400 font-medium max-w-xs mx-auto">Try adjusting your search or filters to find what you're looking for.</p>
+                                    <p className="text-slate-400 font-medium max-w-xs mx-auto">Try adjusting your search or filters.</p>
                                 </div>
                             )
                         ) : allMessages.map((msg, index) => (
-                            <div key={msg.id} className="relative group">
+                            <div key={msg.id} className="relative group border-b border-slate-100 last:border-b-0">
                                 <Link
                                     href={`/secret-messages/${msg.id}`}
-                                    className="relative flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/5 md:flex-row md:items-center overflow-hidden"
+                                    className="flex items-center gap-4 px-6 py-4 transition-all hover:bg-slate-50/80"
                                 >
-                                    {/* Glass reflection effect */}
-                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/0 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-
-                                    {/* Avatar area */}
-                                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-slate-100 flex items-center justify-center border border-slate-200 group-hover:border-blue-200 group-hover:bg-blue-50 transition-colors">
-                                        <div className="h-full w-full flex items-center justify-center text-slate-400 group-hover:text-blue-500 font-black text-2xl transition-colors">
-                                            {msg.recipient_name?.charAt(0).toUpperCase() || "?"}
-                                        </div>
-                                    </div>
-
-                                    {/* Content area */}
-                                    <div className="flex flex-1 flex-col gap-1.5 pr-10">
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <h3 className="text-base font-black text-slate-900">
-                                                <span className="text-slate-400 font-bold text-sm uppercase tracking-wide mr-1 italic">Private Message</span>
-                                            </h3>
-                                            <div className="h-1 w-1 rounded-full bg-slate-300 mx-1"></div>
-                                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                                {msg.created_at ? format(new Date(msg.created_at), "MMM d, yyyy") : "Recently"}
+                                    <div className="flex-1 min-w-0 pr-12">
+                                        <div className="flex items-center justify-between gap-4 mb-0.5">
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <span className="text-sm font-bold text-slate-900 truncate">
+                                                    To: {msg.recipient_name}
+                                                </span>
+                                                {(msg.song_name || msg.song_artist) && (
+                                                    <div className="flex items-center gap-1 text-[10px] font-medium text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 shrink-0">
+                                                        <Music size={10} />
+                                                        <span className="truncate max-w-[100px]">{msg.song_name}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <span className="text-[11px] font-medium text-slate-400 shrink-0 uppercase tracking-tight">
+                                                {msg.created_at ? format(new Date(msg.created_at), "MMM d") : "Today"}
                                             </span>
                                         </div>
-
-                                        {(msg.song_name || msg.song_artist) && (
-                                            <div className="flex items-center gap-2 py-1 px-2 rounded-lg bg-indigo-50/50 border border-indigo-100/50 w-fit">
-                                                <Music size={12} className="text-indigo-500" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600/70">Attachment:</span>
-                                                <span className="text-xs font-bold text-indigo-700 truncate max-w-[200px]">
-                                                    {msg.song_name} • {msg.song_artist}
-                                                </span>
-                                            </div>
-                                        )}
-
-                                        <p className="line-clamp-2 text-sm text-slate-600 leading-relaxed font-medium mt-1">
+                                        <p className="text-sm text-slate-500 line-clamp-1 group-hover:text-slate-700 transition-colors">
                                             {msg.message}
                                         </p>
                                     </div>
-
-                                    {/* View indicator */}
-                                    <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center justify-center h-10 w-10 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
-                                        <ChevronRight size={20} />
+                                    <div className="text-slate-300 group-hover:text-blue-500 transition-colors">
+                                        <ChevronRight size={16} />
                                     </div>
                                 </Link>
 
@@ -185,10 +166,10 @@ export default function SecretMessagesPage() {
                                             e.preventDefault();
                                             handleDelete(msg.id);
                                         }}
-                                        className="absolute right-20 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center rounded-xl text-slate-300 hover:text-white hover:bg-rose-600 opacity-0 group-hover:opacity-100 transition-all z-20 shadow-sm border border-transparent hover:border-rose-500"
+                                        className="absolute right-12 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-white hover:bg-rose-600 opacity-0 group-hover:opacity-100 transition-all z-20"
                                         title="Delete Message"
                                     >
-                                        <Trash2 size={18} />
+                                        <Trash2 size={16} />
                                     </button>
                                 )}
                             </div>

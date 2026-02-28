@@ -52,110 +52,79 @@ export default function AdminSigninPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white flex flex-col md:flex-row font-display">
-            {/* Left Side: Visual Immersive Area */}
-            <div className="hidden md:flex md:w-1/2 lg:w-3/5 bg-slate-900 relative overflow-hidden group">
-                {/* Background Image with sophisticated zoom effect */}
-                <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-[10000ms] group-hover:scale-110"
-                    style={{ backgroundImage: "url('/img/admin_auth_bg.png')" }}
-                />
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 md:p-10 font-display relative overflow-hidden">
+            {/* Background Decorative Blurs */}
+            <div className="absolute top-0 right-0 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-[120px] z-0" />
+            <div className="absolute bottom-0 left-0 translate-x-1/2 translate-y-1/2 w-[500px] h-[500px] bg-indigo-100/50 rounded-full blur-[120px] z-0" />
 
-                {/* Gradient Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/90 via-slate-900/60 to-transparent" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-blue-600/20 via-transparent to-transparent" />
+            <div className="w-full max-w-5xl bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-white flex overflow-hidden min-h-[600px] z-10">
+                {/* Left Side: Visual Area (Hidden on mobile) */}
+                <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative overflow-hidden">
+                    <div
+                        className="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-60"
+                        style={{ backgroundImage: "url('/img/admin_auth_bg_v2.png')" }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
 
-                {/* Content Overlay */}
-                <div className="relative z-10 w-full h-full p-16 flex flex-col justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                            <ShieldCheck className="text-white" size={24} />
+                    <div className="relative z-10 mt-auto p-12">
+                        <div className="flex items-center gap-2 mb-6">
+                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                <ShieldCheck className="text-white" size={18} />
+                            </div>
+                            <span className="text-xs font-black text-white uppercase tracking-widest">ConnectTeen Admin</span>
                         </div>
-                        <span className="text-xl font-black text-white tracking-tight">ConnectTeen Architecture</span>
-                    </div>
-
-                    <div className="max-w-xl">
-                        <h2 className="text-5xl lg:text-6xl font-black text-white leading-tight tracking-tighter mb-6">
-                            Secure <br />Management <br />System.
+                        <h2 className="text-4xl font-black text-white leading-tight tracking-tight mb-4 text-balance">
+                            Empowering Youth <br />Communities Globally.
                         </h2>
-                        <p className="text-slate-300 text-lg font-medium leading-relaxed mb-10">
-                            Empowering community administrators with advanced analytical tools and centralized control. Log in to manage your digital ecosystem.
+                        <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-xs">
+                            Manage articles, events, and private communications from a single dashboard.
                         </p>
-
-                        <div className="grid grid-cols-2 gap-8">
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center gap-2 text-blue-400">
-                                    <CheckCircle2 size={18} />
-                                    <span className="text-sm font-bold uppercase tracking-widest leading-none mt-0.5">Real-time Analytics</span>
-                                </div>
-                                <p className="text-slate-400 text-xs">Monitor user engagement as it happens across the platform.</p>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center gap-2 text-blue-400">
-                                    <CheckCircle2 size={18} />
-                                    <span className="text-sm font-bold uppercase tracking-widest leading-none mt-0.5">Secure Protocol</span>
-                                </div>
-                                <p className="text-slate-400 text-xs">Multi-layered authentication and encrypted data transmission.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-between border-t border-white/10 pt-8">
-                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">Authorized Access Only</p>
-                        <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">&copy; 2026 CTEEN ADM-V2</p>
                     </div>
                 </div>
-            </div>
 
-            {/* Right Side: Form Area */}
-            <div className="flex-1 flex flex-col bg-white">
-                <div className="flex-1 flex flex-col items-center justify-center px-8 lg:px-24">
-                    <div className="w-full max-w-md">
-                        {/* Mobile Logo (Visible only on small screens) */}
-                        <div className="flex md:hidden items-center gap-3 mb-10">
-                            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                {/* Right Side: Form Area */}
+                <div className="flex-1 flex flex-col items-center justify-center p-8 md:p-16">
+                    <div className="w-full max-w-sm">
+                        {/* Compact Logo */}
+                        <div className="flex items-center gap-3 mb-10">
+                            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/20">
                                 <ShieldCheck className="text-white" size={24} />
                             </div>
-                            <h1 className="text-xl font-black text-slate-900 tracking-tight">ConnectTeen</h1>
+                            <h1 className="text-2xl font-black text-slate-900 tracking-tighter">ConnectTeen</h1>
                         </div>
 
-                        <div className="mb-12">
-                            <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-3">Sign in</h2>
-                            <p className="text-slate-500 font-medium">Please enter your administrative credentials.</p>
+                        <div className="mb-8">
+                            <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-2">Admin Sign In</h2>
+                            <p className="text-slate-500 text-sm font-medium">Log in to access your administrative dashboard.</p>
                         </div>
 
-                        <form onSubmit={handleLogin} className="space-y-6">
-                            <div className="group space-y-2">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1 group-focus-within:text-blue-600 transition-colors">
-                                    Administration Email
+                        <form onSubmit={handleLogin} className="space-y-4">
+                            <div className="space-y-1.5">
+                                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+                                    Email Address
                                 </label>
-                                <div className="relative">
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-10 flex items-center justify-center text-slate-400 group-focus-within:text-blue-600 transition-colors">
-                                        <Mail size={20} />
+                                <div className="relative group">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                                        <Mail size={18} />
                                     </div>
                                     <input
                                         type="email"
                                         required
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="admin@connectteen.com"
-                                        className="w-full pl-10 pr-4 py-4 bg-transparent border-b-2 border-slate-100 text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:border-blue-600 transition-all text-sm"
+                                        placeholder="admin@example.com"
+                                        className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 transition-all text-sm"
                                     />
                                 </div>
                             </div>
 
-                            <div className="group space-y-2">
-                                <div className="flex items-center justify-between px-1">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] group-focus-within:text-blue-600 transition-colors">
-                                        Security Code
-                                    </label>
-                                    <button type="button" className="text-[10px] font-bold text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-widest">
-                                        Reset?
-                                    </button>
-                                </div>
-                                <div className="relative">
-                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-10 flex items-center justify-center text-slate-400 group-focus-within:text-blue-600 transition-colors">
-                                        <Lock size={20} />
+                            <div className="space-y-1.5">
+                                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+                                    Password
+                                </label>
+                                <div className="relative group">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                                        <Lock size={18} />
                                     </div>
                                     <input
                                         type={showPassword ? "text" : "password"}
@@ -163,53 +132,45 @@ export default function AdminSigninPage() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
-                                        className="w-full pl-10 pr-12 py-4 bg-transparent border-b-2 border-slate-100 text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:border-blue-600 transition-all text-sm"
+                                        className="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl text-slate-900 font-bold placeholder:text-slate-300 focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 transition-all text-sm"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-600 transition-colors"
                                     >
                                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                     </button>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3 pt-4">
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="flex-1 py-5 bg-slate-950 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-800 transition-all shadow-xl shadow-slate-950/20 flex items-center justify-center gap-3 group disabled:opacity-50"
-                                >
-                                    {loading ? (
-                                        "Verifying Protocol..."
-                                    ) : (
-                                        <>
-                                            <span>Enter Portal</span>
-                                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                                        </>
-                                    )}
-                                </button>
-                            </div>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all shadow-xl shadow-slate-950/10 flex items-center justify-center gap-2 group disabled:opacity-50 mt-2"
+                            >
+                                {loading ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    <>
+                                        <span>Log In to Dashboard</span>
+                                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                    </>
+                                )}
+                            </button>
                         </form>
 
-                        <div className="mt-20">
+                        <div className="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
                             <Link
                                 href="/"
-                                className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors group"
+                                className="inline-flex items-center gap-2 text-[11px] font-bold text-slate-400 hover:text-slate-900 transition-colors group"
                             >
                                 <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                                <span>Return to platform</span>
+                                <span>Return Home</span>
                             </Link>
+                            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">&copy; 2026 CTEEN</span>
                         </div>
                     </div>
-                </div>
-
-                {/* Footer only for mobile/tablet */}
-                <div className="md:hidden p-8 border-t border-slate-100 text-center">
-                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
-                        &copy; 2026 Architecture. Secured by CTEEN.
-                    </p>
                 </div>
             </div>
         </div>

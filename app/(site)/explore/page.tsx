@@ -12,13 +12,13 @@ import Image from "next/image";
 export default function ExplorePage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const allMessages = useMessageStore((s) => s.allMessages);
-  const fetchAllMessages = useMessageStore((s) => s.fetchAllMessages);
+  const allMessages = useMessageStore((s) => s.messages);
+  const fetchMessages = useMessageStore((s) => s.fetchMessages);
   const router = useRouter();
 
   useEffect(() => {
-    fetchAllMessages().finally(() => setLoading(false));
-  }, [fetchAllMessages]);
+    fetchMessages().finally(() => setLoading(false));
+  }, [fetchMessages]);
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchQuery.trim()) {
@@ -68,7 +68,7 @@ export default function ExplorePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {allMessages.map((msg: any) => (
-            
+
             <Card
               key={msg.id}
               onClick={() => router.push(`/explore/${msg.id}`)}

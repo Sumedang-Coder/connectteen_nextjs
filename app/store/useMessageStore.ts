@@ -60,7 +60,7 @@ export const useMessageStore = create<MessageState>((set) => ({
   fetchAllMessages: async (params) => {
     set({ loading: true });
     try {
-      const res = await api.get("/messages", { params });
+      const res = await api.get("/messages/secret", { params });
       set({
         allMessages: res.data.data || [],
         pagination: res.data.pagination || {
@@ -71,7 +71,7 @@ export const useMessageStore = create<MessageState>((set) => ({
         },
       });
     } catch (err) {
-      console.error("Failed to fetch all messages:", err);
+      console.error("Failed to fetch secret messages:", err);
       set({ allMessages: [] });
     } finally {
       set({ loading: false });
@@ -82,7 +82,15 @@ export const useMessageStore = create<MessageState>((set) => ({
     set({ loading: true });
     try {
       const res = await api.get("/messages", { params });
-      set({ messages: res.data.data || [] });
+      set({
+        messages: res.data.data || [],
+        pagination: res.data.pagination || {
+          totalMessages: (res.data.data || []).length,
+          totalPages: 1,
+          currentPage: 1,
+          limit: 10,
+        }
+      });
     } catch (err) {
       console.error("Failed to fetch messages:", err);
       set({ messages: [] });
