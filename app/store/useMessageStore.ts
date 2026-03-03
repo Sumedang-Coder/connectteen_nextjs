@@ -18,6 +18,9 @@ interface MessageState {
   myMessages: Message[];
   selectedMessage: Message | null;
   loading: boolean;
+  page: number;
+  hasMore: boolean;
+  isFetching: boolean;
   pagination: {
     totalMessages: number;
     totalPages: number;
@@ -41,6 +44,7 @@ interface MessageState {
   fetchMyMessages: () => Promise<void>;
   fetchMessageById: (id: string) => Promise<void>;
   deleteMessage: (id: string) => Promise<void>;
+  resetAllMessages: () => void;
 }
 
 export const useMessageStore = create<MessageState>((set, get) => ({
@@ -49,6 +53,9 @@ export const useMessageStore = create<MessageState>((set, get) => ({
   myMessages: [],
   selectedMessage: null,
   loading: true,
+  page: 1,
+  hasMore: true,
+  isFetching: false,
   pagination: {
     totalMessages: 0,
     totalPages: 1,
@@ -68,23 +75,31 @@ export const useMessageStore = create<MessageState>((set, get) => ({
   },
 
   fetchAllMessages: async (params) => {
-    set({ loading: true });
+    set({ loading: true, isFetching: true });
     try {
-      const res = await api.get("/messages/secret", { params });
-      set({
-        allMessages: res.data.data || [],
-        pagination: res.data.pagination || {
-          totalMessages: (res.data.data || []).length,
-          totalPages: 1,
-          currentPage: 1,
-          limit: 10,
-        },
-      });
+      // axios requires params to be an object; default to empty if undefined
+      const res = await api.get("/messages", { params: params || {} });
+      const data: Message[] = res.data.data || [];
+      const pagination = res.data.pagination || {
+        totalMessages: data.length,
+        totalPages: 1,
+        currentPage: 1,
+        limit: 10,
+      };
+      set((state) => ({
+        allMessages:
+          params && params.page && params.page > 1
+            ? [...state.allMessages, ...data]
+            : data,
+        pagination,
+        page: pagination.currentPage,
+        hasMore: pagination.currentPage < pagination.totalPages,
+      }));
     } catch (err) {
       console.error("Failed to fetch secret messages:", err);
       set({ allMessages: [] });
     } finally {
-      set({ loading: false });
+      set({ loading: false, isFetching: false });
     }
   },
 
@@ -148,5 +163,18 @@ export const useMessageStore = create<MessageState>((set, get) => ({
       console.error("Failed to delete message:", err);
       throw err;
     }
+  },
+
+  resetAllMessages: () => {
+    // clear the cached messages and restore pagination defaults
+    set({
+      allMessages: [],
+      pagination: {
+        totalMessages: 0,
+        totalPages: 1,
+        currentPage: 1,
+        limit: 10,
+      },
+    });
   },
 }));

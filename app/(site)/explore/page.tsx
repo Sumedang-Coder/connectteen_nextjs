@@ -27,12 +27,13 @@ export default function ExplorePage() {
 
   useEffect(() => {
     resetAllMessages();
-    fetchAllMessages(1, 6);
+    // specify pagination options as object to match store API
+    fetchAllMessages({ page: 1, limit: 6 });
   }, []);
 
   const handleLoadMore = () => {
     if (!isFetching && hasMore) {
-      fetchAllMessages(page + 1, 6);
+      fetchAllMessages({ page: page + 1, limit: 6 });
     }
   };
 
