@@ -19,20 +19,35 @@ interface MessageState {
   allMessages: Message[];
   myMessages: Message[];
   selectedMessage: Message | null;
+  page: number;
+  hasMore: boolean;
+  isFetching: boolean;
 
   sendMessage: (msg: Omit<Message, "id" | "created_at">) => Promise<void>;
   fetchMessages: (search?: string, limit?: number) => Promise<void>;
-  fetchAllMessages: (search?: string) => Promise<void>;
+  fetchAllMessages: (page?: number, limit?: number) => Promise<void>;
+  resetAllMessages: () => void;
   fetchMyMessages: () => Promise<void>;
   fetchMessageById: (id: number | string) => Promise<void>;
   deleteMessage: (id: number | string) => Promise<void>;
 }
 
-export const useMessageStore = create<MessageState>((set) => ({
+export const useMessageStore = create<MessageState>((set, get) => ({
   messages: [],
   allMessages: [],
   myMessages: [],
   selectedMessage: null,
+  page: 1,
+  hasMore: true,
+  isFetching: false,
+
+  resetAllMessages: () => {
+    set({
+      allMessages: [],
+      page: 1,
+      hasMore: true,
+    });
+  },
 
   sendMessage: async (msg) => {
     try {
@@ -45,15 +60,43 @@ export const useMessageStore = create<MessageState>((set) => ({
     }
   },
 
-  fetchAllMessages: async () => {
-    try {
-      const res = await api.get("/messages");
-      set({ allMessages: res.data.data || [] });
-    } catch (err) {
-      console.error("Failed to fetch all messages:", err);
-      set({ allMessages: [] });
-    }
-  },
+  fetchAllMessages: async (page = 1, limit = 6) => {
+  const { isFetching, hasMore } = get();
+  if (isFetching || !hasMore) return;
+
+  set({ isFetching: true });
+
+  try {
+    const res = await api.get("/messages", {
+      params: { page, limit },
+    });
+
+    const newData: Message[] = res.data.data || [];
+    const pagination = res.data.pagination;
+
+    set((state) => ({
+      allMessages:
+        page === 1
+          ? newData
+          : [
+              ...state.allMessages,
+              ...newData.filter(
+                (newMsg) =>
+                  !state.allMessages.some(
+                    (existing) => existing.id === newMsg.id
+                  )
+              ),
+            ],
+
+      page: pagination.currentPage,
+      hasMore: pagination.hasNextPage,
+      isFetching: false,
+    }));
+  } catch (err) {
+    console.error("Failed to fetch messages:", err);
+    set({ isFetching: false });
+  }
+},
 
   fetchMessages: async (search = "", limit = 6) => {
     try {

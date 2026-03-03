@@ -3,22 +3,41 @@
 import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useMessageStore } from "@/app/store/useMessageStore";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Loader from "@/components/Loader";
 
 export default function ExplorePage() {
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const allMessages = useMessageStore((s) => s.allMessages);
-  const fetchAllMessages = useMessageStore((s) => s.fetchAllMessages);
+
+  const {
+    allMessages,
+    fetchAllMessages,
+    resetAllMessages,
+    page,
+    hasMore,
+    isFetching,
+  } = useMessageStore();
+
   const router = useRouter();
 
   useEffect(() => {
-    fetchAllMessages().finally(() => setLoading(false));
-  }, [fetchAllMessages]);
+    resetAllMessages();
+    fetchAllMessages(1, 6);
+  }, []);
+
+  const handleLoadMore = () => {
+    if (!isFetching && hasMore) {
+      fetchAllMessages(page + 1, 6);
+    }
+  };
+
+ if (isFetching && allMessages.length === 0) {
+    return <Loader fullScreen size="sm" />
+  }
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchQuery.trim()) {
@@ -26,98 +45,146 @@ export default function ExplorePage() {
     }
   };
 
-
   return (
-    <div className="min-h-screen bg-white">
-      {/* HERO */}
-      <div className="bg-linear-to-br from-cyan-600 to-blue-600 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-16 grid lg:grid-cols-2 gap-12 animate-fade-in items-center">
-          <div>
-            <h2 className="text-4xl mb-4">Jelajahi Pesan</h2>
-            <p className="text-cyan-50 mb-8">
-              Temukan pesan dan lagu yang dibagikan teman-teman
-            </p>
+    <div className="min-h-screen bg-slate-50">
 
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <Input
-                placeholder="Cari pesan, lagu, atau nama..."
-                className="h-14 pl-12 text-black"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearch}
-              />
+      {/* ================= HERO ================= */}
+      <section className="px-6 lg:px-20 py-12">
+        <div className="max-w-7xl mx-auto bg-linear-to-br from-cyan-600 to-blue-600 rounded-3xl p-8 lg:p-16 shadow-2xl">
+
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <div className="animate-fade-in">
+                <h1 className="text-white text-5xl lg:text-6xl font-extrabold leading-tight">
+                  Jelajahi <br /> Pesan
+                </h1>
+                <p className="text-white/90 mt-4 text-lg max-w-md">
+                  Temukan cerita dan lagu yang dibagikan oleh orang-orang.
+                </p>
+              </div>
+
+              <div className="relative max-w-xl animate-fade-in">
+                <div className="bg-white rounded-2xl gap-5 flex items-center p-2 shadow-xl">
+                  <Search className="ml-4 text-gray-400 w-5 h-5" />
+                  <Input
+                    placeholder="Cari pesan, lagu, atau nama..."
+                    className="flex-1 border-none focus:ring-0 text-gray-900 px-4 py-3 bg-transparent"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleSearch}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div className="relative h-80 rounded-xl overflow-hidden shadow-2xl">
-            <Image
-              src="/img/hero-explore.jpg"
-              alt="Explore"
-              fill
-              className="object-cover"
-              priority
-            />
+            <div className="hidden lg:block animate-fade-in">
+              <div className="bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/20 shadow-2xl">
+                <div className="relative w-full aspect-4/3 rounded-2xl overflow-hidden">
+                  <Image
+                    src="/img/hero-explore.jpg"
+                    alt="Explore"
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* CONTENT */}
-      <div className="max-w-6xl mx-auto px-6 py-12 animate-fade-in">
-        <h2 className="text-2xl mb-6">Semua Pesan</h2>
+      {/* ================= CONTENT ================= */}
+      <main className="px-6 lg:px-20 pb-20">
+        <div className="max-w-7xl mx-auto animate-fade-in">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {allMessages.map((msg: any) => (
-            
-            <Card
-              key={msg.id}
-              onClick={() => router.push(`/explore/${msg.id}`)}
-              className="overflow-hidden cursor-pointer hover:shadow-2xl transition-all hover:-translate-y-2 border-4 border-white shadow-lg h-[300px] flex flex-col"
-            >
-              <CardHeader className="pb-3 bg-linear-to-br bg-cyan-50">
-                <div className="flex items-center gap-3">
-                  <Avatar className="border-3 border-white shadow-md">
-                    <AvatarFallback className="bg-linear-to-br bg-blue-400 text-white">
-                      {msg.recipient_name?.[0] || "?"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-medium truncate">To: {msg.recipient_name || "Unknown"}</p>
+          <h2 className="text-2xl font-extrabold mb-10">
+            ✨ Recent Explorations
+          </h2>
+
+          {/* Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-15 gap-8">
+            {allMessages.map((msg: any) => (
+              <Card
+                key={msg.id}
+                onClick={() => router.push(`/explore/${msg.id}`)}
+                className="group bg-white rounded-3xl p-1 shadow-lg border-[6px] border-white transition-all hover:-translate-y-2 cursor-pointer"
+              >
+                <CardContent className="bg-cyan-50 flex flex-col flex-1 min-h-[260px] rounded-2xl p-6 space-y-6">
+
+                  {/* Header */}
+                  <div className="flex items-center gap-3">
+                    <Avatar className="border-2 border-cyan-500">
+                      <AvatarFallback className="bg-linear-to-br from-cyan-500 to-blue-500 text-white">
+                        {msg.recipient_name?.[0] || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div>
+                      <p className="font-bold text-gray-900">
+                        To: {msg.recipient_name || "Unknown"}
+                      </p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">
+                        Shared Message
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
 
-              <CardContent className="flex flex-col flex-1 gap-3 pb-4">
-                <p className="text-gray-800 line-clamp-3 leading-relaxed">
-                  {msg.message || "–"}
-                </p>
-                {msg.song_name && (
-                  <div className="mt-auto p-3 bg-linear-to-br from-cyan-50 to-blue-50 rounded-xl border border-cyan-200">
-                    <div className="flex items-center gap-3">
+                  {/* Message */}
+                  <p className="text-gray-700 leading-relaxed line-clamp-3">
+                    {msg.message || "–"}
+                  </p>
+
+                  {/* Song */}
+                  {msg.song_name && (
+                    <div className="mt-auto bg-linear-to-r from-cyan-500 to-blue-500 rounded-2xl p-4 flex items-center gap-4">
+
                       {msg.song_image && (
                         <img
                           src={msg.song_image}
                           alt={msg.song_name}
-                          className="w-12 h-12 rounded-lg object-cover shrink-0"
+                          className="w-14 h-14 rounded-xl object-cover shrink-0 bg-white p-1"
                         />
                       )}
 
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-bold truncate">
                           {msg.song_name}
                         </p>
-                        <p className="text-xs text-gray-600 truncate">
+                        <p className="text-white/80 text-xs truncate">
                           {msg.song_artist}
                         </p>
                       </div>
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                  )}
+
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Load More Button */}
+          {hasMore && (
+            <div className="flex justify-center mt-12">
+              <button
+                onClick={handleLoadMore}
+                disabled={isFetching}
+                className="px-8 py-3 rounded-xl bg-cyan-600 text-white font-semibold hover:bg-cyan-700 transition disabled:opacity-50"
+              >
+                {isFetching ? "Loading..." : "Load More"}
+              </button>
+            </div>
+          )}
+
+          {!hasMore && (
+            <p className="text-center text-gray-400 mt-12">
+              No more messages
+            </p>
+          )}
+
         </div>
-      </div>
+      </main>
     </div>
   );
 }

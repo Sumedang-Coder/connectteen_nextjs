@@ -30,10 +30,18 @@ interface EventState {
   events: Event[];
   event: Event | null;
   registrants: Registrant[];
+
+  page: number;
+  hasMore: boolean;
+  isFetching: boolean;
+
   loading: boolean;
   error: string | null;
 
-  fetchEvents: () => Promise<void>;
+  fetchEvents: (page?: number, limit?: number, search?: string) => Promise<void>;
+  fetchNextEvents: () => Promise<void>;
+  resetEvents: () => void;
+
   fetchEventById: (id: string) => Promise<void>;
   toggleRegisterEvent: (eventId: string) => Promise<void>;
   createEvent: (formData: FormData) => Promise<boolean>;
@@ -47,24 +55,68 @@ export const useEventStore = create<EventState>((set, get) => ({
   events: [],
   event: null,
   registrants: [],
+
+  page: 1,
+  hasMore: true,
+  isFetching: false,
+
   loading: false,
   error: null,
 
- fetchEvents: async () => {
+  fetchEvents: async (page = 1, limit = 6, search = "") => {
+  const { isFetching, hasMore } = get();
+  if (isFetching || !hasMore) return;
+
   try {
-    set({ loading: true, error: null });
-    const res = await api.get("/events");
-    set({
-      events: res.data.data.map((e: any) => ({
-        ...e,
-        is_registered: e.isRegistered,
-      })),
+    set({ isFetching: true, error: null });
+
+    const res = await api.get("/events", {
+      params: { page, limit, search },
     });
+
+    const newData: Event[] = (res.data.data || []).map((e: any) => ({
+      ...e,
+      is_registered: e.isRegistered,
+    }));
+
+    const pagination = res.data.pagination;
+
+    set((state) => ({
+      events:
+        page === 1
+          ? newData
+          : [
+              ...state.events,
+              ...newData.filter(
+                (newEvent) =>
+                  !state.events.some(
+                    (existing) => existing.id === newEvent.id
+                  )
+              ),
+            ],
+      page: pagination.currentPage,
+      hasMore: pagination.hasNextPage,
+      isFetching: false,
+    }));
   } catch (err: any) {
-    set({ error: err?.response?.data?.message || "Fetch events failed" });
-  } finally {
-    set({ loading: false });
+    set({
+      error: err?.response?.data?.message || "Fetch events failed",
+      isFetching: false,
+    });
   }
+},
+
+fetchNextEvents: async () => {
+  const { page, fetchEvents } = get();
+  await fetchEvents(page + 1);
+},
+
+resetEvents: () => {
+  set({
+    events: [],
+    page: 1,
+    hasMore: true,
+  });
 },
 
 

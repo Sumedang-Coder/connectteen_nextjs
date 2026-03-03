@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Music, LogOut, Search, Trash2 } from "lucide-react"
+import { useEffect, useState, useMemo } from "react"
+import { Search, Trash2 } from "lucide-react"
 import Loader from "@/components/Loader"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -15,64 +15,53 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export default function HistoryPage() {
-  const user = useAuthStore((s) => s.user)
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const loadingAuth = useAuthStore((s) => s.loading)
-  const logout = useAuthStore((s) => s.logout)
-  const myMessages = useMessageStore((s) => s.myMessages)
-  const fetchMyMessages = useMessageStore((s) => s.fetchMyMessages)
-  const deleteMessage = useMessageStore((s) => s.deleteMessage)
+  const router = useRouter()
+
+  const { user, isAuthenticated, loading: loadingAuth } = useAuthStore()
+  const { myMessages, fetchMyMessages, deleteMessage } = useMessageStore()
+
   const [loadingData, setLoadingData] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const router = useRouter()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null)
-
-  useEffect(() => {
-    if (!isAuthenticated) return
-
-    fetchMyMessages().finally(() => setLoadingData(false))
-  }, [isAuthenticated, fetchMyMessages])
-
-  const handleLogin = () => {
-    window.location.href =
-      "https://connectteen-server.vercel.app/api/auth/google"
-  }
-
-  const filteredMessages = searchQuery
-    ? myMessages.filter(
-      (msg) =>
-        msg.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        msg.recipient_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        msg.song_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        msg.song_artist.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    : myMessages
-
-  if (loadingAuth) {
-    return <Loader size="sm" fullScreen />
-  }
-
-  useEffect(() => {
-    if (!isAuthenticated) return
-
-    fetchMyMessages().finally(() => setLoadingData(false))
-  }, [isAuthenticated, fetchMyMessages])
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!loadingAuth && !isAuthenticated) {
-      router.replace('/signin')
+      router.replace("/signin")
     }
   }, [loadingAuth, isAuthenticated, router])
 
+  useEffect(() => {
+    if (!isAuthenticated) return
 
+    fetchMyMessages().finally(() => setLoadingData(false))
+  }, [isAuthenticated, fetchMyMessages])
 
+  useEffect(() => {
+    document.body.style.overflow = showDeleteModal ? "hidden" : "auto"
+  }, [showDeleteModal])
+
+  const filteredMessages = useMemo(() => {
+    if (!searchQuery) return myMessages
+
+    return myMessages.filter((msg) =>
+      [msg.message, msg.recipient_name, msg.song_name, msg.song_artist]
+        .some((field) =>
+          field?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+    )
+  }, [searchQuery, myMessages])
+
+  if (loadingAuth || loadingData) {
+    return <Loader size="sm" fullScreen />
+  }
 
   return (
     <div className="min-h-screen bg-white">
       {/* HERO */}
       <div className="bg-linear-to-br from-cyan-600 to-blue-600 text-white">
-        <div className="max-w-7xl animate-fade-in mx-auto px-6 py-14 grid lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-6 py-14 grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="text-4xl mb-2">
               History Pesan {user?.name}
@@ -91,8 +80,8 @@ export default function HistoryPage() {
               />
             </div>
           </div>
-          <div className="relative h-80 rounded-xl  hidden md:block overflow-hidden shadow-2xl">
 
+          <div className="relative h-80 rounded-xl hidden md:block overflow-hidden shadow-2xl">
             <Image
               src="/img/hero2.jpg"
               alt="History"
@@ -101,13 +90,12 @@ export default function HistoryPage() {
               className="object-cover"
             />
           </div>
-
         </div>
       </div>
 
       {/* CONTENT */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="mb-6 animate-fade-in">
+        <div className="mb-6">
           <h2 className="text-2xl mb-1">
             {searchQuery
               ? `Hasil Pencarian (${filteredMessages.length})`
@@ -119,88 +107,97 @@ export default function HistoryPage() {
         </div>
 
         {filteredMessages.length === 0 ? (
-          <div className="text-center py-16 animate-fade-in text-gray-500">
+          <div className="text-center py-16 text-gray-500">
             Tidak ada pesan yang cocok
           </div>
         ) : (
-          <div className="grid grid-cols-1 animate-fade-in md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 md:px-15 gap-8">
             {filteredMessages.map((msg) => (
-
               <Card
                 key={msg.id}
                 onClick={() => router.push(`/explore/${msg.id}`)}
-                className="overflow-hidden cursor-pointer hover:shadow-2xl transition-all hover:-translate-y-2 border-4 border-white shadow-lg h-[300px] flex flex-col"
+                className="group bg-white rounded-3xl p-1 shadow-lg border-[6px] border-white transition-all hover:-translate-y-2 cursor-pointer"
               >
-                <CardHeader className="pb-3 bg-linear-to-br flex justify-between bg-cyan-50">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="border-3 border-white shadow-md">
-                      <AvatarFallback className="bg-linear-to-br bg-blue-400 text-white">
-                        {msg.recipient_name?.[0] || "?"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium truncate">To: {msg.recipient_name || "Unknown"}</p>
-                    </div>
-                  </div>
-                  <Button
-                    size="icon"
-                    variant="ghost"
+                <CardContent className="bg-cyan-50 flex flex-col flex-1 min-h-[260px] rounded-2xl p-6 space-y-6">
+                  <button
                     onClick={(e) => {
                       e.stopPropagation()
                       setSelectedMessageId(msg.id)
                       setShowDeleteModal(true)
                     }}
+                    className="absolute top-4 right-4 p-2 rounded-full bg-white shadow hover:bg-red-50 transition"
                   >
-                    <Trash2 className="w-4 h-4 text-red-500" />
-                  </Button>
-                </CardHeader>
+                    <Trash2 className="w-4 h-4 text-red-600" />
+                  </button>
+                  {/* Header */}
+                  <div className="flex items-center gap-3">
+                    <Avatar className="border-2 border-cyan-500">
+                      <AvatarFallback className="bg-linear-to-br from-cyan-500 to-blue-500 text-white">
+                        {msg.recipient_name?.[0] || "?"}
+                      </AvatarFallback>
+                    </Avatar>
 
-                <CardContent className="flex flex-col flex-1 gap-3 pb-4">
-                  <p className="text-gray-800 line-clamp-3 leading-relaxed">
+                    <div>
+                      <p className="font-bold text-gray-900">
+                        To: {msg.recipient_name || "Unknown"}
+                      </p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">
+                        Shared Message
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Message */}
+                  <p className="text-gray-700 leading-relaxed line-clamp-3">
                     {msg.message || "–"}
                   </p>
-                  {msg.song_name && (
-                    <div className="mt-auto p-3 bg-linear-to-br from-cyan-50 to-blue-50 rounded-xl border border-cyan-200">
-                      <div className="flex items-center gap-3">
-                        {msg.song_image && (
-                          <img
-                            src={msg.song_image}
-                            alt={msg.song_name}
-                            className="w-12 h-12 rounded-lg object-cover shrink-0"
-                          />
-                        )}
 
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {msg.song_name}
-                          </p>
-                          <p className="text-xs text-gray-600 truncate">
-                            {msg.song_artist}
-                          </p>
-                        </div>
+                  {/* Song */}
+                  {msg.song_name && (
+                    <div className="mt-auto bg-linear-to-r from-cyan-500 to-blue-500 rounded-2xl p-4 flex items-center gap-4">
+
+                      {msg.song_image && (
+                        <img
+                          src={msg.song_image}
+                          alt={msg.song_name}
+                          className="w-14 h-14 rounded-xl object-cover shrink-0 bg-white p-1"
+                        />
+                      )}
+
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-bold truncate">
+                          {msg.song_name}
+                        </p>
+                        <p className="text-white/80 text-xs truncate">
+                          {msg.song_artist}
+                        </p>
                       </div>
                     </div>
                   )}
+
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
       </div>
+
+      {/* DELETE MODAL */}
       {showDeleteModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-80 flex flex-col gap-4 animate-fade-in">
-            <h2 className="text-lg font-semibold text-gray-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-[380px] bg-white rounded-2xl shadow-2xl p-8">
+            <h2 className="text-xl font-semibold mb-2">
               Hapus Pesan?
             </h2>
-
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 mb-6">
               Pesan ini akan dihapus permanen dan tidak bisa dikembalikan.
             </p>
 
-            <div className="flex justify-end gap-3 mt-4">
+            <div className="flex gap-3">
               <Button
                 variant="outline"
+                className="w-1/2"
+                disabled={deleting}
                 onClick={() => {
                   setShowDeleteModal(false)
                   setSelectedMessageId(null)
@@ -210,15 +207,18 @@ export default function HistoryPage() {
               </Button>
 
               <Button
-                variant="destructive"
+                className="w-1/2 bg-red-600 hover:bg-red-700 text-white"
+                disabled={deleting}
                 onClick={async () => {
                   if (!selectedMessageId) return
+                  setDeleting(true)
                   await deleteMessage(selectedMessageId)
+                  setDeleting(false)
                   setShowDeleteModal(false)
                   setSelectedMessageId(null)
                 }}
               >
-                Hapus
+                {deleting ? "Menghapus..." : "Hapus"}
               </Button>
             </div>
           </div>
@@ -227,3 +227,4 @@ export default function HistoryPage() {
     </div>
   )
 }
+

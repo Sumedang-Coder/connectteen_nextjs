@@ -243,21 +243,47 @@ export function SendPage() {
         </div>
 
         {showSentModal && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-            <div className="bg-white rounded-xl shadow-lg p-6 w-80 flex flex-col gap-4 animate-fade-in">
-              <h2 className="text-lg font-semibold text-gray-800">Pesan Terkirim!</h2>
-              <p className="text-sm text-gray-600">
-                Pesanmu berhasil dikirim ke {lastRecipient} 🎉
-              </p>
-              <div className="flex justify-end gap-3 mt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowSentModal(false)}
-                  className="px-4"
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="relative w-[360px] bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl p-8 flex flex-col items-center text-center animate-[fadeIn_0.2s_ease-out]">
+
+              {/* Success Icon */}
+              <div className="w-16 h-16 rounded-full bg-linear-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-lg mb-5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
                 >
-                  Tutup
-                </Button>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
               </div>
+
+              {/* Title */}
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                Pesan Terkirim!
+              </h2>
+
+              {/* Description */}
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Pesanmu berhasil dikirim ke{" "}
+                <span className="font-semibold text-gray-800">
+                  {lastRecipient}
+                </span>{" "}
+                🎉
+              </p>
+
+              {/* Divider */}
+              <div className="w-full h-px bg-gray-200 my-6" />
+
+              {/* Button */}
+              <Button
+                onClick={() => setShowSentModal(false)}
+                className="w-full rounded-xl bg-linear-to-r from-blue-500 to-indigo-500 text-white hover:opacity-90 transition"
+              >
+                Tutup
+              </Button>
             </div>
           </div>
         )}

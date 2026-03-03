@@ -26,7 +26,7 @@ export function RecentPosts() {
   }, [fetchMessages]);
 
   if (loading) {
-    return <Loader size="md" fullScreen/>;
+    return <Loader size="md" fullScreen />;
   }
 
 
@@ -50,47 +50,56 @@ export function RecentPosts() {
               <Card
                 key={msg.id}
                 onClick={() => router.push(`/explore/${msg.id}`)}
-                className="overflow-hidden cursor-pointer hover:shadow-2xl transition-all hover:-translate-y-2 border-4 border-white shadow-lg h-[300px] flex flex-col"
+                className="group bg-white rounded-3xl p-1 shadow-lg border-[6px] border-white transition-all hover:-translate-y-2 cursor-pointer"
               >
-                <CardHeader className="pb-3 bg-linear-to-br bg-cyan-50">
+                <CardContent className="bg-cyan-50 flex flex-col flex-1 min-h-[260px] rounded-2xl p-6 space-y-6">
+
+                  {/* Header */}
                   <div className="flex items-center gap-3">
-                    <Avatar className="border-3 border-white shadow-md">
-                      <AvatarFallback className="bg-linear-to-br bg-blue-400 text-white">
-                        {avatarLetter}
+                    <Avatar className="border-2 border-cyan-500">
+                      <AvatarFallback className="bg-linear-to-br from-cyan-500 to-blue-500 text-white">
+                        {msg.recipient_name?.[0] || "?"}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium truncate">To: {msg.recipient_name || "Unknown"}</p>
+
+                    <div>
+                      <p className="font-bold text-gray-900">
+                        To: {msg.recipient_name || "Unknown"}
+                      </p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">
+                        Shared Message
+                      </p>
                     </div>
                   </div>
-                </CardHeader>
 
-                <CardContent className="flex flex-col flex-1 gap-3 pb-4">
-                  <p className="text-gray-800 line-clamp-3 leading-relaxed">
+                  {/* Message */}
+                  <p className="text-gray-700 leading-relaxed line-clamp-3">
                     {msg.message || "–"}
                   </p>
-                  {msg.song_name && (
-                    <div className="mt-auto p-3 bg-linear-to-br from-cyan-50 to-blue-50 rounded-xl border border-cyan-200">
-                      <div className="flex items-center gap-3">
-                        {msg.song_image && (
-                          <img
-                            src={msg.song_image}
-                            alt={msg.song_name}
-                            className="w-12 h-12 rounded-lg object-cover shrink-0"
-                          />
-                        )}
 
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {msg.song_name}
-                          </p>
-                          <p className="text-xs text-gray-600 truncate">
-                            {msg.song_artist}
-                          </p>
-                        </div>
+                  {/* Song */}
+                  {msg.song_name && (
+                    <div className="mt-auto bg-linear-to-r from-cyan-500 to-blue-500 rounded-2xl p-4 flex items-center gap-4">
+
+                      {msg.song_image && (
+                        <img
+                          src={msg.song_image}
+                          alt={msg.song_name}
+                          className="w-14 h-14 rounded-xl object-cover shrink-0 bg-white p-1"
+                        />
+                      )}
+
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-bold truncate">
+                          {msg.song_name}
+                        </p>
+                        <p className="text-white/80 text-xs truncate">
+                          {msg.song_artist}
+                        </p>
                       </div>
                     </div>
                   )}
+
                 </CardContent>
               </Card>
             );
