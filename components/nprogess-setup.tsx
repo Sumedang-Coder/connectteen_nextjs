@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 
 export default function NProgressProvider() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     NProgress.start();
@@ -19,7 +18,7 @@ export default function NProgressProvider() {
     return () => {
       clearTimeout(timer);
     };
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   return null;
 }

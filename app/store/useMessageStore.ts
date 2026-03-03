@@ -26,14 +26,24 @@ interface MessageState {
   };
 
   sendMessage: (msg: Omit<Message, "id" | "created_at">) => Promise<void>;
-  fetchMessages: (params?: { search?: string; sort?: string; page?: number; limit?: number }) => Promise<void>;
-  fetchAllMessages: (params?: { search?: string; sort?: string; page?: number; limit?: number }) => Promise<void>;
+  fetchMessages: (params?: {
+    search?: string;
+    sort?: string;
+    page?: number;
+    limit?: number;
+  }) => Promise<void>;
+  fetchAllMessages: (params?: {
+    search?: string;
+    sort?: string;
+    page?: number;
+    limit?: number;
+  }) => Promise<void>;
   fetchMyMessages: () => Promise<void>;
   fetchMessageById: (id: string) => Promise<void>;
   deleteMessage: (id: string) => Promise<void>;
 }
 
-export const useMessageStore = create<MessageState>((set) => ({
+export const useMessageStore = create<MessageState>((set, get) => ({
   messages: [],
   allMessages: [],
   myMessages: [],
@@ -89,7 +99,7 @@ export const useMessageStore = create<MessageState>((set) => ({
           totalPages: 1,
           currentPage: 1,
           limit: 10,
-        }
+        },
       });
     } catch (err) {
       console.error("Failed to fetch messages:", err);

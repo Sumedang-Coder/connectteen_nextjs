@@ -26,27 +26,7 @@ export function Footer() {
             </p>
           </div>
 
-          <div className="animate-fade-in">
-            <div className="mb-8">
-              <h3 className="mb-4">Quick Links</h3>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors hover:underline">Tentang Kami</a></li>
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors hover:underline">Pedoman Komunitas</a></li>
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors hover:underline">Pusat Keamanan</a></li>
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors hover:underline">Bantuan & Dukungan</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="mb-4">Resources</h3>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors hover:underline">Blog</a></li>
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors hover:underline">Acara</a></li>
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors hover:underline">Kebijakan Privasi</a></li>
-                <li><a href="#" className="text-white/80 hover:text-white transition-colors hover:underline">Persyaratan Layanan</a></li>
-              </ul>
-            </div>
-          </div>
+          
 
           <div className="animate-fade-in">
             <h3 className="mb-4">Stay Connected 🌟</h3>
@@ -77,7 +57,7 @@ export function Footer() {
             Made with <Heart className="w-4 h-4 text-red-300 fill-red-300" />
           </p>
           <p>
-            for our teen community © 2026 ConnectTeen
+            for our teen community © {new Date().getFullYear()} ConnectTeen
           </p>
         </div>
       </div>
