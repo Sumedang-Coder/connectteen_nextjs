@@ -6,7 +6,7 @@ import AuthProvider from "./provider/AuthProvider";
 
 const zenMaru = Zen_Maru_Gothic({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "700", "900"],
+  weight: "400",
   display: "swap",
 });
 

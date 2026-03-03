@@ -23,7 +23,7 @@ export default function ArticlesPage() {
 
   useEffect(() => {
     resetArticles()
-    fetchArticles(1, 6, "")
+    fetchArticles({ page: 1, limit: 6, search: "" })
   }, [])
 
   if (isFetching && articles.length === 0) {
@@ -32,7 +32,7 @@ export default function ArticlesPage() {
 
   const handleSearch = async () => {
     resetArticles()
-    await fetchArticles(1, 6, searchQuery)
+    await fetchArticles({ page: 1, limit: 6, search: searchQuery })
   }
 
   return (

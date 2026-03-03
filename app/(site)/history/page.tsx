@@ -30,9 +30,7 @@ export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   // Tipe ID fleksibel string | number
-  const [selectedMessageId, setSelectedMessageId] = useState<
-    string | number | null
-  >(null);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   // Proteksi Route
