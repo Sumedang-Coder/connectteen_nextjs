@@ -54,7 +54,7 @@ export default function Form() {
                     style={{ backgroundImage: "url('/img/doodles_new.png')" }}
                 >
 
-                    <div className="absolute inset-0 bg-black/40"></div>
+                    
 
                     <div className="relative h-72 flex flex-col justify-center items-center">
                     </div>
