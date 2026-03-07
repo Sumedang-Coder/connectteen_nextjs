@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useLayoutEffect, useMemo } from "react";
 import Image from "next/image";
 import { Calendar, MapPin, Users, Search } from "lucide-react";
+import Link from "next/link";
 
 import { useEventStore } from "@/app/store/useEventStore";
 
@@ -89,6 +90,42 @@ export default function Events() {
           </p>
         </div>
 
+        <Link href="/events/live-doodles">
+          <div className="mb-8 max-w-3xl mx-auto cursor-pointer rounded-xl overflow-hidden shadow-md hover:shadow-lg hover:scale-[1.01] transition group relative">
+
+            {/* BACKGROUND IMAGE */}
+            <Image
+              src="/img/doodles.jpg"
+              alt="Send Message"
+              fill
+              className="object-cover group-hover:scale-105 transition duration-500"
+            />
+
+            {/* OVERLAY */}
+            <div className="absolute inset-0 bg-linear-to-r from-blue-600/90 to-indigo-600/80"></div>
+
+            {/* CONTENT */}
+            <div className="relative flex items-center justify-between p-6 md:p-8 text-white">
+
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold mb-2">
+                  Kirim Pesan ke Kami ✨
+                </h3>
+
+                <p className="text-blue-100 text-sm md:text-base">
+                  Punya saran, ide event, atau pesan untuk komunitas?
+                  Tulis langsung di sini.
+                </p>
+              </div>
+
+              <div className="hidden md:flex items-center justify-center w-16 h-16 bg-white/20 rounded-xl group-hover:rotate-6 transition">
+                ✍️
+              </div>
+
+            </div>
+          </div>
+        </Link>
+
         {/* Empty State */}
         {!loading && filteredEvents.length === 0 && (
           <div className="text-center py-20 text-gray-500">
@@ -157,17 +194,16 @@ export default function Events() {
                       setLoadingId(null);
                     }}
                     className={`mt-auto py-3 rounded-xl font-semibold transition shadow-md
-                      ${
-                        event.is_registered
-                          ? "bg-red-500 hover:bg-red-600 text-white"
-                          : "bg-blue-600 hover:brightness-110 text-white"
+                      ${event.is_registered
+                        ? "bg-red-500 hover:bg-red-600 text-white"
+                        : "bg-blue-600 hover:brightness-110 text-white"
                       }`}
                   >
                     {isLoading
                       ? "Memproses..."
                       : event.is_registered
-                      ? "Batalkan"
-                      : "Register"}
+                        ? "Batalkan"
+                        : "Register"}
                   </button>
                 </div>
               </div>
@@ -203,9 +239,8 @@ function DescriptionWithToggle({
     <div>
       <p
         ref={textRef}
-        className={`text-sm whitespace-pre-line text-gray-600 ${
-          isExpanded ? "" : "line-clamp-2"
-        }`}
+        className={`text-sm whitespace-pre-line text-gray-600 ${isExpanded ? "" : "line-clamp-2"
+          }`}
       >
         {description}
       </p>
