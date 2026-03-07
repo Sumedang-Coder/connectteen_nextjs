@@ -44,26 +44,19 @@ export default function Form() {
     }
 
     return (
-        <div className="min-h-screen flex justify-center items-center bg-slate-50 dark:bg-slate-900 p-4">
+        <div className="min-h-screen flex flex-col justify-center items-center bg-slate-50 dark:bg-slate-900 p-4">
 
-            <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden">
-
+            <h2 className="text-2xl font-bold text-center mt-6 mb-4">Live Doodles Photo</h2>
+            <div className="w-full max-w-md mb-20 bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden">
                 {/* HERO */}
                 <div
                     className="relative p-6 text-center bg-cover bg-center"
-                    style={{ backgroundImage: "url('/img/doodles.jpg')" }}
+                    style={{ backgroundImage: "url('/img/doodles_new.png')" }}
                 >
 
                     <div className="absolute inset-0 bg-black/40"></div>
 
-                    <div className="relative h-40 flex flex-col justify-center items-center">
-                        <h1 className="text-3xl font-bold text-white">
-                            Say Hello!
-                        </h1>
-
-                        <p className="text-sm text-white/80 mt-2">
-                            Drop your message below
-                        </p>
+                    <div className="relative h-72 flex flex-col justify-center items-center">
                     </div>
 
                 </div>

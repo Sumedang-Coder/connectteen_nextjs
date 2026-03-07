@@ -91,38 +91,47 @@ export default function Events() {
         </div>
 
         <Link href="/events/live-doodles">
-          <div className="mb-8 max-w-3xl mx-auto cursor-pointer rounded-xl overflow-hidden shadow-md hover:shadow-lg hover:scale-[1.01] transition group relative">
+          <div className="max-w-lg mx-auto cursor-pointer rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-xl transition-all group">
 
-            {/* BACKGROUND IMAGE */}
-            <Image
-              src="/img/doodles.jpg"
-              alt="Send Message"
-              fill
-              className="object-cover group-hover:scale-105 transition duration-500"
-            />
-
-            {/* OVERLAY */}
-            <div className="absolute inset-0 bg-linear-to-r from-blue-600/90 to-indigo-600/80"></div>
+            {/* IMAGE */}
+            <div className="h-72 relative overflow-hidden">
+              <Image
+                src="/img/doodles_new.png"
+                alt="Send Message"
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+            </div>
 
             {/* CONTENT */}
-            <div className="relative flex items-center justify-between p-6 md:p-8 text-white">
+            <div className="p-6 flex items-center justify-between">
 
               <div>
-                <h3 className="text-xl md:text-2xl font-bold mb-2">
-                  Kirim Pesan ke Kami ✨
+                <h3 className="text-xl md:text-2xl font-bold mb-2 group-hover:text-blue-600 transition">
+                  Live Doodles Photo
                 </h3>
 
-                <p className="text-blue-100 text-sm md:text-base">
-                  Punya saran, ide event, atau pesan untuk komunitas?
-                  Tulis langsung di sini.
+                <p className="text-slate-600 dark:text-slate-400 text-sm md:text-base">
+                  Tuliskan pesan mu di Event ini.
                 </p>
-              </div>
 
-              <div className="hidden md:flex items-center justify-center w-16 h-16 bg-white/20 rounded-xl group-hover:rotate-6 transition">
-                ✍️
+                <div className="flex flex-wrap gap-2 mt-4 mb-6">
+                    <Tag>
+                      <Calendar className="w-4 h-4" />
+                      8 Maret 2026
+                    </Tag>
+
+                    <Tag color="purple">
+                      <MapPin className="w-4 h-4" />
+                      Sumedang Creative Center
+                    </Tag>
+
+                  </div>
+
               </div>
 
             </div>
+
           </div>
         </Link>
 
