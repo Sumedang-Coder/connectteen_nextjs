@@ -91,7 +91,7 @@ export default function Events() {
         </div>
 
         <Link href="/events/live-doodles">
-          <div className="max-w-lg mx-auto cursor-pointer rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-xl transition-all group">
+          <div className="max-w-lg mb-10 mx-auto cursor-pointer rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-xl transition-all group">
 
             {/* IMAGE */}
             <div className="h-72 relative overflow-hidden">
