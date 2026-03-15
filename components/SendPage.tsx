@@ -3,7 +3,9 @@ import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { Search, Send, Music, Users } from "lucide-react";
+import { Search, Send, Music, Users, Lock, EyeOff, Globe } from "lucide-react";
+import { Switch } from "./ui/switch";
+import { Label } from "./ui/label";
 import { useMessageStore } from "@/app/store/useMessageStore";
 import api from "@/lib/axios"
 
@@ -20,6 +22,8 @@ export function SendPage() {
   const [loadingSongs, setLoadingSongs] = useState(false);
   const [loadingSend, setLoadingSend] = useState(false);
   const [showSentModal, setShowSentModal] = useState(false);
+  const [isAdminOnly, setIsAdminOnly] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(true);
 
   const handleSearchSongs = async (query: string) => {
     if (!query) return setSongs([]);
@@ -60,6 +64,9 @@ export function SendPage() {
         song_name: selectedSong.name,
         song_artist: selectedSong.artist,
         song_image: selectedSong.image,
+        preview_url: selectedSong.preview_url,
+        is_admin_only: isAdminOnly,
+        is_anonymous: isAnonymous,
       });
 
       setRecipient("");
@@ -101,6 +108,47 @@ export function SendPage() {
 
         {/* Form Card */}
         <div className="bg-white rounded-xl animate-fade-in shadow-lg border border-gray-200 p-8 mb-8 space-y-6">
+          {/* Toggles */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex items-center justify-between space-x-2">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${isAdminOnly ? 'bg-indigo-100 text-indigo-600' : 'bg-blue-100 text-blue-600'}`}>
+                  {isAdminOnly ? <Lock size={20} /> : <Globe size={20} />}
+                </div>
+                <div>
+                  <Label htmlFor="admin-toggle" className="font-bold text-gray-900">Kirim ke siapa?</Label>
+                  <p className="text-xs text-gray-500">{isAdminOnly ? "Hanya Admin (Secret)" : "Semua Orang (Publik)"}</p>
+                </div>
+              </div>
+              <Switch
+                id="admin-toggle"
+                checked={isAdminOnly}
+                onCheckedChange={(checked) => {
+                  setIsAdminOnly(checked);
+                  if (checked) setRecipient("Admin");
+                  else setRecipient("");
+                }}
+              />
+            </div>
+
+            <div className="flex items-center justify-between space-x-2">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${isAnonymous ? 'bg-slate-100 text-slate-600' : 'bg-cyan-100 text-cyan-600'}`}>
+                  {isAnonymous ? <EyeOff size={20} /> : <Users size={20} />}
+                </div>
+                <div>
+                  <Label htmlFor="anon-toggle" className="font-bold text-gray-900">Identitas Pengirim</Label>
+                  <p className="text-xs text-gray-500">{isAnonymous ? "Gunakan Nama Samaran" : "Tampilkan Nama Asli"}</p>
+                </div>
+              </div>
+              <Switch
+                id="anon-toggle"
+                checked={isAnonymous}
+                onCheckedChange={setIsAnonymous}
+              />
+            </div>
+          </div>
+
           {/* Recipient */}
           <div>
             <label className="block text-sm text-gray-700 mb-2">Untuk siapa pesannya?</label>
@@ -110,7 +158,8 @@ export function SendPage() {
                 placeholder="Enter recipient's name..."
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
-                className="h-12 pl-10 border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
+                disabled={isAdminOnly}
+                className="h-12 pl-10 border-gray-300 focus:border-cyan-500 focus:ring-cyan-500 disabled:bg-gray-100"
               />
               <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             </div>

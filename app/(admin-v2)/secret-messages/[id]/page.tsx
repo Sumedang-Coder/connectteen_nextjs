@@ -101,16 +101,17 @@ export default function SecretMessageDetailPage() {
                 <div className="max-w-3xl mx-auto flex flex-col gap-6">
                     {/* Meta Info */}
                     <div className="flex flex-col gap-1">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col gap-1">
                             <h1 className="text-xl font-bold text-slate-900">To: {message.recipient_name}</h1>
-                            <div className="text-right">
-                                <p className="text-sm font-medium text-slate-900">
-                                    {message.created_at ? format(new Date(message.created_at), "MMM d, yyyy") : "TBA"}
-                                </p>
-                                <p className="text-xs text-slate-400">
-                                    {message.created_at ? format(new Date(message.created_at), "h:mm a") : ""}
-                                </p>
-                            </div>
+                            <p className="text-sm font-medium text-slate-500">From: {message.sender_name || "Unknown"}</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-sm font-medium text-slate-900">
+                                {message.created_at ? format(new Date(message.created_at), "MMM d, yyyy") : "TBA"}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                                {message.created_at ? format(new Date(message.created_at), "h:mm a") : ""}
+                            </p>
                         </div>
                         <div className="h-px bg-slate-200 mt-2"></div>
                     </div>

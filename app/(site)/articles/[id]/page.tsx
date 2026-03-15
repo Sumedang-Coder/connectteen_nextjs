@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { ArrowLeft, Clock } from "lucide-react"
+import { ArrowLeft, Clock, Loader2, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { useArticleStore } from "@/app/store/useArticleStore"
 import Loader from "@/components/Loader"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 type Reply = {
   id: number
@@ -27,113 +27,78 @@ export default function ArticleDetailPage() {
   const router = useRouter()
   const { id } = useParams() as { id: string }
 
-  const { article, fetchArticleById, loading } = useArticleStore()
+  const { article, fetchArticleById, loading, error, reactToArticle, fetchComments, addComment, addReply } = useArticleStore()
 
-  const [comment, setComment] = useState("")
+  const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyText, setReplyText] = useState("")
-  const [replyingTo, setReplyingTo] = useState<number | null>(null)
+  const [commentInput, setCommentInput] = useState("")
+  
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set())
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [replyLoadingId, setReplyLoadingId] = useState<string | null>(null)
 
-  const [reactions, setReactions] = useState({
-    heart: 10,
-    like: 6,
-    wow: 2,
-    laugh: 3,
+  const reactions = article?.reactions || {
+    heart: 0,
+    laugh: 0,
+    like: 0,
+    wow: 0,
     sad: 0
-  })
+  }
 
-  const [comments, setComments] = useState<Comment[]>([
-    { id: 1, name: "Raka", message: "Artikelnya keren banget!", replies: [] },
-    { id: 2, name: "Siska", message: "Insightful sekali.", replies: [] }
-  ])
+  const comments = article?.comments || []
 
-  const [page, setPage] = useState(1)
 
   useEffect(() => {
-    if (id) fetchArticleById(id)
+    if (id) {
+      fetchArticleById(id).then(() => {
+        fetchComments(id)
+      })
+    }
   }, [id])
 
   if (loading || !article) return <Loader size="sm" fullScreen />
 
-  const handleReaction = (type: keyof typeof reactions) => {
-
-    setReactions(prev => ({
-      ...prev,
-      [type]: prev[type] + 1
-    }))
-
-  }
-
-  const handleComment = () => {
-
-    if (!comment.trim()) return
-
-    const newComment: Comment = {
-      id: Date.now(),
-      name: "You",
-      message: comment,
-      replies: []
+  const handleReaction = (type: string) => {
+    if (article) {
+      reactToArticle(article.id, type)
     }
-
-    setComments(prev => [newComment, ...prev])
-
-    setComment("")
-
   }
 
-  const handleReply = (commentId: number) => {
+  const handleCommentSubmit = async () => {
+    if (!commentInput.trim() || !article || isSubmitting) return
 
-    if (!replyText.trim()) return
-
-    setComments(prev =>
-      prev.map(c => {
-
-        if (c.id === commentId) {
-
-          return {
-            ...c,
-            replies: [
-              ...c.replies,
-              {
-                id: Date.now(),
-                name: "You",
-                message: replyText
-              }
-            ]
-          }
-
-        }
-
-        return c
-
-      })
-    )
-
-    setReplyText("")
-    setReplyingTo(null)
-
+    setIsSubmitting(true)
+    try {
+      await addComment(article.id, "", commentInput)
+      setCommentInput("")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const loadMoreComments = () => {
+  const handleReplySubmit = async (commentId: string) => {
+    if (!replyText.trim() || replyLoadingId) return
 
-    const newComments: Comment[] = [
-      {
-        id: Date.now(),
-        name: "User " + (page + 3),
-        message: "Komentar tambahan ke-" + page,
-        replies: []
-      },
-      {
-        id: Date.now() + 1,
-        name: "User " + (page + 4),
-        message: "Komentar tambahan ke-" + (page + 1),
-        replies: []
-      }
-    ]
-
-    setComments(prev => [...prev, ...newComments])
-    setPage(prev => prev + 1)
-
+    setReplyLoadingId(commentId)
+    try {
+      await addReply(commentId, "", replyText)
+      setReplyText("")
+      setReplyingTo(null)
+      setExpandedComments(prev => new Set(prev).add(commentId))
+    } finally {
+      setReplyLoadingId(null)
+    }
   }
+
+  const toggleReplies = (commentId: string) => {
+    setExpandedComments(prev => {
+      const next = new Set(prev)
+      if (next.has(commentId)) next.delete(commentId)
+      else next.add(commentId)
+      return next
+    })
+  }
+
 
   return (
     <div className="min-h-screen bg-white">
@@ -193,27 +158,52 @@ export default function ArticleDetailPage() {
             {article.description}
           </div>
 
-
-
         </div>
 
         <div className="space-y-6 mx-auto max-w-4xl px-2 md:px-6">
           {/* REACTIONS */}
           <div className="mt-10 pt-6 border-t">
 
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+                <span>⚠️</span> {error}
+              </div>
+            )}
             <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">
               Reaksi
             </h3>
 
             <div className="flex gap-2 flex-wrap">
-
-              <button onClick={() => handleReaction("heart")} className="px-3 py-1.5 bg-white border rounded-full text-sm shadow hover:bg-red-50">❤️ {reactions.heart}</button>
-              <button onClick={() => handleReaction("laugh")} className="px-3 py-1.5 bg-white border rounded-full text-sm shadow hover:bg-yellow-50">😂 {reactions.laugh}</button>
-              <button onClick={() => handleReaction("like")} className="px-3 py-1.5 bg-white border rounded-full text-sm shadow hover:bg-blue-50">👍 {reactions.like}</button>
-              <button onClick={() => handleReaction("wow")} className="px-3 py-1.5 bg-white border rounded-full text-sm shadow hover:bg-orange-50">😮 {reactions.wow}</button>
-              <button onClick={() => handleReaction("sad")} className="px-3 py-1.5 bg-white border rounded-full text-sm shadow hover:bg-indigo-50">😢 {reactions.sad}</button>
-
-
+              <button 
+                onClick={() => handleReaction("heart")} 
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'heart' ? 'bg-red-50 border-red-200 text-red-600 shadow-sm' : 'bg-white hover:bg-red-50'}`}
+              >
+                ❤️ <span className="text-sm">{reactions.heart}</span>
+              </button>
+              <button 
+                onClick={() => handleReaction("laugh")} 
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'laugh' ? 'bg-yellow-50 border-yellow-200 text-yellow-600 shadow-sm' : 'bg-white hover:bg-yellow-50'}`}
+              >
+                😂 <span className="text-sm">{reactions.laugh}</span>
+              </button>
+              <button 
+                onClick={() => handleReaction("like")} 
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'like' ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm' : 'bg-white hover:bg-blue-50'}`}
+              >
+                👍 <span className="text-sm">{reactions.like}</span>
+              </button>
+              <button 
+                onClick={() => handleReaction("wow")} 
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'wow' ? 'bg-orange-50 border-orange-200 text-orange-600 shadow-sm' : 'bg-white hover:bg-orange-50'}`}
+              >
+                😮 <span className="text-sm">{reactions.wow}</span>
+              </button>
+              <button 
+                onClick={() => handleReaction("sad")} 
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'sad' ? 'bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm' : 'bg-white hover:bg-indigo-50'}`}
+              >
+                😢 <span className="text-sm">{reactions.sad}</span>
+              </button>
             </div>
 
           </div>
@@ -228,61 +218,76 @@ export default function ArticleDetailPage() {
             <div className="flex gap-3 w-full">
 
               <input
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
+                value={commentInput}
+                onChange={(e) => setCommentInput(e.target.value)}
                 placeholder="Tulis komentar..."
-                className="flex-1 px-4 py-3 bg-gray-100 rounded-xl"
+                className="flex-1 px-4 py-3 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
 
               <button
-                onClick={handleComment}
-                className="px-6 py-3 bg-blue-500 text-white rounded-xl"
+                onClick={handleCommentSubmit}
+                disabled={isSubmitting}
+                className="px-6 py-3 bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-xl font-semibold shadow disabled:opacity-50 flex items-center gap-2"
               >
-                Kirim
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Kirim"}
               </button>
 
             </div>
 
-            {comments.map(c => (
+            {comments.map((c: any) => (
 
-              <div key={c.id} className="space-y-2">
+              <div key={c._id} className="space-y-2">
 
                 <div className="flex gap-3">
 
-                  <Avatar>
-                    <AvatarFallback>{c.name[0]}</AvatarFallback>
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={c.avatarUrl} alt={c.name} />
+                    <AvatarFallback>{c.name.charAt(0)}</AvatarFallback>
                   </Avatar>
 
-                  <div className="bg-gray-100 p-3 rounded-xl grow">
+                  <div className="bg-gray-100 p-3 rounded-2xl rounded-tl-none grow relative">
 
-                    <p className="text-xs font-bold text-blue-600">{c.name}</p>
+                    <p className="text-xs font-bold text-blue-600 mb-1">{c.name}</p>
 
-                    <p className="text-sm">{c.message}</p>
+                    <p className="text-sm text-gray-700">{c.message}</p>
 
-                    <button
-                      onClick={() => setReplyingTo(c.id)}
-                      className="text-xs text-blue-500 mt-1"
-                    >
-                      Balas
-                    </button>
+                    <div className="flex items-center gap-4 mt-2">
+                      <button
+                        onClick={() => setReplyingTo(c._id)}
+                        className="text-xs font-medium text-gray-500 hover:text-blue-600 transition"
+                      >
+                        Balas
+                      </button>
+                      
+                      {c.replies && c.replies.length > 0 && (
+                        <button
+                          onClick={() => toggleReplies(c._id)}
+                          className="text-xs font-medium text-blue-600 flex items-center gap-1 hover:underline"
+                        >
+                          <MessageCircle className="h-3 w-3" />
+                          {expandedComments.has(c._id) ? "Sembunyikan balasan" : `Lihat ${c.replies.length} balasan`}
+                        </button>
+                      )}
+                    </div>
 
                   </div>
 
                 </div>
 
-                {c.replies.map(r => (
+                {expandedComments.has(c._id) && c.replies && c.replies.map((r: any) => (
 
-                  <div key={r.id} className="flex gap-3 ml-12">
+                  <div key={r._id} className="flex gap-3 ml-12 animate-in slide-in-from-top-2 duration-300">
 
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback>{r.name[0]}</AvatarFallback>
+                      <AvatarImage src={r.avatarUrl} alt={r.name} />
+                      <AvatarFallback>{r.name.charAt(0)}</AvatarFallback>
                     </Avatar>
 
-                    <div className="bg-gray-100 p-2 rounded-lg">
+                    <div className="bg-gray-100 p-2 rounded-2xl rounded-tl-none grow border border-white">
 
-                      <p className="text-xs font-bold text-blue-600">{r.name}</p>
+                      <p className="text-xs font-bold text-blue-600 mb-0.5">{r.name}</p>
 
-                      <p className="text-sm">{r.message}</p>
+                      <p className="text-sm text-gray-700">{r.message}</p>
 
                     </div>
 
@@ -290,22 +295,34 @@ export default function ArticleDetailPage() {
 
                 ))}
 
-                {replyingTo === c.id && (
+                {replyingTo === c._id && (
 
-                  <div className="flex gap-2 ml-12">
+                  <div className="flex gap-2 ml-12 items-center animate-in zoom-in-95 duration-200">
 
                     <input
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
-                      className="flex-1 px-3 py-2 bg-gray-100 rounded-lg"
+                      className="flex-1 px-4 py-2 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
                       placeholder="Tulis balasan..."
+                      autoFocus
                     />
 
                     <button
-                      onClick={() => handleReply(c.id)}
-                      className="px-3 py-2 bg-blue-500 text-white rounded-lg"
+                      onClick={() => handleReplySubmit(c._id)}
+                      disabled={!!replyLoadingId}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-semibold shadow hover:bg-blue-600 disabled:opacity-50"
                     >
-                      Kirim
+                      {replyLoadingId === c._id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Kirim"}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setReplyingTo(null)
+                        setReplyText("")
+                      }}
+                      className="text-xs text-gray-500 hover:text-red-500"
+                    >
+                      Batal
                     </button>
 
                   </div>
@@ -316,16 +333,6 @@ export default function ArticleDetailPage() {
 
             ))}
 
-            <div className="text-center">
-
-              <button
-                onClick={loadMoreComments}
-                className="text-blue-600 font-semibold text-sm"
-              >
-                Muat komentar lainnya
-              </button>
-
-            </div>
 
           </div>
         </div>

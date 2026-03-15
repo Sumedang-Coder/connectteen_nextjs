@@ -1,14 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Zen_Maru_Gothic } from "next/font/google";
 import { Toaster } from "sonner";
 import AuthProvider from "./provider/AuthProvider";
-
-const zenMaru = Zen_Maru_Gothic({
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "ConnectTeen",
@@ -21,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning className={zenMaru.className}>
+    <html lang="id" suppressHydrationWarning>
       <body>
         <AuthProvider>{children}</AuthProvider>
 

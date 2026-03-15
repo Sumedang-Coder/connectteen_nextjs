@@ -8,18 +8,27 @@ export interface Article {
   image_url: string;
   created_at?: string;
   updated_at?: string;
+  reactions: {
+    heart: number;
+    laugh: number;
+    like: number;
+    wow: number;
+    sad: number;
+  };
+  userReaction?: string | null;
+  comments?: any[];
 }
 
 interface ArticleState {
   articles: Article[];
   article: Article | null;
 
-  // State untuk Infinite Scroll (Anda)
+  // State untuk Infinite Scroll
   page: number;
   hasMore: boolean;
   isFetching: boolean;
 
-  // State Umum & Pagination (Gabungan)
+  // State Umum & Pagination
   loading: boolean;
   error: string | null;
   pagination: {
@@ -28,9 +37,13 @@ interface ArticleState {
     currentPage: number;
     limit: number;
   };
+  
+  // Interactions & Sync
+  reactionSequence: number;
+  reactionTimeout: any;
+  reactingIds: Set<string>;
 
   createArticle: (formData: FormData) => Promise<boolean>;
-  // Mendukung parameter individual (Anda) dan objek params (Dev 1)
   fetchArticles: (params?: {
     limit?: number;
     search?: string;
@@ -43,6 +56,12 @@ interface ArticleState {
   fetchArticleById: (id: string) => Promise<void>;
   updateArticle: (id: string, data: FormData) => Promise<boolean>;
   deleteArticle: (id: string) => Promise<boolean>;
+
+  // Reactions & Comments
+  fetchComments: (articleId: string) => Promise<void>;
+  reactToArticle: (id: string, type: string) => Promise<void>;
+  addComment: (articleId: string, name: string, message: string) => Promise<void>;
+  addReply: (commentId: string, name: string, message: string) => Promise<void>;
 }
 
 export const useArticleStore = create<ArticleState>((set, get) => ({
@@ -50,13 +69,12 @@ export const useArticleStore = create<ArticleState>((set, get) => ({
   article: null,
   loading: false,
   error: null,
-
-  // Initial state Anda
   page: 1,
   hasMore: true,
   isFetching: false,
-
-  // Initial state Dev 1
+  reactionSequence: 0,
+  reactionTimeout: null,
+  reactingIds: new Set(),
   pagination: {
     totalArticles: 0,
     totalPages: 0,
@@ -182,6 +200,108 @@ export const useArticleStore = create<ArticleState>((set, get) => ({
       return false;
     } finally {
       set({ loading: false });
+    }
+  },
+
+  fetchComments: async (articleId: string) => {
+    try {
+      const res = await api.get(`/articles/${articleId}/comments`);
+      if (res.data.success) {
+        const comments = res.data.data;
+        set((state) => ({
+          article: state.article && state.article.id === articleId 
+            ? { ...state.article, comments }
+            : state.article
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to fetch comments:", err);
+    }
+  },
+
+  reactToArticle: async (id, type) => {
+    // 1. Prevent concurrent requests for the same ID
+    if (get().reactingIds.has(id)) return;
+
+    // 2. Determine Intent (Toggle-off vs Set)
+    const currentItem = get().articles.find(a => a.id === id) || (get().article?.id === id ? get().article : null);
+    const nextUserReaction = currentItem?.userReaction === type ? null : type;
+
+    // 3. Update State: Entering "Reacting" Mode
+    set((state) => {
+      const nextIds = new Set(state.reactingIds);
+      nextIds.add(id);
+      return { reactingIds: nextIds, error: null };
+    });
+
+    const sequence = get().reactionSequence + 1;
+    set({ reactionSequence: sequence });
+
+    try {
+      // 4. IMMEDIATE Server Request (No Debounce for Non-Optimistic Mode)
+      const res = await api.post(`/articles/${id}/react`, { type: nextUserReaction });
+      if (!res.data.success) throw new Error("Sync failed");
+
+      // 5. Update State: Apply Verified Server Ground Truth
+      if (get().reactionSequence === sequence) {
+        set((state) => {
+          const syncData = (item: any) => {
+            if (!item || item.id !== id) return item;
+            return { 
+              ...item, 
+              reactions: res.data.data.allReactions, 
+              userReaction: res.data.data.userReaction 
+            };
+          };
+
+          return {
+            article: syncData(state.article),
+            articles: state.articles.map(syncData)
+          };
+        });
+      }
+    } catch (err: any) {
+      console.error("Article reaction failed:", err);
+      if (get().reactionSequence === sequence) {
+        set({ 
+          error: err?.response?.status === 401 
+            ? "Harap login untuk memberikan reaksi" 
+            : "Gagal menghubungkan ke server" 
+        });
+        if (err?.response?.status === 401) {
+          alert("Harap login terlebih dahulu untuk memberikan reaksi.");
+        }
+      }
+    } finally {
+      // 6. Exit "Reacting" Mode
+      set((state) => {
+        const nextIds = new Set(state.reactingIds);
+        nextIds.delete(id);
+        return { reactingIds: nextIds };
+      });
+    }
+  },
+
+  addComment: async (articleId, name, message) => {
+    try {
+      const res = await api.post(`/articles/${articleId}/comments`, { name, message });
+      if (res.data.success) {
+        get().fetchComments(articleId);
+      }
+    } catch (err) {
+      console.error("Comment failed:", err);
+    }
+  },
+
+  addReply: async (commentId, name, message) => {
+    try {
+      const res = await api.post(`/comments/${commentId}/reply`, { name, message });
+      if (res.data.success) {
+        const article = get().article;
+        if (article) get().fetchComments(article.id);
+      }
+    } catch (err) {
+      console.error("Reply failed:", err);
     }
   },
 }));
