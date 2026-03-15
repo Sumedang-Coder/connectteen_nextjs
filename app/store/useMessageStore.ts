@@ -14,7 +14,7 @@ interface Message {
   is_anonymous?: boolean;
   sender_name?: string;
   created_at?: string;
-  reactions: {
+  reactions?: {
     heart: number;
     laugh: number;
     like: number;
@@ -45,7 +45,7 @@ interface MessageState {
   reactingIds: Set<string>;
   error: string | null;
 
-  sendMessage: (msg: Omit<Message, "id" | "created_at">) => Promise<void>;
+  sendMessage: (msg: Omit<Message, "id" | "created_at" | "reactions" | "userReaction" | "comments">) => Promise<void>;
   fetchMessages: (params?: {
     search?: string;
     sort?: string;
