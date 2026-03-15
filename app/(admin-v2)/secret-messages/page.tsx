@@ -26,7 +26,7 @@ export default function SecretMessagesPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const { user } = useAuthStore();
 
-    const { allMessages, loading, pagination, fetchAllMessages, deleteMessage } = useMessageStore();
+    const { allMessages, loading, pagination, fetchSecretMessages, deleteMessage } = useMessageStore();
 
     // Debounce search term
     useEffect(() => {
@@ -39,13 +39,13 @@ export default function SecretMessagesPage() {
 
     // Fetch messages on criteria change
     useEffect(() => {
-        fetchAllMessages({
+        fetchSecretMessages({
             search: debouncedSearch,
             sort: sortBy,
             page: currentPage,
             limit: 10
         });
-    }, [debouncedSearch, sortBy, currentPage, fetchAllMessages]);
+    }, [debouncedSearch, sortBy, currentPage, fetchSecretMessages]);
 
     const handleDelete = async (id: string) => {
         if (confirm(`Are you sure you want to delete this secret message?`)) {
@@ -136,9 +136,14 @@ export default function SecretMessagesPage() {
                                     <div className="flex-1 min-w-0 pr-12">
                                         <div className="flex items-center justify-between gap-4 mb-0.5">
                                             <div className="flex items-center gap-2 min-w-0">
-                                                <span className="text-sm font-bold text-slate-900 truncate">
-                                                    To: {msg.recipient_name}
-                                                </span>
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-bold text-slate-900 truncate">
+                                                        To: {msg.recipient_name}
+                                                    </span>
+                                                    <span className="text-[11px] font-medium text-slate-400 truncate">
+                                                        From: {msg.sender_name || "Unknown"}
+                                                    </span>
+                                                </div>
                                                 {(msg.song_name || msg.song_artist) && (
                                                     <div className="flex items-center gap-1 text-[10px] font-medium text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 shrink-0">
                                                         <Music size={10} />

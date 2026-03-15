@@ -1,7 +1,7 @@
 import axios from "axios"
 
 const api = axios.create({
-  baseURL: "https://connectteen-server.vercel.app/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "https://connectteen-server.vercel.app/api",
   withCredentials: true,
 })
 
