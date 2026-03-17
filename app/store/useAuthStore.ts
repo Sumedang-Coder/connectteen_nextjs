@@ -7,7 +7,7 @@ interface AuthState {
   loading: boolean;
 
   setUser: (user: any) => void;
-  loginGuest: () => Promise<void>;
+  loginGuest: () => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
@@ -35,9 +35,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         loading: false,
       });
+      return true;
     } catch (error) {
       console.error("Guest login failed:", error);
       set({ loading: false });
+      return false;
     }
   },
 
