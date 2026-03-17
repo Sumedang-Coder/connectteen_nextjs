@@ -7,7 +7,7 @@ interface AuthState {
   loading: boolean;
 
   setUser: (user: any) => void;
-  loginGuest: () => Promise<void>;
+  loginGuest: () => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
