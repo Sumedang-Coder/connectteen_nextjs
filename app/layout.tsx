@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 import AuthProvider from "./provider/AuthProvider";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "ConnectTeen",
@@ -16,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>{children}</AuthProvider>
+        </ErrorBoundary>
 
         <Toaster richColors position="top-center" />
       </body>

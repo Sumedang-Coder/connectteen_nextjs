@@ -223,24 +223,39 @@ export default function MessageDetailPage() {
             Komentar
           </h3>
 
-          <div className="flex gap-3">
+          {isAuthenticated ? (
+            <div className="flex gap-3">
+              <input
+                value={commentInput}
+                onChange={(e) => setCommentInput(e.target.value)}
+                placeholder="Tulis komentar..."
+                className="flex-1 px-4 py-3 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
 
-            <input
-              value={commentInput}
-              onChange={(e) => setCommentInput(e.target.value)}
-              placeholder="Tulis komentar..."
-              className="flex-1 px-4 py-3 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-
-            <button
-              onClick={handleCommentSubmit}
-              disabled={isSubmitting}
-              className="px-6 py-3 bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-xl font-semibold shadow disabled:opacity-50 flex items-center gap-2"
-            >
-              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Kirim"}
-            </button>
-
-          </div>
+              <button
+                onClick={handleCommentSubmit}
+                disabled={isSubmitting}
+                className="px-6 py-3 bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-xl font-semibold shadow disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Kirim"}
+              </button>
+            </div>
+          ) : (
+            <div className="bg-gray-50 border border-dashed border-gray-300 rounded-2xl p-8 text-center space-y-3">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+                <Lock size={20} />
+              </div>
+              <p className="text-sm text-gray-500">Silakan login untuk memberikan komentar</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50"
+                onClick={() => router.push("/signin")}
+              >
+                Sign In Sekarang
+              </Button>
+            </div>
+          )}
 
           <div className="space-y-3">
             {comments.length === 0 && (
@@ -265,12 +280,14 @@ export default function MessageDetailPage() {
                     <p className="text-sm text-gray-700">{c.message}</p>
 
                     <div className="flex items-center gap-4 mt-2">
-                      <button
-                        onClick={() => setReplyingTo(c._id)}
-                        className="text-xs font-medium text-gray-500 hover:text-blue-600 transition"
-                      >
-                        Balas
-                      </button>
+                      {isAuthenticated && (
+                        <button
+                          onClick={() => setReplyingTo(c._id)}
+                          className="text-xs font-medium text-gray-500 hover:text-blue-600 transition"
+                        >
+                          Balas
+                        </button>
+                      )}
 
                       {c.replies && c.replies.length > 0 && (
                         <button

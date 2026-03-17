@@ -59,6 +59,7 @@ export default function ManageEventsPage() {
             page: page,
             limit: 10
         });
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     const handleSortChange = () => {

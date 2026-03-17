@@ -49,6 +49,7 @@ interface ArticleState {
     search?: string;
     page?: number;
     sort?: string;
+    append?: boolean;
   }) => Promise<void>;
   fetchNextArticles: () => Promise<void>;
   resetArticles: () => void;
@@ -113,9 +114,8 @@ export const useArticleStore = create<ArticleState>((set, get) => ({
 
       set((state) => ({
         articles:
-          targetPage === 1
-            ? newData
-            : [
+          params.append
+            ? [
                 ...state.articles,
                 ...newData.filter(
                   (newArt) =>
@@ -123,7 +123,8 @@ export const useArticleStore = create<ArticleState>((set, get) => ({
                       (existing) => existing.id === newArt.id,
                     ),
                 ),
-              ],
+              ]
+            : newData,
         // Sync ke dua sistem pagination
         page: apiPagination?.currentPage || targetPage,
         hasMore: apiPagination?.hasNextPage || false,
@@ -143,7 +144,7 @@ export const useArticleStore = create<ArticleState>((set, get) => ({
   fetchNextArticles: async () => {
     const { page, fetchArticles } = get();
     // Mengirim objek params agar sesuai dengan signature baru
-    await fetchArticles({ page: page + 1 });
+    await fetchArticles({ page: page + 1, append: true });
   },
 
   resetArticles: () => {

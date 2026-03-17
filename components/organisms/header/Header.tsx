@@ -17,7 +17,8 @@ function Avatar({
 }) {
   const [imgSrc, setImgSrc] = useState(src);
 
-  const initials = name
+  const displayName = name || "Guest";
+  const initials = displayName
     .split(" ")
     .map((n) => n[0])
     .join("")
@@ -31,7 +32,7 @@ function Avatar({
     "bg-purple-400",
   ];
 
-  const colorIndex = name.charCodeAt(0) % bgColors.length;
+  const colorIndex = displayName.charCodeAt(0) % bgColors.length;
   const bgColor = bgColors[colorIndex];
 
   return imgSrc ? (
@@ -212,11 +213,11 @@ export function Header() {
             {user ? (
               <div className="flex items-center gap-2">
                 <Avatar
-                  name={user.name}
+                  name={user.name || user.anonymous_name || "Tamu"}
                   src={user.avatarUrl}
                   className="w-8 h-8 rounded-full"
                 />
-                <span className="font-medium">{user.name}</span>
+                <span className="font-medium">{user.name || user.anonymous_name || "Tamu"}</span>
                 <Button
                   variant="ghost"
                   size="icon"
@@ -313,11 +314,11 @@ export function Header() {
             <div className="flex items-center justify-between px-4">
               <div className="flex items-center gap-3">
                 <Avatar
-                  name={user.name}
+                  name={user.name || user.anonymous_name || "Tamu"}
                   src={user.avatarUrl}
                   className="w-8 h-8 rounded-full"
                 />
-                <span className="font-medium text-sm">{user.name}</span>
+                <span className="font-medium text-sm">{user.name || user.anonymous_name || "Tamu"}</span>
               </div>
 
               <button

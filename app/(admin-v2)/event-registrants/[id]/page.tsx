@@ -17,6 +17,8 @@ import {
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useEventStore } from "@/app/store/useEventStore";
+import { useDebounce } from "@/app/hooks/useDebounce";
+import PaginationComponent from "@/components/PaginationComponent";
 
 export default function EventRegistrantsPage() {
     const { id } = useParams();
@@ -26,22 +28,34 @@ export default function EventRegistrantsPage() {
     const {
         event,
         registrants,
+        registrantsPagination,
         loading,
         fetchEventById,
         fetchRegistrants
     } = useEventStore();
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const debouncedSearch = useDebounce(searchTerm, 500);
+
     useEffect(() => {
         if (id) {
             fetchEventById(id as string);
-            fetchRegistrants(id as string);
         }
-    }, [id, fetchEventById, fetchRegistrants]);
+    }, [id, fetchEventById]);
 
-    const filteredRegistrants = registrants.filter(r =>
-        r.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    useEffect(() => {
+        if (id) {
+            fetchRegistrants(id as string, {
+                page: currentPage,
+                limit: 10,
+                search: debouncedSearch
+            });
+        }
+    }, [id, currentPage, debouncedSearch, fetchRegistrants]);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
 
     if (loading && !event) {
         return (
@@ -124,22 +138,21 @@ export default function EventRegistrantsPage() {
                             </div>
                             <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-2">
-                                    Total: <span className="text-slate-900">{filteredRegistrants.length}</span> Results
+                                    Total: <span className="text-slate-900">{registrantsPagination.totalRegistrants}</span> Registrants
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <button className="p-2 text-slate-400 hover:bg-slate-50 rounded-lg"><Filter size={18} /></button>
-                                    <button className="p-2 text-slate-400 hover:bg-slate-50 rounded-lg"><ArrowUpDown size={18} /></button>
                                 </div>
                             </div>
                         </div>
 
                         {/* Mobile Card View (Visible on Mobile) */}
                         <div className="grid grid-cols-1 gap-4 lg:hidden p-4">
-                            {filteredRegistrants.length === 0 ? (
+                            {registrants.length === 0 ? (
                                 <div className="bg-white p-10 text-center text-slate-400 font-medium">
                                     No registrants found.
                                 </div>
-                            ) : filteredRegistrants.map((r: any) => (
+                            ) : registrants.map((r: any) => (
                                 <div key={r.id || r._id} className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col gap-4">
                                     <div className="flex items-center gap-4">
                                         <div className="size-11 rounded-lg bg-white flex items-center justify-center text-slate-400 font-black text-lg border border-slate-200 overflow-hidden">
@@ -180,9 +193,9 @@ export default function EventRegistrantsPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
-                                    {filteredRegistrants.length === 0 ? (
+                                    {registrants.length === 0 ? (
                                         <tr><td colSpan={5} className="px-6 py-10 text-center text-slate-400 font-medium">No registrants found.</td></tr>
-                                    ) : filteredRegistrants.map((r: any) => (
+                                    ) : registrants.map((r: any) => (
                                         <tr key={r.id || r._id} className="group hover:bg-slate-50 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
@@ -218,12 +231,16 @@ export default function EventRegistrantsPage() {
                             </table>
                         </div>
 
-                        <div className="p-6 border-t border-slate-100 bg-slate-50/30 flex justify-between items-center">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Showing {filteredRegistrants.length} Total Results</p>
-                            <div className="flex gap-2">
-                                <button disabled className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-300 uppercase tracking-wider">Previous</button>
-                                <button disabled className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-300 uppercase tracking-wider">Next</button>
-                            </div>
+                        <div className="p-6 border-t border-slate-100 bg-slate-50/30 flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                                Showing {registrants.length} of {registrantsPagination.totalRegistrants} Registrants
+                            </p>
+                            <PaginationComponent
+                                currentPage={registrantsPagination.currentPage}
+                                totalPages={registrantsPagination.totalPages}
+                                onPageChange={handlePageChange}
+                                activeColor="blue"
+                            />
                         </div>
                     </div>
                 </div>

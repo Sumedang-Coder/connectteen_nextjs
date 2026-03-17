@@ -21,6 +21,7 @@ import { useAuthStore } from "@/app/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useDebounce } from "@/app/hooks/useDebounce";
 
 const ROLE_DISPLAY = {
     super_admin: "Super Admin",
@@ -54,11 +55,13 @@ export default function ManageAdminsPage() {
         }
     }, [user, authLoading, router]);
 
+    const debouncedSearch = useDebounce(searchTerm, 500);
+
     useEffect(() => {
         if (user?.role === "super_admin") {
-            fetchAdmins();
+            fetchAdmins({ search: debouncedSearch });
         }
-    }, [fetchAdmins, user]);
+    }, [fetchAdmins, user, debouncedSearch]);
 
     if (authLoading || (user && user.role !== "super_admin")) {
         return (
@@ -83,16 +86,22 @@ export default function ManageAdminsPage() {
 
 
     const handleDelete = async (admin: AdminUser) => {
+        if (admin.id === user?.id) {
+            toast.error("Anda tidak dapat menghapus akun Anda sendiri.");
+            return;
+        }
+
         if (confirm(`Are you sure you want to delete "${admin.name || admin.email}"?`)) {
             const success = await deleteAdmin(admin.id);
-            if (success) toast.success("Admin deleted.");
+            if (success) {
+                toast.success("Admin deleted.");
+            } else {
+                toast.error(useAdminStore.getState().error || "Failed to delete admin.");
+            }
         }
     };
 
-    const filteredAdmins = admins.filter(admin =>
-        (admin.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-        admin.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredAdmins = admins;
 
     return (
         <div className="flex flex-col h-full overflow-hidden bg-slate-50">
@@ -202,8 +211,7 @@ export default function ManageAdminsPage() {
                                                     <button
                                                         onClick={() => handleDelete(admin)}
                                                         className="p-2 rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                                                        disabled={admin.role === 'super_admin'}
-                                                        title={admin.role === 'super_admin' ? "Cannot revoke Super Admin" : "Delete Account"}
+                                                        title={admin.id === user?.id ? "Cannot delete your own account" : "Delete Account"}
                                                     >
                                                         <Trash2 size={18} />
                                                     </button>
@@ -249,7 +257,6 @@ export default function ManageAdminsPage() {
                                     >
                                         <option value="content_editor">Content Editor</option>
                                         <option value="viewer">Viewer</option>
-                                        <option value="user">User</option>
                                         <option value="super_admin">Super Admin</option>
                                     </select>
                                 </div>

@@ -22,6 +22,7 @@ import {
     Plus
 } from "lucide-react";
 import { useEventStore } from "@/app/store/useEventStore";
+import { useAuthStore } from "@/app/store/useAuthStore";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -30,7 +31,16 @@ function EventEditorContent() {
     const searchParams = useSearchParams();
     const editId = searchParams.get("edit");
 
-    const { createEvent, updateEvent, fetchEventById, event, loading } = useEventStore();
+    const { user } = useAuthStore();
+    const { events, event, fetchEventById, createEvent, updateEvent, loading, error } = useEventStore();
+
+    // Role guard for Viewers
+    useEffect(() => {
+        if (user && user.role === "viewer") {
+            toast.error("Account Viewer tidak memiliki izin untuk mengelola event.");
+            router.replace("/manage-events");
+        }
+    }, [user, router]);
 
     const [eventTitle, setEventTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -67,9 +77,51 @@ function EventEditorContent() {
         }
     }, [event, editId]);
 
+    // Unsaved changes warning (Close/Reload + Back Button)
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            const hasContent = eventTitle.trim() || description.trim() || location.trim();
+            if (hasContent) {
+                e.preventDefault();
+                e.returnValue = "";
+            }
+        };
+
+        const handlePopState = () => {
+             const hasContent = eventTitle.trim() || description.trim() || location.trim();
+             if (hasContent) {
+                 if (confirm("Perubahan yang Anda buat mungkin tidak disimpan. Apakah Anda yakin ingin keluar?")) {
+                    router.push("/manage-events");
+                 } else {
+                     window.history.pushState(null, "", window.location.href);
+                 }
+             }
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        window.addEventListener("popstate", handlePopState);
+        window.history.pushState(null, "", window.location.href);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+            window.removeEventListener("popstate", handlePopState);
+        };
+    }, [eventTitle, description, location, router]);
+
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error("Ukuran file maksimal 5MB");
+                e.target.value = "";
+                return;
+            }
+            const allowedTypes = ["image/jpeg", "image/png"];
+            if (!allowedTypes.includes(file.type)) {
+                toast.error("Format file tidak didukung. Gunakan JPG atau PNG.");
+                e.target.value = "";
+                return;
+            }
             setImageFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -81,7 +133,22 @@ function EventEditorContent() {
 
     const handleSave = async () => {
         if (!eventTitle || !description || !location || !date) {
-            toast.error("Please fill in all required fields (Title, Description, Location, Date)");
+            toast.error("Harap isi semua field wajib");
+            return;
+        }
+
+        if (new Date(date) < new Date() && !editId) {
+            toast.error("Tanggal event tidak boleh di masa lalu");
+            return;
+        }
+
+        if (quota < 0) {
+            toast.error("Kuota tidak boleh negatif");
+            return;
+        }
+
+        if (!imageFile && !editId) {
+            toast.error("Harap unggah poster event");
             return;
         }
 
@@ -108,9 +175,12 @@ function EventEditorContent() {
             toast.success(editId ? "Event updated!" : "Event created!");
             router.push("/manage-events");
         } else {
-            toast.error("Operation failed. Check your data.");
+            const errorMsg = useEventStore.getState().error;
+            toast.error(errorMsg || "Operation failed. Check your data.");
         }
     };
+
+    if (user?.role === "viewer") return null;
 
     return (
         <div className="flex flex-col h-full bg-slate-50 overflow-hidden">
@@ -130,7 +200,10 @@ function EventEditorContent() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <button className="px-4 py-2 text-slate-600 font-medium text-sm hover:bg-white rounded-lg transition-colors">
+                    <button
+                        onClick={() => router.push("/manage-events")}
+                        className="px-6 py-2 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors"
+                    >
                         Cancel
                     </button>
                     <button
@@ -161,6 +234,7 @@ function EventEditorContent() {
                                     <input
                                         type="text"
                                         placeholder="Enter event name..."
+                                        maxLength={200}
                                         value={eventTitle}
                                         onChange={(e) => setEventTitle(e.target.value)}
                                         className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-slate-900 placeholder:text-slate-300 focus:ring-2 focus:ring-indigo-600 font-medium"
@@ -246,9 +320,10 @@ function EventEditorContent() {
                                     )}
                                     <input
                                         type="file"
+                                        id="image"
                                         ref={fileInputRef}
                                         className="hidden"
-                                        accept="image/*"
+                                        accept="image/jpeg,image/png,.jpg,.jpeg,.png"
                                         onChange={handleImageChange}
                                     />
                                 </div>

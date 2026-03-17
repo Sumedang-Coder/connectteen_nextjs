@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { LuUser } from "react-icons/lu";
 import { FcGoogle } from "react-icons/fc";
 import { useAuthStore } from "@/app/store/useAuthStore";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface AuthProps {
   onClick?: () => void;
@@ -11,12 +13,24 @@ interface AuthProps {
 
 export default function Auth({ onClick }: AuthProps) {
   const [mounted, setMounted] = useState(false);
-  const loginGuest = useAuthStore((s) => s.loginGuest);
-  const loading = useAuthStore((s) => s.loading);
+  const { loginGuest, loading, isAuthenticated } = useAuthStore();
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
+
+  const handleGuestLogin = async () => {
+    toast.loading("Masuk sebagai tamu...", { id: "guest-login" });
+    await loginGuest();
+    toast.success("Berhasil masuk sebagai tamu!", { id: "guest-login" });
+  };
 
   return (
     <div
@@ -68,7 +82,7 @@ export default function Auth({ onClick }: AuthProps) {
 
         {/* Guest Login */}
         <button
-          onClick={loginGuest}
+          onClick={handleGuestLogin}
           disabled={loading}
           className="
             w-full flex items-center justify-center gap-2
