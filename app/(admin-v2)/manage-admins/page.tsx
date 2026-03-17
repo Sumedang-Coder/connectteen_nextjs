@@ -83,9 +83,18 @@ export default function ManageAdminsPage() {
 
 
     const handleDelete = async (admin: AdminUser) => {
+        if (admin.id === user?.id) {
+            toast.error("Anda tidak dapat menghapus akun Anda sendiri.");
+            return;
+        }
+
         if (confirm(`Are you sure you want to delete "${admin.name || admin.email}"?`)) {
             const success = await deleteAdmin(admin.id);
-            if (success) toast.success("Admin deleted.");
+            if (success) {
+                toast.success("Admin deleted.");
+            } else {
+                toast.error(useAdminStore.getState().error || "Failed to delete admin.");
+            }
         }
     };
 
@@ -202,8 +211,7 @@ export default function ManageAdminsPage() {
                                                     <button
                                                         onClick={() => handleDelete(admin)}
                                                         className="p-2 rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                                                        disabled={admin.role === 'super_admin'}
-                                                        title={admin.role === 'super_admin' ? "Cannot revoke Super Admin" : "Delete Account"}
+                                                        title={admin.id === user?.id ? "Cannot delete your own account" : "Delete Account"}
                                                     >
                                                         <Trash2 size={18} />
                                                     </button>
