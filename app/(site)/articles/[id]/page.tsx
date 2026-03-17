@@ -8,6 +8,8 @@ import Image from "next/image"
 import { useArticleStore } from "@/app/store/useArticleStore"
 import Loader from "@/components/Loader"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useAuthStore } from "@/app/store/useAuthStore"
+import { Lock } from "lucide-react"
 
 type Reply = {
   id: number
@@ -28,11 +30,13 @@ export default function ArticleDetailPage() {
   const { id } = useParams() as { id: string }
 
   const { article, fetchArticleById, loading, error, reactToArticle, fetchComments, addComment, addReply } = useArticleStore()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
 
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyText, setReplyText] = useState("")
   const [commentInput, setCommentInput] = useState("")
   
+  const [showLoginModal, setShowLoginModal] = useState(false)
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set())
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [replyLoadingId, setReplyLoadingId] = useState<string | null>(null)
@@ -59,6 +63,10 @@ export default function ArticleDetailPage() {
   if (loading || !article) return <Loader size="sm" fullScreen />
 
   const handleReaction = (type: string) => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true)
+      return
+    }
     if (article) {
       reactToArticle(article.id, type)
     }
@@ -215,24 +223,39 @@ export default function ArticleDetailPage() {
               Komentar
             </h3>
 
-            <div className="flex gap-3 w-full">
+            {isAuthenticated ? (
+              <div className="flex gap-3 w-full">
+                <input
+                  value={commentInput}
+                  onChange={(e) => setCommentInput(e.target.value)}
+                  placeholder="Tulis komentar..."
+                  className="flex-1 px-4 py-3 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
 
-              <input
-                value={commentInput}
-                onChange={(e) => setCommentInput(e.target.value)}
-                placeholder="Tulis komentar..."
-                className="flex-1 px-4 py-3 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-
-              <button
-                onClick={handleCommentSubmit}
-                disabled={isSubmitting}
-                className="px-6 py-3 bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-xl font-semibold shadow disabled:opacity-50 flex items-center gap-2"
-              >
-                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Kirim"}
-              </button>
-
-            </div>
+                <button
+                  onClick={handleCommentSubmit}
+                  disabled={isSubmitting}
+                  className="px-6 py-3 bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-xl font-semibold shadow disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Kirim"}
+                </button>
+              </div>
+            ) : (
+              <div className="bg-gray-50 border border-dashed border-gray-300 rounded-2xl p-8 text-center space-y-3 w-full">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
+                  <Lock size={20} />
+                </div>
+                <p className="text-sm text-gray-500">Silakan login untuk memberikan komentar</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50"
+                  onClick={() => router.push("/signin")}
+                >
+                  Sign In Sekarang
+                </Button>
+              </div>
+            )}
 
             {comments.map((c: any) => (
 
@@ -252,12 +275,14 @@ export default function ArticleDetailPage() {
                     <p className="text-sm text-gray-700">{c.message}</p>
 
                     <div className="flex items-center gap-4 mt-2">
-                      <button
-                        onClick={() => setReplyingTo(c._id)}
-                        className="text-xs font-medium text-gray-500 hover:text-blue-600 transition"
-                      >
-                        Balas
-                      </button>
+                      {isAuthenticated && (
+                        <button
+                          onClick={() => setReplyingTo(c._id)}
+                          className="text-xs font-medium text-gray-500 hover:text-blue-600 transition"
+                        >
+                          Balas
+                        </button>
+                      )}
                       
                       {c.replies && c.replies.length > 0 && (
                         <button
@@ -337,6 +362,21 @@ export default function ArticleDetailPage() {
           </div>
         </div>
       </div>
-    </div>
-  )
+    {showLoginModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="w-full max-w-[380px] bg-white rounded-2xl shadow-2xl p-8 text-center">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100">
+            <Lock className="w-6 h-6 text-blue-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Kamu belum Login</h2>
+          <p className="text-sm text-gray-600 leading-relaxed mb-6">Kalo mau kasih reaksi Login dulu yaa</p>
+          <div className="flex gap-3">
+            <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setShowLoginModal(false)}>Tutup</Button>
+            <Button className="flex-1 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white" onClick={() => router.push("/signin")}>Sign In</Button>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+)
 }

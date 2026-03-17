@@ -4,12 +4,16 @@ import { useEffect, useState, useRef, useLayoutEffect, useMemo } from "react";
 import Image from "next/image";
 import { Calendar, MapPin, Users, Search } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/app/store/useAuthStore";
 
 import { useEventStore } from "@/app/store/useEventStore";
 
 export default function Events() {
   const { events, fetchEvents, toggleRegisterEvent, loading } =
     useEventStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const router = useRouter();
 
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
@@ -198,6 +202,10 @@ export default function Events() {
                   <button
                     disabled={isLoading}
                     onClick={async () => {
+                      if (!isAuthenticated) {
+                        router.push("/signin");
+                        return;
+                      }
                       setLoadingId(event.id);
                       await toggleRegisterEvent(event.id);
                       setLoadingId(null);
