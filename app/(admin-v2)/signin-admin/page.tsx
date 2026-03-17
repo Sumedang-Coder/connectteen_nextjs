@@ -35,7 +35,8 @@ export default function AdminSigninPage() {
 
         setLoading(true);
         try {
-            const res = await api.post("/auth/admin/login", { email, password });
+            const normalizedEmail = email.trim().toLowerCase();
+            const res = await api.post("/auth/admin/login", { email: normalizedEmail, password });
 
             if (res.data.success) {
                 toast.success("Welcome back, Admin!");

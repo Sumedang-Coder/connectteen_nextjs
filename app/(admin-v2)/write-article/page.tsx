@@ -77,6 +77,14 @@ function ArticleEditor() {
         }
     }, [editId, fetchArticleById]);
 
+    // Role guard for Viewers
+    useEffect(() => {
+        if (user && user.role === "viewer") {
+            toast.error("Account Viewer tidak memiliki izin untuk menulis artikel.");
+            router.replace("/manage-articles");
+        }
+    }, [user, router]);
+
     useEffect(() => {
         if (editId && article) {
             setTitle(article.title);
@@ -88,9 +96,53 @@ function ArticleEditor() {
     }, [article, editId, editor]);
 
 
+    // Unsaved changes warning (Close/Reload + Back Button)
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            const hasContent = title.trim() || (editor && !editor.isEmpty);
+            if (hasContent) {
+                e.preventDefault();
+                e.returnValue = "";
+            }
+        };
+
+        const handlePopState = () => {
+             const hasContent = title.trim() || (editor && !editor.isEmpty);
+             if (hasContent) {
+                 if (confirm("Perubahan yang Anda buat mungkin tidak disimpan. Apakah Anda yakin ingin keluar?")) {
+                    router.push("/manage-articles");
+                 } else {
+                     // Stay on page: push original state back
+                     window.history.pushState(null, "", window.location.href);
+                 }
+             }
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        window.addEventListener("popstate", handlePopState);
+        // Sentinel state to detect Back button
+        window.history.pushState(null, "", window.location.href);
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+            window.removeEventListener("popstate", handlePopState);
+        };
+    }, [title, editor, router]);
+
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error("Ukuran file maksimal 5MB");
+                e.target.value = "";
+                return;
+            }
+            const allowedTypes = ["image/jpeg", "image/png"];
+            if (!allowedTypes.includes(file.type)) {
+                toast.error("Format file tidak didukung. Gunakan JPG atau PNG.");
+                e.target.value = "";
+                return;
+            }
             setImageFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -122,11 +174,12 @@ function ArticleEditor() {
         }
 
         if (success) {
-            toast.success(editId ? "Article updated!" : "Article published!");
-            router.push("/manage-articles");
-        } else {
-            toast.error("Process failed. Please try again.");
-        }
+        toast.success(editId ? "Article updated!" : "Article published!");
+        router.push("/manage-articles");
+      } else {
+        const errorMsg = useArticleStore.getState().error;
+        toast.error(errorMsg || "Failed to publish article.");
+      }
     };
 
     const handleDelete = async () => {
@@ -138,6 +191,8 @@ function ArticleEditor() {
             }
         }
     };
+
+    if (user?.role === "viewer") return null;
 
     return (
         <div className="min-h-full bg-slate-50 font-display text-slate-900 pb-20">
@@ -210,9 +265,10 @@ function ArticleEditor() {
                         )}
                         <input
                             type="file"
+                            id="image"
                             ref={fileInputRef}
                             className="hidden"
-                            accept="image/*"
+                            accept="image/jpeg,image/png,.jpg,.jpeg,.png"
                             onChange={handleImageChange}
                         />
                     </div>
@@ -222,6 +278,7 @@ function ArticleEditor() {
                         {/* Title Input */}
                         <textarea
                             placeholder="Enter article title..."
+                            maxLength={200}
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             rows={1}

@@ -18,24 +18,17 @@ import { toast } from "sonner";
 import PaginationComponent from "@/components/PaginationComponent";
 import { useMessageStore } from "@/app/store/useMessageStore";
 import { useAuthStore } from "@/app/store/useAuthStore";
+import { useDebounce } from "@/app/hooks/useDebounce";
 
 export default function SecretMessagesPage() {
     const [searchTerm, setSearchTerm] = useState("");
-    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [sortBy, setSortBy] = useState("-createdAt");
     const [currentPage, setCurrentPage] = useState(1);
     const { user } = useAuthStore();
 
     const { allMessages, loading, pagination, fetchSecretMessages, deleteMessage } = useMessageStore();
 
-    // Debounce search term
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(searchTerm);
-            setCurrentPage(1); // Reset to first page on search
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
+    const debouncedSearch = useDebounce(searchTerm, 500);
 
     // Fetch messages on criteria change
     useEffect(() => {

@@ -35,7 +35,7 @@ export default function ArticleDetailPage() {
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyText, setReplyText] = useState("")
   const [commentInput, setCommentInput] = useState("")
-  
+
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set())
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -158,13 +158,10 @@ export default function ArticleDetailPage() {
       {/* CONTENT */}
       <div className="relative pb-20 px-6">
         <div className="max-w-4xl mx-auto px-2 md:px-6 py-8">
-          <p className="text-xl md:text-xl text-justify text-slate-600 font-light italic leading-relaxed mb-10 border-l-4 border-blue-500 pl-6">
-            {article.description.split("\n")[0]}
-          </p>
-
-          <div className="prose prose-lg max-w-none text-slate-800 whitespace-pre-line">
-            {article.description}
-          </div>
+          <div
+            className="prose prose-lg max-w-none text-slate-800"
+            dangerouslySetInnerHTML={{ __html: article.description }}
+          />
 
         </div>
 
@@ -182,32 +179,32 @@ export default function ArticleDetailPage() {
             </h3>
 
             <div className="flex gap-2 flex-wrap">
-              <button 
-                onClick={() => handleReaction("heart")} 
+              <button
+                onClick={() => handleReaction("heart")}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'heart' ? 'bg-red-50 border-red-200 text-red-600 shadow-sm' : 'bg-white hover:bg-red-50'}`}
               >
                 ❤️ <span className="text-sm">{reactions.heart}</span>
               </button>
-              <button 
-                onClick={() => handleReaction("laugh")} 
+              <button
+                onClick={() => handleReaction("laugh")}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'laugh' ? 'bg-yellow-50 border-yellow-200 text-yellow-600 shadow-sm' : 'bg-white hover:bg-yellow-50'}`}
               >
                 😂 <span className="text-sm">{reactions.laugh}</span>
               </button>
-              <button 
-                onClick={() => handleReaction("like")} 
+              <button
+                onClick={() => handleReaction("like")}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'like' ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm' : 'bg-white hover:bg-blue-50'}`}
               >
                 👍 <span className="text-sm">{reactions.like}</span>
               </button>
-              <button 
-                onClick={() => handleReaction("wow")} 
+              <button
+                onClick={() => handleReaction("wow")}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'wow' ? 'bg-orange-50 border-orange-200 text-orange-600 shadow-sm' : 'bg-white hover:bg-orange-50'}`}
               >
                 😮 <span className="text-sm">{reactions.wow}</span>
               </button>
-              <button 
-                onClick={() => handleReaction("sad")} 
+              <button
+                onClick={() => handleReaction("sad")}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'sad' ? 'bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm' : 'bg-white hover:bg-indigo-50'}`}
               >
                 😢 <span className="text-sm">{reactions.sad}</span>
@@ -246,9 +243,9 @@ export default function ArticleDetailPage() {
                   <Lock size={20} />
                 </div>
                 <p className="text-sm text-gray-500">Silakan login untuk memberikan komentar</p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50"
                   onClick={() => router.push("/signin")}
                 >
@@ -283,7 +280,7 @@ export default function ArticleDetailPage() {
                           Balas
                         </button>
                       )}
-                      
+
                       {c.replies && c.replies.length > 0 && (
                         <button
                           onClick={() => toggleReplies(c._id)}
@@ -362,21 +359,21 @@ export default function ArticleDetailPage() {
           </div>
         </div>
       </div>
-    {showLoginModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-        <div className="w-full max-w-[380px] bg-white rounded-2xl shadow-2xl p-8 text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100">
-            <Lock className="w-6 h-6 text-blue-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Kamu belum Login</h2>
-          <p className="text-sm text-gray-600 leading-relaxed mb-6">Kalo mau kasih reaksi Login dulu yaa</p>
-          <div className="flex gap-3">
-            <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setShowLoginModal(false)}>Tutup</Button>
-            <Button className="flex-1 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white" onClick={() => router.push("/signin")}>Sign In</Button>
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-[380px] bg-white rounded-2xl shadow-2xl p-8 text-center">
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100">
+              <Lock className="w-6 h-6 text-blue-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Kamu belum Login</h2>
+            <p className="text-sm text-gray-600 leading-relaxed mb-6">Kalo mau kasih reaksi Login dulu yaa</p>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setShowLoginModal(false)}>Tutup</Button>
+              <Button className="flex-1 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white" onClick={() => router.push("/signin")}>Sign In</Button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
-  </div>
-)
+      )}
+    </div>
+  )
 }

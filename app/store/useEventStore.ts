@@ -50,6 +50,12 @@ interface EventState {
     currentPage: number;
     limit: number;
   };
+  registrantsPagination: {
+    totalRegistrants: number;
+    totalPages: number;
+    currentPage: number;
+    limit: number;
+  };
 
   fetchEvents: (params?: {
     limit?: number;
@@ -66,7 +72,12 @@ interface EventState {
   createEvent: (formData: FormData) => Promise<boolean>;
   updateEvent: (id: string, formData: FormData) => Promise<boolean>;
   deleteEvent: (id: string) => Promise<boolean>;
-  fetchRegistrants: (eventId: string) => Promise<void>;
+  fetchRegistrants: (eventId: string, params?: { 
+    page?: number; 
+    limit?: number; 
+    search?: string;
+    sort?: string;
+  }) => Promise<void>;
 }
 
 export const useEventStore = create<EventState>((set, get) => ({
@@ -83,6 +94,12 @@ export const useEventStore = create<EventState>((set, get) => ({
 
   pagination: {
     totalEvents: 0,
+    totalPages: 0,
+    currentPage: 1,
+    limit: 10,
+  },
+  registrantsPagination: {
+    totalRegistrants: 0,
     totalPages: 0,
     currentPage: 1,
     limit: 10,
@@ -249,11 +266,21 @@ export const useEventStore = create<EventState>((set, get) => ({
     }
   },
 
-  fetchRegistrants: async (eventId) => {
+  fetchRegistrants: async (eventId, params = {}) => {
     try {
       set({ loading: true, error: null });
-      const res = await api.get(`/events/${eventId}/registrants`);
-      set({ registrants: res.data.data || [] });
+      const res = await api.get(`/events/${eventId}/registrants`, { params });
+      if (res.data.success) {
+        set({ 
+          registrants: res.data.data || [],
+          registrantsPagination: res.data.pagination || {
+            totalRegistrants: (res.data.data || []).length,
+            totalPages: 1,
+            currentPage: 1,
+            limit: 10,
+          }
+        });
+      }
     } catch (err: any) {
       set({
         error: err?.response?.data?.message || "Fetch registrants failed",

@@ -21,6 +21,7 @@ import { useAuthStore } from "@/app/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useDebounce } from "@/app/hooks/useDebounce";
 
 const ROLE_DISPLAY = {
     super_admin: "Super Admin",
@@ -54,11 +55,13 @@ export default function ManageAdminsPage() {
         }
     }, [user, authLoading, router]);
 
+    const debouncedSearch = useDebounce(searchTerm, 500);
+
     useEffect(() => {
         if (user?.role === "super_admin") {
-            fetchAdmins();
+            fetchAdmins({ search: debouncedSearch });
         }
-    }, [fetchAdmins, user]);
+    }, [fetchAdmins, user, debouncedSearch]);
 
     if (authLoading || (user && user.role !== "super_admin")) {
         return (
@@ -98,10 +101,7 @@ export default function ManageAdminsPage() {
         }
     };
 
-    const filteredAdmins = admins.filter(admin =>
-        (admin.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-        admin.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredAdmins = admins;
 
     return (
         <div className="flex flex-col h-full overflow-hidden bg-slate-50">
@@ -257,7 +257,6 @@ export default function ManageAdminsPage() {
                                     >
                                         <option value="content_editor">Content Editor</option>
                                         <option value="viewer">Viewer</option>
-                                        <option value="user">User</option>
                                         <option value="super_admin">Super Admin</option>
                                     </select>
                                 </div>
