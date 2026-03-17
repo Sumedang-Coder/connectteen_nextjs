@@ -28,8 +28,12 @@ export default function Auth({ onClick }: AuthProps) {
 
   const handleGuestLogin = async () => {
     toast.loading("Masuk sebagai tamu...", { id: "guest-login" });
-    await loginGuest();
-    toast.success("Berhasil masuk sebagai tamu!", { id: "guest-login" });
+    const success = await loginGuest();
+    if (success) {
+      toast.success("Berhasil masuk sebagai tamu!", { id: "guest-login" });
+    } else {
+      toast.error("Gagal masuk sebagai tamu. Silakan coba lagi.", { id: "guest-login" });
+    }
   };
 
   return (

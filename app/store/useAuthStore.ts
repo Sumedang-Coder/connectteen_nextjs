@@ -35,9 +35,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         loading: false,
       });
+      return true;
     } catch (error) {
       console.error("Guest login failed:", error);
       set({ loading: false });
+      return false;
     }
   },
 
