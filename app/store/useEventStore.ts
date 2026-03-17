@@ -56,6 +56,7 @@ interface EventState {
     search?: string;
     page?: number;
     sort?: string;
+    append?: boolean;
   }) => Promise<void>;
   fetchNextEvents: () => Promise<void>;
   resetEvents: () => void;
@@ -107,9 +108,8 @@ export const useEventStore = create<EventState>((set, get) => ({
 
       set((state) => ({
         events:
-          targetPage === 1
-            ? newData
-            : [
+          params.append
+            ? [
                 ...state.events,
                 ...newData.filter(
                   (newEvent) =>
@@ -117,7 +117,8 @@ export const useEventStore = create<EventState>((set, get) => ({
                       (existing) => existing.id === newEvent.id,
                     ),
                 ),
-              ],
+              ]
+            : newData,
         page: apiPagination?.currentPage || targetPage,
         hasMore: apiPagination?.hasNextPage || false,
         pagination: apiPagination || state.pagination,
@@ -135,7 +136,7 @@ export const useEventStore = create<EventState>((set, get) => ({
 
   fetchNextEvents: async () => {
     const { page, fetchEvents } = get();
-    await fetchEvents({ page: page + 1 });
+    await fetchEvents({ page: page + 1, append: true });
   },
 
   resetEvents: () => {
