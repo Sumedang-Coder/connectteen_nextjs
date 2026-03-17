@@ -8,7 +8,10 @@ import Loader from "@/components/Loader";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import MusicPlayerCard from "@/components/MusicPlayerCard";
 import { ArrowLeft, Loader2, MessageCircle } from "lucide-react";
+import { useAuthStore } from "@/app/store/useAuthStore";
+import { Lock } from "lucide-react";
 
 type Reply = {
   id: number;
@@ -26,17 +29,17 @@ type Comment = {
 export default function MessageDetailPage() {
 
   const { id } = useParams();
-  const router = useRouter();
-
   const { selectedMessage, fetchMessageById, reactToMessage, addComment, addReply } = useMessageStore();
 
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [commentInput, setCommentInput] = useState("");
-  
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [replyLoadingId, setReplyLoadingId] = useState<string | null>(null);
+  const router = useRouter();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const reactions = selectedMessage?.reactions || {
     heart: 0,
@@ -67,6 +70,10 @@ export default function MessageDetailPage() {
   const avatarLetter = selectedMessage.recipient_name?.charAt(0).toUpperCase() || "?";
 
   const handleReaction = (type: string) => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
     if (selectedMessage) {
       reactToMessage(selectedMessage.id, type);
     }
@@ -167,34 +174,13 @@ export default function MessageDetailPage() {
                   />
                 ) : (
                   /* iTunes Player */
-                  <div className="bg-linear-to-br from-gray-50 to-white border border-gray-200 rounded-2xl p-6 shadow-xs">
-                    <div className="flex items-center gap-5">
-                      <img 
-                        src={selectedMessage.song_image} 
-                        alt={selectedMessage.song_name} 
-                        className="w-24 h-24 rounded-xl shadow-md object-cover"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xl font-bold text-gray-900 truncate">{selectedMessage.song_name}</h3>
-                        <p className="text-gray-500 mb-4">{selectedMessage.song_artist}</p>
-                        
-                        {selectedMessage.preview_url && (
-                          <audio controls className="w-full h-10">
-                            <source src={selectedMessage.preview_url} type="audio/mpeg" />
-                            Your browser does not support the audio element.
-                          </audio>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  <MusicPlayerCard song={selectedMessage} />
                 )}
               </div>
             )}
 
             <div className="relative md:max-w-2xl mx-auto">
-
               <span className="absolute -left-2 top-0 h-full w-1 rounded-full bg-linear-to-b from-cyan-400 to-blue-500" />
-
               <div className="pl-4 text-gray-800 text-lg leading-relaxed whitespace-pre-line">
                 {selectedMessage.message}
               </div>
@@ -209,147 +195,190 @@ export default function MessageDetailPage() {
 
         </Card>
       </div>
-        <div className="space-y-6 mx-auto mt-20 max-w-4xl px-2 md:px-6">
-          <hr />
-          {/* REACTION SECTION */}
-          <div className="space-y-3">
+      <div className="space-y-6 mx-auto mt-20 max-w-4xl px-2 md:px-6">
+        <hr />
+        {/* REACTION SECTION */}
+        <div className="space-y-3">
 
-            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest">
-              Reaksi
-            </h3>
+          <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest">
+            Reaksi
+          </h3>
 
-            <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
 
-              <button onClick={() => handleReaction("heart")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "heart" ? "bg-red-100 border-red-500 scale-105" : "bg-white hover:bg-red-50"}`}>❤️ {reactions.heart}</button>
-              <button onClick={() => handleReaction("laugh")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "laugh" ? "bg-yellow-100 border-yellow-500 scale-105" : "bg-white hover:bg-yellow-50"}`}>😂 {reactions.laugh}</button>
-              <button onClick={() => handleReaction("like")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "like" ? "bg-blue-100 border-blue-500 scale-105" : "bg-white hover:bg-blue-50"}`}>👍 {reactions.like}</button>
-              <button onClick={() => handleReaction("wow")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "wow" ? "bg-orange-100 border-orange-500 scale-105" : "bg-white hover:bg-orange-50"}`}>😮 {reactions.wow}</button>
-              <button onClick={() => handleReaction("sad")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "sad" ? "bg-indigo-100 border-indigo-500 scale-105" : "bg-white hover:bg-indigo-50"}`}>😢 {reactions.sad}</button>
-
-            </div>
+            <button onClick={() => handleReaction("heart")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "heart" ? "bg-red-100 border-red-500 scale-105" : "bg-white hover:bg-red-50"}`}>❤️ {reactions.heart}</button>
+            <button onClick={() => handleReaction("laugh")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "laugh" ? "bg-yellow-100 border-yellow-500 scale-105" : "bg-white hover:bg-yellow-50"}`}>😂 {reactions.laugh}</button>
+            <button onClick={() => handleReaction("like")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "like" ? "bg-blue-100 border-blue-500 scale-105" : "bg-white hover:bg-blue-50"}`}>👍 {reactions.like}</button>
+            <button onClick={() => handleReaction("wow")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "wow" ? "bg-orange-100 border-orange-500 scale-105" : "bg-white hover:bg-orange-50"}`}>😮 {reactions.wow}</button>
+            <button onClick={() => handleReaction("sad")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "sad" ? "bg-indigo-100 border-indigo-500 scale-105" : "bg-white hover:bg-indigo-50"}`}>😢 {reactions.sad}</button>
 
           </div>
 
-          {/* COMMENT SECTION */}
-          <div className="space-y-4 pt-4 border-t">
+        </div>
 
-            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest">
-              Komentar
-            </h3>
+        {/* COMMENT SECTION */}
+        <div className="space-y-4 pt-4 border-t">
 
-            <div className="flex gap-3">
+          <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest">
+            Komentar
+          </h3>
 
-              <input
-                value={commentInput}
-                onChange={(e) => setCommentInput(e.target.value)}
-                placeholder="Tulis komentar..."
-                className="flex-1 px-4 py-3 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
+          <div className="flex gap-3">
 
-              <button
-                onClick={handleCommentSubmit}
-                disabled={isSubmitting}
-                className="px-6 py-3 bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-xl font-semibold shadow disabled:opacity-50 flex items-center gap-2"
-              >
-                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Kirim"}
-              </button>
+            <input
+              value={commentInput}
+              onChange={(e) => setCommentInput(e.target.value)}
+              placeholder="Tulis komentar..."
+              className="flex-1 px-4 py-3 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
 
-            </div>
+            <button
+              onClick={handleCommentSubmit}
+              disabled={isSubmitting}
+              className="px-6 py-3 bg-linear-to-r from-cyan-500 to-blue-500 text-white rounded-xl font-semibold shadow disabled:opacity-50 flex items-center gap-2"
+            >
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Kirim"}
+            </button>
 
-            <div className="space-y-3">
+          </div>
 
-              {comments.map((c: any) => (
-                <div key={c._id} className="space-y-2">
+          <div className="space-y-3">
+            {comments.length === 0 && (
+              <p className="text-sm text-gray-500 text-center py-6">
+                Belum ada komentar
+              </p>
+            )}
+            {comments.map((c: any) => (
+              <div key={c._id} className="space-y-2">
 
-                  <div className="flex gap-3">
+                <div className="flex gap-3">
 
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={c.avatarUrl} alt={c.name} />
-                      <AvatarFallback>{c.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={c.avatarUrl} alt={c.name} />
+                    <AvatarFallback>{c.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
 
-                    <div className="bg-gray-100 p-3 rounded-2xl rounded-tl-none grow relative">
+                  <div className="bg-gray-100 p-3 rounded-2xl rounded-tl-none grow relative">
 
-                      <p className="text-xs font-bold text-blue-600 mb-1">{c.name}</p>
+                    <p className="text-xs font-bold text-blue-600 mb-1">{c.name}</p>
 
-                      <p className="text-sm text-gray-700">{c.message}</p>
+                    <p className="text-sm text-gray-700">{c.message}</p>
 
-                      <div className="flex items-center gap-4 mt-2">
+                    <div className="flex items-center gap-4 mt-2">
+                      <button
+                        onClick={() => setReplyingTo(c._id)}
+                        className="text-xs font-medium text-gray-500 hover:text-blue-600 transition"
+                      >
+                        Balas
+                      </button>
+
+                      {c.replies && c.replies.length > 0 && (
                         <button
-                          onClick={() => setReplyingTo(c._id)}
-                          className="text-xs font-medium text-gray-500 hover:text-blue-600 transition"
+                          onClick={() => toggleReplies(c._id)}
+                          className="text-xs font-medium text-blue-600 flex items-center gap-1 hover:underline"
                         >
-                          Balas
+                          <MessageCircle className="h-3 w-3" />
+                          {expandedComments.has(c._id) ? "Sembunyikan balasan" : `Lihat ${c.replies.length} balasan`}
                         </button>
-                        
-                        {c.replies && c.replies.length > 0 && (
-                          <button
-                            onClick={() => toggleReplies(c._id)}
-                            className="text-xs font-medium text-blue-600 flex items-center gap-1 hover:underline"
-                          >
-                            <MessageCircle className="h-3 w-3" />
-                            {expandedComments.has(c._id) ? "Sembunyikan balasan" : `Lihat ${c.replies.length} balasan`}
-                          </button>
-                        )}
-                      </div>
-
+                      )}
                     </div>
 
                   </div>
 
-                  {expandedComments.has(c._id) && c.replies && c.replies.map((r: any) => (
-                    <div key={r._id} className="flex gap-3 ml-12 animate-in slide-in-from-top-2 duration-300">
-
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={r.avatarUrl} alt={r.name} />
-                        <AvatarFallback>{r.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-
-                      <div className="bg-gray-100 p-2 rounded-xl grow">
-
-                        <p className="text-xs font-bold text-blue-600">{r.name}</p>
-
-                        <p className="text-sm text-gray-700">{r.message}</p>
-
-                      </div>
-
-                    </div>
-                  ))}
-
-                  {replyingTo === c._id && (
-
-                    <div className="flex gap-2 ml-12 pt-2 animate-in zoom-in-95 duration-200">
-
-                      <input
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                        placeholder="Tulis balasan..."
-                        className="flex-1 px-3 py-2 bg-gray-100 rounded-lg text-sm focus:ring-1 focus:ring-blue-400 outline-none"
-                        autoFocus
-                      />
-
-                      <button
-                        onClick={() => handleReplySubmit(c._id)}
-                        disabled={replyLoadingId === c._id}
-                        className="px-3 py-2 text-sm bg-blue-500 text-white rounded-lg font-medium shadow hover:bg-blue-600 disabled:opacity-50 flex items-center gap-2"
-                      >
-                        {replyLoadingId === c._id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Kirim"}
-                      </button>
-
-                      <button
-                        onClick={() => setReplyingTo(null)}
-                        className="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                      >
-                        Batal
-                      </button>
-                    </div>
-                  )}
                 </div>
-              ))}
-            </div>
 
+                {expandedComments.has(c._id) && c.replies && c.replies.map((r: any) => (
+                  <div key={r._id} className="flex gap-3 ml-12 animate-in slide-in-from-top-2 duration-300">
+
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={r.avatarUrl} alt={r.name} />
+                      <AvatarFallback>{r.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+
+                    <div className="bg-gray-100 p-2 rounded-xl grow">
+
+                      <p className="text-xs font-bold text-blue-600">{r.name}</p>
+
+                      <p className="text-sm text-gray-700">{r.message}</p>
+
+                    </div>
+
+                  </div>
+                ))}
+
+                {replyingTo === c._id && (
+
+                  <div className="flex gap-2 ml-12 pt-2 animate-in zoom-in-95 duration-200">
+
+                    <input
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Tulis balasan..."
+                      className="flex-1 px-3 py-2 bg-gray-100 rounded-lg text-sm focus:ring-1 focus:ring-blue-400 outline-none"
+                      autoFocus
+                    />
+
+                    <button
+                      onClick={() => handleReplySubmit(c._id)}
+                      disabled={replyLoadingId === c._id}
+                      className="px-3 py-2 text-sm bg-blue-500 text-white rounded-lg font-medium shadow hover:bg-blue-600 disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {replyLoadingId === c._id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Kirim"}
+                    </button>
+
+                    <button
+                      onClick={() => setReplyingTo(null)}
+                      className="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                    >
+                      Batal
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
+          {showLoginModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+              <div className="w-full max-w-[380px] bg-white rounded-2xl shadow-2xl p-8 text-center">
+
+                {/* Icon */}
+                <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100">
+                  <Lock className="w-6 h-6 text-blue-600" />
+                </div>
+
+                {/* Title */}
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  Kamu belum Login
+                </h2>
+
+                {/* Description */}
+                <p className="text-sm text-gray-600 leading-relaxed mb-6">
+                  Kalo mau kasih reaksi Login dulu yaa
+                </p>
+
+                {/* Buttons */}
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    className="flex-1 rounded-xl"
+                    onClick={() => setShowLoginModal(false)}
+                  >
+                    Tutup
+                  </Button>
+
+                  <Button
+                    className="flex-1 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white"
+                    onClick={() => router.push("/signin")}
+                  >
+                    Sign In
+                  </Button>
+                </div>
+
+              </div>
+            </div>
+          )}
         </div>
+      </div>
     </div>
   );
 }
