@@ -14,6 +14,7 @@ export interface AdminUser {
     email: string;
     role: "super_admin" | "content_editor" | "viewer";
     status: "active" | "suspended" | "invited";
+    avatarUrl?: string;
     lastLogin?: string;
 }
 

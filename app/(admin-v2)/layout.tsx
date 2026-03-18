@@ -16,7 +16,8 @@ import {
   Plus,
   Bell,
   HelpCircle,
-  Shield
+  Shield,
+  User
 } from "lucide-react";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { useRouter } from "next/navigation";
@@ -130,9 +131,18 @@ export default function AdminV2Layout({
       <aside className="hidden lg:flex flex-col w-64 h-screen fixed inset-y-0 left-0 bg-slate-50 border-r border-slate-200 z-20">
         <div className="flex flex-col h-full justify-between p-4">
           <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-1 px-4 py-2 bg-white/50 rounded-xl border border-slate-200/50 shadow-sm">
-              <h1 className="text-slate-900 text-base font-bold leading-tight">Admin Panel</h1>
-              <p className="text-slate-500 text-[10px] uppercase tracking-wider font-bold">{user?.role?.replace('_', ' ') || 'Administrator'}</p>
+            <div className="flex items-center gap-3 px-4 py-3 bg-white/50 rounded-xl border border-slate-200/50 shadow-sm">
+              <div className="w-10 h-10 rounded-lg bg-blue-600 flex-shrink-0 flex items-center justify-center text-white font-bold overflow-hidden shadow-sm">
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                  user?.name?.[0]?.toUpperCase() || "A"
+                )}
+              </div>
+              <div className="flex flex-col min-w-0">
+                <h1 className="text-slate-900 text-sm font-bold leading-tight truncate">{user?.name}</h1>
+                <p className="text-slate-500 text-[10px] uppercase tracking-wider font-bold truncate">{user?.role?.replace('_', ' ') || 'Administrator'}</p>
+              </div>
             </div>
 
             <nav className="flex flex-col gap-1">
@@ -168,6 +178,12 @@ export default function AdminV2Layout({
                   active={pathname === "/manage-admins"}
                 />
               )}
+              <SidebarItem
+                href="/manage-profile"
+                icon={<User size={20} />}
+                label="Manage Profile"
+                active={pathname === "/manage-profile"}
+              />
             </nav>
           </div>
 
@@ -207,7 +223,19 @@ export default function AdminV2Layout({
           <aside className="absolute inset-y-0 left-0 w-64 bg-slate-50 p-4 flex flex-col justify-between">
             <div className="flex flex-col gap-6">
               <div className="flex items-center justify-between">
-                <h1 className="text-slate-900 text-lg font-bold">Admin Panel</h1>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold overflow-hidden shadow-sm">
+                    {user?.avatarUrl ? (
+                      <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      user?.name?.[0]?.toUpperCase() || "A"
+                    )}
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <h1 className="text-slate-900 text-sm font-bold leading-tight truncate">{user?.name}</h1>
+                    <p className="text-slate-500 text-[10px] uppercase tracking-wider font-bold truncate">{user?.role?.replace('_', ' ') || 'Administrator'}</p>
+                  </div>
+                </div>
                 <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-slate-600">
                   <X size={24} />
                 </button>
@@ -245,6 +273,12 @@ export default function AdminV2Layout({
                     active={pathname === "/manage-admins"}
                   />
                 )}
+                <SidebarItem
+                  href="/manage-profile"
+                  icon={<User size={20} />}
+                  label="Manage Profile"
+                  active={pathname === "/manage-profile"}
+                />
               </nav>
             </div>
             <button

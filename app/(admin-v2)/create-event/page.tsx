@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
     Plus,
     Bold as BoldIcon,
@@ -391,16 +392,19 @@ function EventEditorContent() {
             {/* Top Bar */}
             <header className="h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200 shrink-0">
                 <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => router.back()}
-                        className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
-                    >
-                        <ChevronLeft size={20} />
-                    </button>
-                    <div className="h-6 w-px bg-slate-200 mx-2" />
-                    <span className="text-sm font-medium text-slate-500">
-                        {editId ? "Edit Event" : "Create New Event"}
-                    </span>
+                    <div className="flex items-center text-sm text-slate-500">
+                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
+                            Admin
+                        </Link>
+                        <ChevronRight size={14} className="mx-1" />
+                        <Link href="/manage-events" className="hover:text-blue-600 transition-colors">
+                            Events Management
+                        </Link>
+                        <ChevronRight size={14} className="mx-1" />
+                        <span className="text-slate-900 font-medium">
+                             {editId ? "Edit Event" : "Create New Event"}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-3">

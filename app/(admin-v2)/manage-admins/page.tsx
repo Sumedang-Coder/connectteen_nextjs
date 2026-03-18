@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
     Search,
     Plus,
@@ -109,7 +110,9 @@ export default function ManageAdminsPage() {
             <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center text-sm text-slate-500">
-                        <span>Security</span>
+                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
+                            Admin
+                        </Link>
                         <ChevronRight size={14} className="mx-1" />
                         <span className="text-slate-900 font-medium">Manage Administrators</span>
                     </div>
@@ -184,8 +187,12 @@ export default function ManageAdminsPage() {
                                         <tr key={admin.id} className="group hover:bg-slate-50 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-bold">
-                                                        {(admin.name || admin.email).charAt(0).toUpperCase()}
+                                                    <div className="w-10 h-10 rounded-lg bg-blue-600 flex-shrink-0 flex items-center justify-center text-white font-bold overflow-hidden shadow-sm border border-slate-200">
+                                                        {admin.avatarUrl ? (
+                                                            <img src={admin.avatarUrl} alt={admin.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            (admin.name || admin.email).charAt(0).toUpperCase()
+                                                        )}
                                                     </div>
                                                     <div className="flex flex-col">
                                                         <span className="text-sm font-bold text-slate-900">{admin.name || "Pending Invite..."}</span>

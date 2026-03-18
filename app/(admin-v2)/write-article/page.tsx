@@ -379,44 +379,53 @@ function ArticleEditor() {
     if (user?.role === "viewer") return null;
 
     return (
-        <div className="min-h-full bg-slate-50 font-display text-slate-900 pb-20">
-            <main className="max-w-4xl mx-auto px-4 pt-10 flex flex-col gap-8">
-
-                {/* Header Actions */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-2 text-sm text-slate-500">
-                        <Link href="/manage-articles" className="hover:text-blue-600 transition-colors flex items-center gap-1">
-                            <ArrowLeft size={16} />
-                            <span>Articles</span>
+        <div className="flex flex-col h-full bg-slate-50 overflow-hidden font-display selection:bg-blue-600/10 selection:text-blue-600">
+            {/* Standard Header / Breadcrumb */}
+            <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center text-sm text-slate-500">
+                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
+                            Admin
                         </Link>
-                        <ChevronRight size={14} />
-                        <span className="text-slate-900 font-semibold">{editId ? "Edit Article" : "Create New"}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        {editId && (
-                            <button
-                                onClick={handleDelete}
-                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                                title="Delete Article"
-                            >
-                                <Trash2 size={20} />
-                            </button>
-                        )}
-                        <button
-                            onClick={handlePublish}
-                            disabled={loading}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all disabled:opacity-50"
-                        >
-                            {loading ? "Saving..." : (
-                                <>
-                                    <Send size={18} />
-                                    <span>{editId ? "Update Article" : "Publish Article"}</span>
-                                </>
-                            )}
-                        </button>
+                        <ChevronRight size={14} className="mx-1" />
+                        <Link href="/manage-articles" className="hover:text-blue-600 transition-colors">
+                            Articles
+                        </Link>
+                        <ChevronRight size={14} className="mx-1" />
+                        <span className="text-slate-900 font-medium">{editId ? "Edit Article" : "Create New"}</span>
                     </div>
                 </div>
+
+                <div className="flex items-center gap-3">
+                    {editId && (
+                        <button
+                            onClick={handleDelete}
+                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                            title="Delete Article"
+                        >
+                            <Trash2 size={20} />
+                        </button>
+                    )}
+                    <button
+                        onClick={handlePublish}
+                        disabled={loading}
+                        className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all disabled:opacity-50"
+                    >
+                        {loading ? (
+                            <Loader2 size={18} className="animate-spin" />
+                        ) : (
+                            <>
+                                <Send size={18} />
+                                <span>{editId ? "Update" : "Publish"}</span>
+                            </>
+                        )}
+                    </button>
+                </div>
+            </header>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-4 md:p-10">
+                <div className="max-w-4xl mx-auto flex flex-col gap-10">
 
                 {/* Editor Card */}
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
@@ -506,8 +515,9 @@ function ArticleEditor() {
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
+    </div>
     );
 }
 

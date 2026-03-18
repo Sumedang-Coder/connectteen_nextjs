@@ -84,7 +84,9 @@ export default function ManageEventsPage() {
             <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center text-sm text-slate-500">
-                        <span>Admin</span>
+                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
+                            Admin
+                        </Link>
                         <ChevronRight size={14} className="mx-1" />
                         <span className="text-slate-900 font-medium">Events Management</span>
                     </div>
