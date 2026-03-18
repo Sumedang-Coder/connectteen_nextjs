@@ -1,38 +1,34 @@
 "use client";
 
-import { useEffect, useState, useRef, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-    ChevronLeft,
     ChevronRight,
-    Image as ImageIcon,
     Upload,
-    X,
-    Layout,
-    Type,
-    Link as LinkIcon,
-    AlignLeft,
-    User,
-    Globe,
-    Search,
-    Settings,
-    HelpCircle,
-    MoreVertical,
-    Calendar,
-    Eye,
-    Check,
-    Trash2,
-    Bold,
-    Italic,
-    Underline,
-    Heading1,
-    Heading2,
-    Quote,
-    List,
-    ImagePlus,
     ArrowLeft,
     Save,
-    Send
+    Send,
+    Trash2,
+    ImagePlus,
+    Bold as BoldIcon,
+    Italic as ItalicIcon,
+    Underline as UnderlineIcon,
+    Strikethrough,
+    Code,
+    Heading1,
+    Heading2,
+    Heading3,
+    List,
+    ListOrdered,
+    Quote,
+    Undo,
+    Redo,
+    Link as LinkIcon,
+    Unlink,
+    AlignLeft,
+    AlignCenter,
+    AlignRight,
+    AlignJustify
 } from "lucide-react";
 import { useArticleStore } from "@/app/store/useArticleStore";
 import { toast } from "sonner";
@@ -41,8 +37,190 @@ import { useAuthStore } from "@/app/store/useAuthStore";
 
 // Tiptap imports
 import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import UnderlineExtension from '@tiptap/extension-underline';
+import { BubbleMenu } from '@tiptap/react/menus';
+import { StarterKit } from '@tiptap/starter-kit';
+import { Underline } from '@tiptap/extension-underline';
+import { Link as TiptapLink } from '@tiptap/extension-link';
+import { Placeholder } from '@tiptap/extension-placeholder';
+import { BubbleMenu as BubbleMenuExtension } from '@tiptap/extension-bubble-menu';
+import { TextAlign } from '@tiptap/extension-text-align';
+
+const MenuBar = ({ editor }: { editor: any }) => {
+    if (!editor) {
+        return null;
+    }
+
+    const setLink = useCallback(() => {
+        const previousUrl = editor.getAttributes('link').href;
+        const url = window.prompt('URL', previousUrl);
+
+        if (url === null) {
+            return;
+        }
+
+        if (url === '') {
+            editor.chain().focus().extendMarkRange('link').unsetLink().run();
+            return;
+        }
+
+        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    }, [editor]);
+
+    return (
+        <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+            <button
+                onClick={() => editor.chain().focus().toggleBold().run()}
+                disabled={!editor.can().chain().focus().toggleBold().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('bold') ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="Bold"
+            >
+                <BoldIcon size={18} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleItalic().run()}
+                disabled={!editor.can().chain().focus().toggleItalic().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('italic') ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="Italic"
+            >
+                <ItalicIcon size={18} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleUnderline().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('underline') ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="Underline"
+            >
+                <UnderlineIcon size={18} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleStrike().run()}
+                disabled={!editor.can().chain().focus().toggleStrike().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('strike') ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="Strike"
+            >
+                <Strikethrough size={18} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleCode().run()}
+                disabled={!editor.can().chain().focus().toggleCode().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('code') ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="Code"
+            >
+                <Code size={18} />
+            </button>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            <button
+                onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="H1"
+            >
+                <Heading1 size={18} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="H2"
+            >
+                <Heading2 size={18} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('heading', { level: 3 }) ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="H3"
+            >
+                <Heading3 size={18} />
+            </button>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            <button
+                onClick={() => editor.chain().focus().toggleBulletList().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('bulletList') ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="Bullet List"
+            >
+                <List size={18} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('orderedList') ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="Ordered List"
+            >
+                <ListOrdered size={18} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleBlockquote().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('blockquote') ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="Blockquote"
+            >
+                <Quote size={18} />
+            </button>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            <button
+                onClick={setLink}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('link') ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="Set Link"
+            >
+                <LinkIcon size={18} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().extendMarkRange('link').unsetLink().run()}
+                className="p-2 rounded hover:bg-slate-200 text-slate-600 active:bg-slate-300"
+                title="Unlink"
+            >
+                <Unlink size={18} />
+            </button>
+
+            <button
+                onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive({ textAlign: 'left' }) ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="Align Left"
+            >
+                <AlignLeft size={18} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive({ textAlign: 'center' }) ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="Align Center"
+            >
+                <AlignCenter size={18} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive({ textAlign: 'right' }) ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="Align Right"
+            >
+                <AlignRight size={18} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive({ textAlign: 'justify' }) ? 'bg-slate-200 text-blue-600' : 'text-slate-600'}`}
+                title="Align Justify"
+            >
+                <AlignJustify size={18} />
+            </button>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            <button
+                onClick={() => editor.chain().focus().undo().run()}
+                className="p-2 rounded hover:bg-slate-200 text-slate-600 active:bg-slate-300"
+                title="Undo"
+            >
+                <Undo size={18} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().redo().run()}
+                className="p-2 rounded hover:bg-slate-200 text-slate-600 active:bg-slate-300"
+                title="Redo"
+            >
+                <Redo size={18} />
+            </button>
+        </div>
+    );
+};
 
 function ArticleEditor() {
     const router = useRouter();
@@ -60,15 +238,23 @@ function ArticleEditor() {
     const editor = useEditor({
         extensions: [
             StarterKit,
-            UnderlineExtension,
+            Underline,
+            BubbleMenuExtension,
+            TextAlign.configure({
+                types: ['heading', 'paragraph'],
+            }),
+            TiptapLink.configure({
+                openOnClick: false,
+                HTMLAttributes: {
+                    class: 'text-blue-600 underline cursor-pointer',
+                },
+            }),
+            Placeholder.configure({
+                placeholder: 'Tulis cerita Anda di sini...',
+            }),
         ],
         content: '',
         immediatelyRender: false,
-        editorProps: {
-            attributes: {
-                class: 'outline-none min-h-[500px] text-lg text-slate-700 leading-relaxed',
-            },
-        },
     });
 
     useEffect(() => {
@@ -96,7 +282,7 @@ function ArticleEditor() {
     }, [article, editId, editor]);
 
 
-    // Unsaved changes warning (Close/Reload + Back Button)
+    // Unsaved changes warning
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
             const hasContent = title.trim() || (editor && !editor.isEmpty);
@@ -112,7 +298,6 @@ function ArticleEditor() {
                  if (confirm("Perubahan yang Anda buat mungkin tidak disimpan. Apakah Anda yakin ingin keluar?")) {
                     router.push("/manage-articles");
                  } else {
-                     // Stay on page: push original state back
                      window.history.pushState(null, "", window.location.href);
                  }
              }
@@ -120,7 +305,6 @@ function ArticleEditor() {
 
         window.addEventListener("beforeunload", handleBeforeUnload);
         window.addEventListener("popstate", handlePopState);
-        // Sentinel state to detect Back button
         window.history.pushState(null, "", window.location.href);
 
         return () => {
@@ -174,12 +358,12 @@ function ArticleEditor() {
         }
 
         if (success) {
-        toast.success(editId ? "Article updated!" : "Article published!");
-        router.push("/manage-articles");
-      } else {
-        const errorMsg = useArticleStore.getState().error;
-        toast.error(errorMsg || "Failed to publish article.");
-      }
+            toast.success(editId ? "Article updated!" : "Article published!");
+            router.push("/manage-articles");
+        } else {
+            const errorMsg = useArticleStore.getState().error;
+            toast.error(errorMsg || "Failed to publish article.");
+        }
     };
 
     const handleDelete = async () => {
@@ -196,10 +380,9 @@ function ArticleEditor() {
 
     return (
         <div className="min-h-full bg-slate-50 font-display text-slate-900 pb-20">
-            {/* Content Area */}
             <main className="max-w-4xl mx-auto px-4 pt-10 flex flex-col gap-8">
 
-                {/* Breadcrumbs & Actions */}
+                {/* Header Actions */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-2 text-sm text-slate-500">
                         <Link href="/manage-articles" className="hover:text-blue-600 transition-colors flex items-center gap-1">
@@ -225,9 +408,7 @@ function ArticleEditor() {
                             disabled={loading}
                             className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all disabled:opacity-50"
                         >
-                            {loading ? (
-                                "Saving..."
-                            ) : (
+                            {loading ? "Saving..." : (
                                 <>
                                     <Send size={18} />
                                     <span>{editId ? "Update Article" : "Publish Article"}</span>
@@ -237,18 +418,17 @@ function ArticleEditor() {
                     </div>
                 </div>
 
-                {/* Editor Main Card */}
+                {/* Editor Card */}
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                    {/* Hero Image Upload */}
+                    {/* Hero Image */}
                     <div
-                        className={`group relative w-full h-64 md:h-96 border-b border-slate-100 transition-colors cursor-pointer ${imagePreview ? "" : "bg-slate-50 hover:bg-slate-100"
-                            }`}
+                        className={`group relative w-full h-64 md:h-96 border-b border-slate-100 transition-colors cursor-pointer ${imagePreview ? "" : "bg-slate-50 hover:bg-slate-100"}`}
                         onClick={() => fileInputRef.current?.click()}
                     >
                         {imagePreview ? (
                             <>
-                                <img src={imagePreview} alt="Hero" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                                <img src={imagePreview} alt="Hero" className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl text-white">
                                         <Upload size={24} />
                                     </div>
@@ -260,82 +440,69 @@ function ArticleEditor() {
                                     <ImagePlus size={32} className="text-blue-500" />
                                 </div>
                                 <span className="text-sm font-bold text-slate-900">Add Cover Image</span>
-                                <span className="text-xs text-slate-500 mt-1">1200 x 600px recommended</span>
                             </div>
                         )}
                         <input
                             type="file"
-                            id="image"
                             ref={fileInputRef}
                             className="hidden"
-                            accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+                            accept="image/*"
                             onChange={handleImageChange}
                         />
                     </div>
 
                     <div className="p-6 md:p-10 flex flex-col gap-6">
-
-                        {/* Title Input */}
-                        <textarea
-                            placeholder="Enter article title..."
-                            maxLength={200}
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            rows={1}
-                            className="w-full bg-transparent border-none text-4xl md:text-5xl font-black text-slate-900 placeholder:text-slate-200 focus:ring-0 px-0 resize-none leading-tight"
-                        />
-
-                        {/* Toolbar */}
-                        <div className="flex items-center gap-1 p-1.5 bg-slate-50 rounded-2xl border border-slate-100 overflow-x-auto scollbar-hide sticky top-4 z-10 shadow-sm">
-                            <button
-                                onClick={() => editor?.chain().focus().toggleBold().run()}
-                                className={`p-2 rounded-xl transition-all ${editor?.isActive('bold') ? 'bg-blue-100 text-blue-600' : 'hover:bg-white hover:shadow-sm text-slate-400 hover:text-slate-900'}`}
-                            >
-                                <Bold size={20} />
-                            </button>
-                            <button
-                                onClick={() => editor?.chain().focus().toggleItalic().run()}
-                                className={`p-2 rounded-xl transition-all ${editor?.isActive('italic') ? 'bg-blue-100 text-blue-600' : 'hover:bg-white hover:shadow-sm text-slate-400 hover:text-slate-900'}`}
-                            >
-                                <Italic size={20} />
-                            </button>
-                            <button
-                                onClick={() => editor?.chain().focus().toggleUnderline().run()}
-                                className={`p-2 rounded-xl transition-all ${editor?.isActive('underline') ? 'bg-blue-100 text-blue-600' : 'hover:bg-white hover:shadow-sm text-slate-400 hover:text-slate-900'}`}
-                            >
-                                <Underline size={20} />
-                            </button>
-                            <div className="w-px h-6 bg-slate-200 mx-1" />
-                            <button
-                                onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
-                                className={`p-2 rounded-xl transition-all ${editor?.isActive('heading', { level: 1 }) ? 'bg-blue-100 text-blue-600' : 'hover:bg-white hover:shadow-sm text-slate-400 hover:text-slate-900'}`}
-                            >
-                                <Heading1 size={20} />
-                            </button>
-                            <button
-                                onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                                className={`p-2 rounded-xl transition-all ${editor?.isActive('heading', { level: 2 }) ? 'bg-blue-100 text-blue-600' : 'hover:bg-white hover:shadow-sm text-slate-400 hover:text-slate-900'}`}
-                            >
-                                <Heading2 size={20} />
-                            </button>
-                            <div className="w-px h-6 bg-slate-200 mx-1" />
-                            <button
-                                onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-                                className={`p-2 rounded-xl transition-all ${editor?.isActive('blockquote') ? 'bg-blue-100 text-blue-600' : 'hover:bg-white hover:shadow-sm text-slate-400 hover:text-slate-900'}`}
-                            >
-                                <Quote size={20} />
-                            </button>
-                            <button
-                                onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                                className={`p-2 rounded-xl transition-all ${editor?.isActive('bulletList') ? 'bg-blue-100 text-blue-600' : 'hover:bg-white hover:shadow-sm text-slate-400 hover:text-slate-900'}`}
-                            >
-                                <List size={20} />
-                            </button>
+                        {/* Title */}
+                        <div className="flex flex-col gap-2">
+                             <textarea
+                                placeholder="Judul Artikel..."
+                                maxLength={200}
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                rows={1}
+                                className="w-full bg-transparent border-none text-4xl md:text-5xl font-black text-slate-900 placeholder:text-slate-200 focus:ring-0 px-0 resize-none leading-tight"
+                            />
+                            <div className="flex items-center justify-between text-[10px] uppercase tracking-widest font-bold text-slate-400">
+                                 <span>{title.length}/200 Characters</span>
+                            </div>
                         </div>
 
-                        {/* Content Area */}
-                        <div className="prose prose-slate max-w-none">
-                            <EditorContent editor={editor} />
+                        {/* Editor Content Area */}
+                        <div className="border border-slate-200 rounded-2xl overflow-hidden min-h-[600px] flex flex-col">
+                            {editor && (
+                                <BubbleMenu editor={editor}>
+                                    <div className="flex items-center gap-1 p-1 bg-white rounded-lg shadow-xl border border-slate-200">
+                                        <button
+                                            onClick={() => editor.chain().focus().toggleBold().run()}
+                                            className={`p-1.5 rounded transition-all ${editor.isActive('bold') ? 'bg-blue-100 text-blue-600' : 'hover:bg-slate-100 text-slate-500'}`}
+                                        >
+                                            <BoldIcon size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => editor.chain().focus().toggleItalic().run()}
+                                            className={`p-1.5 rounded transition-all ${editor.isActive('italic') ? 'bg-blue-100 text-blue-600' : 'hover:bg-slate-100 text-slate-500'}`}
+                                        >
+                                            <ItalicIcon size={16} />
+                                        </button>
+                                        <div className="w-px h-4 bg-slate-200 mx-0.5" />
+                                        <button
+                                            onClick={() => {
+                                                const url = window.prompt('URL', editor.getAttributes('link').href)
+                                                if (url) editor.chain().focus().setLink({ href: url }).run()
+                                            }}
+                                            className={`p-1.5 rounded transition-all ${editor.isActive('link') ? 'bg-blue-100 text-blue-600' : 'hover:bg-slate-100 text-slate-500'}`}
+                                        >
+                                            <LinkIcon size={16} />
+                                        </button>
+                                    </div>
+                                </BubbleMenu>
+                            )}
+                            
+                            <MenuBar editor={editor} />
+                            
+                            <div className="p-6 md:p-8 flex-1 prose prose-slate max-w-none focus:outline-none overflow-y-auto">
+                                <EditorContent editor={editor} className="outline-none min-h-[400px]" />
+                            </div>
                         </div>
                     </div>
                 </div>

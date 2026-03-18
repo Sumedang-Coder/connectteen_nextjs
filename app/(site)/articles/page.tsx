@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button"
 import { useArticleStore, Article } from "@/app/store/useArticleStore"
 import Loader from "@/components/Loader"
 
+const stripHtml = (html: string) => {
+  return html.replace(/<[^>]*>?/gm, '');
+};
+
 export default function ArticlesPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
@@ -125,7 +129,7 @@ export default function ArticlesPage() {
                     </h3>
 
                     <p className="text-slate-600 dark:text-slate-400 text-sm mb-6 line-clamp-2">
-                      {article.description}
+                      {stripHtml(article.description || "")}
                     </p>
 
                     <div className="mt-auto flex items-center justify-between text-xs text-slate-500">
