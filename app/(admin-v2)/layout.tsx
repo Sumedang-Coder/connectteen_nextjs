@@ -130,20 +130,9 @@ export default function AdminV2Layout({
       <aside className="hidden lg:flex flex-col w-64 h-screen fixed inset-y-0 left-0 bg-slate-50 border-r border-slate-200 z-20">
         <div className="flex flex-col h-full justify-between p-4">
           <div className="flex flex-col gap-6">
-            <div className="flex items-center gap-3 px-2">
-              <div
-                className="bg-blue-100 size-10 rounded-full flex items-center justify-center ring-2 ring-blue-500/20 overflow-hidden"
-              >
-                {user?.image ? (
-                  <img src={user.image} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-blue-600 font-bold">A</span>
-                )}
-              </div>
-              <div className="flex flex-col">
-                <h1 className="text-slate-900 text-base font-semibold leading-tight">Admin Panel</h1>
-                <p className="text-slate-500 text-xs font-normal capitalize">{user?.role?.replace('_', ' ') || 'Administrator'}</p>
-              </div>
+            <div className="flex flex-col gap-1 px-4 py-2 bg-white/50 rounded-xl border border-slate-200/50 shadow-sm">
+              <h1 className="text-slate-900 text-base font-bold leading-tight">Admin Panel</h1>
+              <p className="text-slate-500 text-[10px] uppercase tracking-wider font-bold">{user?.role?.replace('_', ' ') || 'Administrator'}</p>
             </div>
 
             <nav className="flex flex-col gap-1">
@@ -200,7 +189,7 @@ export default function AdminV2Layout({
             <Menu size={24} />
           </button>
           <h1 className="text-lg font-bold text-slate-900">Admin Panel</h1>
-          <div className="size-8 rounded-full bg-blue-100" />
+          <div className="w-8 h-8" />
         </header>
 
         <div className="flex-1 overflow-y-auto bg-white">
