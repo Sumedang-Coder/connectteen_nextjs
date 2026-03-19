@@ -32,7 +32,7 @@ interface AdminState {
 
     fetchStats: () => Promise<void>;
     fetchAdmins: (params?: { search?: string; page?: number; limit?: number }) => Promise<void>;
-    inviteAdmin: (email: string, role: string) => Promise<{ success: boolean; token?: string }>;
+    inviteAdmin: (email: string, role: string) => Promise<{ success: boolean; token?: string; emailSent?: boolean }>;
     updateAdmin: (id: string, data: Partial<AdminUser>) => Promise<boolean>;
     deleteAdmin: (id: string) => Promise<boolean>;
 }
@@ -89,7 +89,11 @@ export const useAdminStore = create<AdminState>((set, get) => ({
         try {
             set({ loading: true, error: null });
             const res = await api.post("/admin/invite", { email, role });
-            return { success: true, token: res.data.data.invitationToken };
+            return { 
+                success: true, 
+                token: res.data?.data?.invitationToken,
+                emailSent: res.data?.data?.emailSent
+            };
         } catch (err: any) {
             set({ error: err?.response?.data?.message || "Invite failed" });
             return { success: false };

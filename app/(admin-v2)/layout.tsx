@@ -73,10 +73,12 @@ export default function AdminV2Layout({
   useEffect(() => {
     if (!loading) {
       const ADMIN_ROLES = ["super_admin", "content_editor", "viewer"];
+      const PUBLIC_ADMIN_PATHS = ["/signin-admin", "/forgot-password", "/reset-password"];
 
-      if (pathname === "/signin-admin") {
-        // If on signin page but already logged in as admin, go to dashboard
-        if (user && ADMIN_ROLES.includes(user.role)) {
+      if (PUBLIC_ADMIN_PATHS.includes(pathname)) {
+        // If on auth-related page but already logged in as admin, go to dashboard
+        // EXCEPTION: Allow /reset-password even if logged in (for profile reset flow)
+        if (user && ADMIN_ROLES.includes(user.role) && pathname !== "/reset-password") {
           router.push("/dashboard");
         }
       } else {
@@ -112,7 +114,7 @@ export default function AdminV2Layout({
   }
 
   // Prevent rendering if not authorized and not on auth page
-  const isAuthPage = pathname === "/signin-admin";
+  const isAuthPage = ["/signin-admin", "/forgot-password", "/reset-password"].includes(pathname);
   const isAdmin = user && ["super_admin", "content_editor", "viewer"].includes(user.role);
 
   if (!isAuthPage && !isAdmin) {
@@ -121,7 +123,7 @@ export default function AdminV2Layout({
 
   // If this is the signin page, show it without layout
   if (isAuthPage) {
-    if (isAdmin) return null; // Already redirecting in useEffect
+    if (isAdmin && pathname !== "/reset-password") return null; // Already redirecting in useEffect
     return <div className={inter.className}>{children}</div>;
   }
 

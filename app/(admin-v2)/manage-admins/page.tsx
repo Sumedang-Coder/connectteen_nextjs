@@ -15,7 +15,8 @@ import {
     ChevronLeft,
     Mail,
     KeyRound,
-    ShieldAlert
+    ShieldAlert,
+    ShieldCheck
 } from "lucide-react";
 import { useAdminStore, AdminUser } from "@/app/store/useAdminStore";
 import { useAuthStore } from "@/app/store/useAuthStore";
@@ -37,6 +38,8 @@ export default function ManageAdminsPage() {
     const [inviteEmail, setInviteEmail] = useState("");
     const [inviteRole, setInviteRole] = useState("content_editor");
     const [invitedToken, setInvitedToken] = useState<string | null>(null);
+    const [isEmailSent, setIsEmailSent] = useState(false);
+    const [lastInvitedEmail, setLastInvitedEmail] = useState("");
     const router = useRouter();
     const { user, loading: authLoading } = useAuthStore();
 
@@ -74,14 +77,21 @@ export default function ManageAdminsPage() {
 
     const handleInvite = async (e: React.FormEvent) => {
         e.preventDefault();
+        const emailToInvite = inviteEmail;
         const result = await inviteAdmin(inviteEmail, inviteRole);
         if (result.success) {
-            toast.success("Invitation created successfully.");
-            if (result.token) setInvitedToken(result.token);
+            setLastInvitedEmail(emailToInvite);
+            if (result.emailSent) {
+                setIsEmailSent(true);
+                toast.success("Undangan berhasil dikirim!");
+            } else {
+                if (result.token) setInvitedToken(result.token);
+                toast.warning("Email gagal terkirim, gunakan link manual.");
+            }
             setInviteEmail("");
             fetchAdmins();
         } else {
-            toast.error("Failed to create invitation.");
+            toast.error(useAdminStore.getState().error || "Failed to create invitation.");
         }
     };
 
@@ -133,9 +143,10 @@ export default function ManageAdminsPage() {
                         <button
                             onClick={() => {
                                 setInvitedToken(null);
+                                setIsEmailSent(false);
                                 setShowInviteModal(true);
                             }}
-                            className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm"
+                            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm"
                         >
                             <Plus size={20} />
                             <span>Invite Admin</span>
@@ -242,7 +253,7 @@ export default function ManageAdminsPage() {
                             <p className="text-sm text-slate-500 mt-1">Send an invitation to join the management portal.</p>
                         </div>
 
-                        {!invitedToken ? (
+                        {!invitedToken && !isEmailSent ? (
                             <form onSubmit={handleInvite} className="p-6 flex flex-col gap-4">
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
@@ -278,18 +289,36 @@ export default function ManageAdminsPage() {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="flex-1 px-4 py-2 text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors shadow-lg shadow-slate-900/20 disabled:opacity-50"
+                                        className="flex-1 px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-lg shadow-blue-600/20 disabled:opacity-50"
                                     >
                                         {loading ? "Sending..." : "Create Invite"}
                                     </button>
                                 </div>
                             </form>
+                        ) : isEmailSent ? (
+                            <div className="p-10 flex flex-col items-center text-center gap-4">
+                                <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mb-2">
+                                    <ShieldCheck className="text-blue-600" size={32} />
+                                </div>
+                                <div className="space-y-1">
+                                    <h4 className="text-xl font-bold text-slate-900">Email Terkirim!</h4>
+                                    <p className="text-sm text-slate-500">
+                                        Undangan telah berhasil dikirim ke <span className="font-bold text-slate-900">{lastInvitedEmail}</span>.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setShowInviteModal(false)}
+                                    className="w-full mt-6 px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-lg shadow-blue-600/20"
+                                >
+                                    Close
+                                </button>
+                            </div>
                         ) : (
                             <div className="p-6 flex flex-col gap-4">
-                                <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl text-center">
-                                    <Shield className="mx-auto text-emerald-500 mb-2" size={32} />
-                                    <h4 className="text-sm font-bold text-emerald-900">Invite Generated!</h4>
-                                    <p className="text-xs text-emerald-700 mt-1">Copy the link below and share it with the user.</p>
+                                <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-center">
+                                    <ShieldAlert className="mx-auto text-blue-600 mb-2" size={32} />
+                                    <h4 className="text-sm font-bold text-blue-900">Email Gagal Terkirim</h4>
+                                    <p className="text-xs text-blue-700 mt-1">Gunakan link manual di bawah untuk mengundang user.</p>
                                 </div>
                                 <div className="flex flex-col gap-1.5 mt-2">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Invitation Link</label>
@@ -305,7 +334,7 @@ export default function ManageAdminsPage() {
                                                 navigator.clipboard.writeText(url);
                                                 toast.success("Invitation link copied!");
                                             }}
-                                            className="p-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors shrink-0"
+                                            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shrink-0"
                                             title="Copy Link"
                                         >
                                             <KeyRound size={16} />
@@ -315,7 +344,7 @@ export default function ManageAdminsPage() {
                                 </div>
                                 <button
                                     onClick={() => setShowInviteModal(false)}
-                                    className="w-full mt-4 px-4 py-2 text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors shadow-lg"
+                                    className="w-full mt-4 px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-lg shadow-blue-600/20"
                                 >
                                     Close
                                 </button>

@@ -8,6 +8,10 @@ interface AuthState {
 
   setUser: (user: any) => void;
   loginGuest: () => Promise<boolean>;
+  verifyEmail: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
+  resendVerification: (email: string) => Promise<{ success: boolean; message: string }>;
+  forgotPassword: (email: string) => Promise<{ success: boolean; message: string }>;
+  resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<void>;
 }
 
@@ -36,10 +40,71 @@ export const useAuthStore = create<AuthState>((set) => ({
         loading: false,
       });
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Guest login failed:", error);
       set({ loading: false });
       return false;
+    }
+  },
+
+  verifyEmail: async (email, otp) => {
+    try {
+      set({ loading: true });
+      const res = await api.post("/auth/verify-email", { email, otp });
+      set({ 
+        user: res.data.user, 
+        isAuthenticated: true, 
+        loading: false 
+      });
+      return { success: true, message: res.data.message };
+    } catch (error: any) {
+      set({ loading: false });
+      return { 
+        success: false, 
+        message: error.response?.data?.message || "Verification failed" 
+      };
+    }
+  },
+
+  resendVerification: async (email) => {
+    try {
+      const res = await api.post("/auth/resend-verification", { email });
+      return { success: true, message: res.data.message };
+    } catch (error: any) {
+      return { 
+        success: false, 
+        message: error.response?.data?.message || "Resend failed" 
+      };
+    }
+  },
+
+  forgotPassword: async (email) => {
+    try {
+      set({ loading: true });
+      const res = await api.post("/auth/forgot-password", { email });
+      set({ loading: false });
+      return { success: true, message: res.data.message };
+    } catch (error: any) {
+      set({ loading: false });
+      return { 
+        success: false, 
+        message: error.response?.data?.message || "Forgot password request failed" 
+      };
+    }
+  },
+
+  resetPassword: async (token, newPassword) => {
+    try {
+      set({ loading: true });
+      const res = await api.post("/auth/reset-password", { token, newPassword });
+      set({ loading: false });
+      return { success: true, message: res.data.message };
+    } catch (error: any) {
+      set({ loading: false });
+      return { 
+        success: false, 
+        message: error.response?.data?.message || "Password reset failed" 
+      };
     }
   },
 
