@@ -16,7 +16,8 @@ import {
   Plus,
   Bell,
   HelpCircle,
-  Shield
+  Shield,
+  User
 } from "lucide-react";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { useRouter } from "next/navigation";
@@ -72,10 +73,12 @@ export default function AdminV2Layout({
   useEffect(() => {
     if (!loading) {
       const ADMIN_ROLES = ["super_admin", "content_editor", "viewer"];
+      const PUBLIC_ADMIN_PATHS = ["/signin-admin", "/forgot-password", "/reset-password"];
 
-      if (pathname === "/signin-admin") {
-        // If on signin page but already logged in as admin, go to dashboard
-        if (user && ADMIN_ROLES.includes(user.role)) {
+      if (PUBLIC_ADMIN_PATHS.includes(pathname)) {
+        // If on auth-related page but already logged in as admin, go to dashboard
+        // EXCEPTION: Allow /reset-password even if logged in (for profile reset flow)
+        if (user && ADMIN_ROLES.includes(user.role) && pathname !== "/reset-password") {
           router.push("/dashboard");
         }
       } else {
@@ -111,7 +114,7 @@ export default function AdminV2Layout({
   }
 
   // Prevent rendering if not authorized and not on auth page
-  const isAuthPage = pathname === "/signin-admin";
+  const isAuthPage = ["/signin-admin", "/forgot-password", "/reset-password"].includes(pathname);
   const isAdmin = user && ["super_admin", "content_editor", "viewer"].includes(user.role);
 
   if (!isAuthPage && !isAdmin) {
@@ -120,7 +123,7 @@ export default function AdminV2Layout({
 
   // If this is the signin page, show it without layout
   if (isAuthPage) {
-    if (isAdmin) return null; // Already redirecting in useEffect
+    if (isAdmin && pathname !== "/reset-password") return null; // Already redirecting in useEffect
     return <div className={inter.className}>{children}</div>;
   }
 
@@ -130,19 +133,17 @@ export default function AdminV2Layout({
       <aside className="hidden lg:flex flex-col w-64 h-screen fixed inset-y-0 left-0 bg-slate-50 border-r border-slate-200 z-20">
         <div className="flex flex-col h-full justify-between p-4">
           <div className="flex flex-col gap-6">
-            <div className="flex items-center gap-3 px-2">
-              <div
-                className="bg-blue-100 size-10 rounded-full flex items-center justify-center ring-2 ring-blue-500/20 overflow-hidden"
-              >
-                {user?.image ? (
-                  <img src={user.image} alt="Profile" className="w-full h-full object-cover" />
+            <div className="flex items-center gap-3 px-4 py-3 bg-white/50 rounded-xl border border-slate-200/50 shadow-sm">
+              <div className="w-10 h-10 rounded-lg bg-blue-600 flex-shrink-0 flex items-center justify-center text-white font-bold overflow-hidden shadow-sm">
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-blue-600 font-bold">A</span>
+                  user?.name?.[0]?.toUpperCase() || "A"
                 )}
               </div>
-              <div className="flex flex-col">
-                <h1 className="text-slate-900 text-base font-semibold leading-tight">Admin Panel</h1>
-                <p className="text-slate-500 text-xs font-normal capitalize">{user?.role?.replace('_', ' ') || 'Administrator'}</p>
+              <div className="flex flex-col min-w-0">
+                <h1 className="text-slate-900 text-sm font-bold leading-tight truncate">{user?.name}</h1>
+                <p className="text-slate-500 text-[10px] uppercase tracking-wider font-bold truncate">{user?.role?.replace('_', ' ') || 'Administrator'}</p>
               </div>
             </div>
 
@@ -171,7 +172,7 @@ export default function AdminV2Layout({
                 label="Secret Messages"
                 active={pathname === "/secret-messages"}
               />
-              {user?.role === "super_admin" && (
+              {user && ["super_admin", "content_editor", "viewer"].includes(user.role) && (
                 <SidebarItem
                   href="/manage-admins"
                   icon={<Shield size={20} />}
@@ -179,6 +180,12 @@ export default function AdminV2Layout({
                   active={pathname === "/manage-admins"}
                 />
               )}
+              <SidebarItem
+                href="/manage-profile"
+                icon={<User size={20} />}
+                label="Manage Profile"
+                active={pathname === "/manage-profile"}
+              />
             </nav>
           </div>
 
@@ -200,7 +207,7 @@ export default function AdminV2Layout({
             <Menu size={24} />
           </button>
           <h1 className="text-lg font-bold text-slate-900">Admin Panel</h1>
-          <div className="size-8 rounded-full bg-blue-100" />
+          <div className="w-8 h-8" />
         </header>
 
         <div className="flex-1 overflow-y-auto bg-white">
@@ -218,7 +225,19 @@ export default function AdminV2Layout({
           <aside className="absolute inset-y-0 left-0 w-64 bg-slate-50 p-4 flex flex-col justify-between">
             <div className="flex flex-col gap-6">
               <div className="flex items-center justify-between">
-                <h1 className="text-slate-900 text-lg font-bold">Admin Panel</h1>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold overflow-hidden shadow-sm">
+                    {user?.avatarUrl ? (
+                      <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      user?.name?.[0]?.toUpperCase() || "A"
+                    )}
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <h1 className="text-slate-900 text-sm font-bold leading-tight truncate">{user?.name}</h1>
+                    <p className="text-slate-500 text-[10px] uppercase tracking-wider font-bold truncate">{user?.role?.replace('_', ' ') || 'Administrator'}</p>
+                  </div>
+                </div>
                 <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-slate-600">
                   <X size={24} />
                 </button>
@@ -248,7 +267,7 @@ export default function AdminV2Layout({
                   label="Secret Messages"
                   active={pathname === "/secret-messages"}
                 />
-                {user?.role === "super_admin" && (
+                {user && ["super_admin", "content_editor", "viewer"].includes(user.role) && (
                   <SidebarItem
                     href="/manage-admins"
                     icon={<Shield size={20} />}
@@ -256,6 +275,12 @@ export default function AdminV2Layout({
                     active={pathname === "/manage-admins"}
                   />
                 )}
+                <SidebarItem
+                  href="/manage-profile"
+                  icon={<User size={20} />}
+                  label="Manage Profile"
+                  active={pathname === "/manage-profile"}
+                />
               </nav>
             </div>
             <button

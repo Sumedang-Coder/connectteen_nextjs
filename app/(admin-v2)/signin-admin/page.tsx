@@ -143,6 +143,15 @@ export default function AdminSigninPage() {
                                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                     </button>
                                 </div>
+                                <div className="flex justify-end">
+                                    <button 
+                                        type="button"
+                                        onClick={() => router.push("/forgot-password")}
+                                        className="text-[10px] text-blue-600 hover:underline font-bold uppercase tracking-wider"
+                                    >
+                                        Forgot your password?
+                                    </button>
+                                </div>
                             </div>
 
                             <button

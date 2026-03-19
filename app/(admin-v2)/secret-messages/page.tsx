@@ -51,7 +51,20 @@ export default function SecretMessagesPage() {
     };
 
     return (
-        <div className="flex flex-col h-full overflow-hidden bg-[#f6f7f8] font-display selection:bg-blue-500/20 selection:text-blue-500 relative">
+        <div className="flex flex-col h-full bg-slate-50 overflow-hidden font-display selection:bg-blue-600/10 selection:text-blue-600">
+            {/* Standard Header / Breadcrumb */}
+            <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center text-sm text-slate-500">
+                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
+                            Admin
+                        </Link>
+                        <ChevronRight size={14} className="mx-1" />
+                        <span className="text-slate-900 font-medium">Private Inbox</span>
+                    </div>
+                </div>
+            </header>
+
             {/* Minimalist Loading Overlay */}
             {loading && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-[2px] transition-all duration-300">
@@ -62,7 +75,7 @@ export default function SecretMessagesPage() {
                 </div>
             )}
 
-            <main className="flex-1 overflow-y-auto px-4 py-8 lg:px-12 lg:py-10">
+            <main className="flex-1 overflow-y-auto px-4 py-8 lg:px-12">
                 <div className="mx-auto max-w-5xl">
                     {/* Header Section */}
                     <header className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">

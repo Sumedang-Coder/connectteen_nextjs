@@ -7,9 +7,11 @@ import {
     Users,
     FileText,
     BarChart3,
-    Loader2
+    Loader2,
+    ChevronRight
 } from "lucide-react";
 import { useAdminStore } from "@/app/store/useAdminStore";
+import Link from "next/link";
 
 export default function DashboardPage() {
     const { stats, fetchStats, loading, error } = useAdminStore();
@@ -76,7 +78,23 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="p-6 lg:p-10 max-w-7xl mx-auto w-full flex flex-col gap-10">
+        <div className="flex flex-col h-full bg-slate-50 overflow-hidden">
+            {/* Header / Breadcrumb */}
+            <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center text-sm text-slate-500">
+                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
+                            Admin
+                        </Link>
+                        <ChevronRight size={14} className="mx-1" />
+                        <span className="text-slate-900 font-medium">Dashboard</span>
+                    </div>
+                </div>
+            </header>
+
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-6 lg:p-10">
+                <div className="max-w-7xl mx-auto flex flex-col gap-10">
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
                 <div>
@@ -116,6 +134,8 @@ export default function DashboardPage() {
                         </div>
                     </div>
                 ))}
+            </div>
+                </div>
             </div>
         </div>
     );

@@ -84,7 +84,9 @@ export default function ManageEventsPage() {
             <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center text-sm text-slate-500">
-                        <span>Admin</span>
+                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
+                            Admin
+                        </Link>
                         <ChevronRight size={14} className="mx-1" />
                         <span className="text-slate-900 font-medium">Events Management</span>
                     </div>
@@ -143,120 +145,41 @@ export default function ManageEventsPage() {
                         </div>
                     </div>
 
-                    {/* Mobile Card View (Visible on Mobile) */}
-                    <div className="grid grid-cols-1 gap-4 md:hidden">
-                        {events.length === 0 ? (
-                            <div className="bg-white p-10 rounded-xl border border-slate-200 text-center text-slate-400">
-                                No events found.
-                            </div>
-                        ) : events.map((event) => (
-                            <div key={event.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-4">
-                                <div className="flex gap-4">
-                                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200">
-                                        {event.image_url ? (
-                                            <img src={event.image_url} alt="" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full text-indigo-500 flex items-center justify-center">
-                                                <CalendarIcon size={24} />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex flex-col flex-1 min-w-0">
-                                        <span className="text-sm font-bold text-slate-900 line-clamp-1">{event.event_title}</span>
-                                        <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium mt-1">
-                                            <MapPin size={10} className="text-indigo-500" />
-                                            <span className="truncate">{event.location}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5">
-                                            <CalendarIcon size={10} />
-                                            <span>{event.date ? format(new Date(event.date), "MMM d, yyyy") : "TBA"}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 mt-2">
-                                            {event.status === "open" ? (
-                                                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black border border-emerald-200 bg-emerald-50 text-emerald-700 uppercase tracking-tighter">Open</span>
-                                            ) : event.status === "full" ? (
-                                                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black border border-amber-200 bg-amber-50 text-amber-700 uppercase tracking-tighter">Full</span>
-                                            ) : (
-                                                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black border border-rose-200 bg-rose-50 text-rose-700 uppercase tracking-tighter">Closed</span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-slate-900 tracking-tighter uppercase whitespace-nowrap">
-                                            {event.registrants_count || 0} / {event.quota > 0 ? event.quota : "∞"}
-                                        </span>
-                                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter flex items-center gap-1 mt-0.5">
-                                            {event.visibility === "public" ? <GlobeIcon size={8} /> : <LockIcon size={8} />}
-                                            {event.visibility}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Link
-                                            href={`/event-registrants/${event.id}`}
-                                            className="p-2 text-slate-500 bg-slate-50 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                                            title="View Registrants"
-                                        >
-                                            <Users size={18} />
-                                        </Link>
-                                        {!isViewer && (
-                                            <>
-                                                <Link
-                                                    href={`/create-event?edit=${event.id}`}
-                                                    className="p-2 text-slate-500 bg-slate-50 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                                    title="Edit Event"
-                                                >
-                                                    <Edit size={18} />
-                                                </Link>
-                                                <button
-                                                    onClick={() => handleDelete(event.id, event.event_title)}
-                                                    className="p-2 text-slate-500 bg-slate-50 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                                                    title="Delete Event"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Desktop Table Section (Hidden on Mobile) */}
-                    <div className="hidden md:flex bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-col min-h-0">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
+                    {/* Table Section */}
+                    <div className="flex bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-col min-h-[550px]">
+                        <div className="flex-1 overflow-x-auto">
+                            <table className="w-full text-left border-collapse min-w-[1000px]">
                                 <thead>
-                                    <tr className="border-b border-slate-200 bg-slate-50/50">
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Event Details</th>
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Venue & Date</th>
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">Registrants</th>
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Status</th>
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Visibility</th>
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Actions</th>
+                                    <tr className="border-b border-slate-200 bg-slate-50/50 uppercase tracking-widest text-[11px] font-bold text-slate-500">
+                                        <th className="px-6 py-5">Event Details</th>
+                                        <th className="px-6 py-5">Venue & Date</th>
+                                        <th className="px-6 py-5 text-center">Registrants</th>
+                                        <th className="px-6 py-5">Status</th>
+                                        <th className="px-6 py-5">Visibility</th>
+                                        <th className="px-6 py-5 text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-200">
+                                <tbody className="divide-y divide-slate-100">
                                     {events.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} className="px-6 py-10 text-center text-slate-400">No events found.</td>
+                                            <td colSpan={6} className="px-6 py-20 text-center text-slate-400 font-medium">No events found.</td>
                                         </tr>
                                     ) : events.map((event) => (
-                                        <tr key={event.id} className="group hover:bg-slate-50 transition-colors">
-                                            <td className="px-6 py-4">
+                                        <tr key={event.id} className="group hover:bg-indigo-50/30 transition-colors">
+                                            <td className="px-6 py-5">
                                                 <div className="flex items-center gap-4">
                                                     {event.image_url ? (
-                                                        <img src={event.image_url} alt="" className="w-12 h-12 rounded-lg object-cover bg-slate-100 border border-slate-200" />
+                                                        <div className="w-14 h-14 rounded-lg overflow-hidden border border-slate-200 shadow-sm flex-shrink-0">
+                                                            <img src={event.image_url} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                                        </div>
                                                     ) : (
-                                                        <div className="w-12 h-12 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center">
-                                                            <CalendarIcon size={20} />
+                                                        <div className="w-14 h-14 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center flex-shrink-0">
+                                                            <CalendarIcon size={24} />
                                                         </div>
                                                     )}
-                                                    <div className="flex flex-col">
-                                                        <span className="text-sm font-bold text-slate-900">{event.event_title}</span>
-                                                        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">ID: {event.id.slice(-6)}</span>
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{event.event_title}</span>
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ID: {event.id.slice(-6)}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -348,9 +271,9 @@ export default function ManageEventsPage() {
                             </table>
                         </div>
 
-                        {/* Pagination Section (Integrated with Table for Desktop) */}
+                        {/* Pagination Section */}
                         {pagination.totalPages > 1 && (
-                            <div className="mt-auto flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50/50">
+                            <div className="mt-auto flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50/50 gap-4">
                                 <span className="text-sm text-slate-500">
                                     Showing <span className="font-medium text-slate-900">{((pagination.currentPage - 1) * pagination.limit) + 1}</span> to <span className="font-medium text-slate-900">{Math.min(pagination.currentPage * pagination.limit, pagination.totalEvents)}</span> of <span className="font-medium text-slate-900">{pagination.totalEvents}</span> results
                                 </span>
@@ -363,21 +286,6 @@ export default function ManageEventsPage() {
                             </div>
                         )}
                     </div>
-
-                    {/* Mobile Pagination View (Visible on Mobile) */}
-                    {pagination.totalPages > 1 && (
-                        <div className="flex flex-col items-center gap-4 pt-2 pb-8 md:hidden">
-                            <span className="text-xs text-slate-500 font-medium">
-                                Page <span className="text-slate-900">{pagination.currentPage}</span> of <span className="text-slate-900">{pagination.totalPages}</span>
-                            </span>
-                            <PaginationComponent
-                                currentPage={pagination.currentPage}
-                                totalPages={pagination.totalPages}
-                                onPageChange={handlePageChange}
-                                activeColor="indigo"
-                            />
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

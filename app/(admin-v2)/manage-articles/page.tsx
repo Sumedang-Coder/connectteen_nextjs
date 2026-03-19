@@ -81,7 +81,9 @@ export default function ManageArticlesPage() {
             <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center text-sm text-slate-500">
-                        <span>Admin</span>
+                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
+                            Admin
+                        </Link>
                         <ChevronRight size={14} className="mx-1" />
                         <span className="text-slate-900 font-medium">Articles Management</span>
                     </div>
@@ -140,88 +142,42 @@ export default function ManageArticlesPage() {
                         </div>
                     </div>
 
-                    {/* Mobile Card View (Visible on Mobile) */}
-                    <div className="grid grid-cols-1 gap-4 md:hidden">
-                        {articles.length === 0 ? (
-                            <div className="bg-white p-10 rounded-xl border border-slate-200 text-center text-slate-400">
-                                No articles found.
-                            </div>
-                        ) : articles.map((article) => (
-                            <div key={article.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-4">
-                                <div className="flex gap-4">
-                                    <div className="w-24 h-16 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200">
-                                        <img src={article.image_url} alt="" className="w-full h-full object-cover" />
-                                    </div>
-                                    <div className="flex flex-col flex-1 min-w-0">
-                                        <span className="text-sm font-bold text-slate-900 line-clamp-2">{article.title}</span>
-                                        <span className="text-[10px] text-slate-400 font-medium uppercase mt-1">
-                                            {article.created_at ? format(new Date(article.created_at), "MMM d, yyyy") : "N/A"}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className={`flex items-center ${isViewer ? 'justify-end' : 'justify-between'} pt-3 border-t border-slate-100`}>
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID: {article.id.slice(-6)}</span>
-                                    <div className="flex items-center gap-2">
-                                        {!isViewer && (
-                                            <>
-                                                <button
-                                                    onClick={() => router.push(`/write-article?edit=${article.id}`)}
-                                                    className="p-2 text-slate-500 bg-slate-50 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                                    title="Edit Article"
-                                                >
-                                                    <Edit size={18} />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(article.id, article.title)}
-                                                    className="p-2 text-slate-500 bg-slate-50 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                                                    title="Delete Article"
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Desktop Table Section (Hidden on Mobile) */}
-                    <div className="hidden md:flex bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-col min-h-0">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
+                    {/* Table Section */}
+                    <div className="flex bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex-col min-h-[500px]">
+                        <div className="flex-1 overflow-x-auto">
+                            <table className="w-full text-left border-collapse min-w-[700px]">
                                 <thead>
-                                    <tr className="border-b border-slate-200 bg-slate-50/50">
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Article Title</th>
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Date Published</th>
-                                        {!isViewer && <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Actions</th>}
+                                    <tr className="border-b border-slate-200 bg-slate-50/50 uppercase tracking-widest">
+                                        <th className="px-6 py-5 text-[11px] font-bold text-slate-500">Article Title</th>
+                                        <th className="px-6 py-5 text-[11px] font-bold text-slate-500">Date Published</th>
+                                        {!isViewer && <th className="px-6 py-5 text-[11px] font-bold text-slate-500 text-right">Actions</th>}
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-200">
+                                <tbody className="divide-y divide-slate-100">
                                     {articles.length === 0 ? (
                                         <tr key="no-articles">
-                                            <td colSpan={isViewer ? 2 : 3} className="px-6 py-10 text-center text-slate-400">No articles found.</td>
+                                            <td colSpan={isViewer ? 2 : 3} className="px-6 py-20 text-center text-slate-400 font-medium">No articles found.</td>
                                         </tr>
                                     ) : articles.map((article) => (
-                                        <tr key={article.id} className="group hover:bg-slate-50 transition-colors">
-                                            <td className="px-6 py-4">
+                                        <tr key={article.id} className="group hover:bg-slate-50/50 transition-colors">
+                                            <td className="px-6 py-5">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-16 h-10 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200">
+                                                    <div className="w-20 h-12 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200 shadow-sm">
                                                         <img
                                                             src={article.image_url}
                                                             alt={article.title}
-                                                            className="w-full h-full object-cover"
+                                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                                         />
                                                     </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-sm font-bold text-slate-900 line-clamp-1">{article.title}</span>
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">{article.title}</span>
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider text-nowrap">ID: {article.id.slice(-6)}</span>
+                                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ID: {article.id.slice(-6)}</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-slate-500 font-medium">
+                                            <td className="px-6 py-5 text-sm text-slate-600 font-semibold">
                                                 {article.created_at ? format(new Date(article.created_at), "MMM d, yyyy") : "N/A"}
                                             </td>
                                             {!isViewer && (
@@ -250,9 +206,9 @@ export default function ManageArticlesPage() {
                             </table>
                         </div>
 
-                        {/* Pagination Section (Integrated with Table for Desktop) */}
+                        {/* Pagination Section */}
                         {pagination.totalPages > 1 && (
-                            <div className="mt-auto flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50/50">
+                            <div className="mt-auto flex flex-col sm:flex-row items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50/50 gap-4">
                                 <span className="text-sm text-slate-500">
                                     Showing <span className="font-medium text-slate-900">{((pagination.currentPage - 1) * pagination.limit) + 1}</span> to <span className="font-medium text-slate-900">{Math.min(pagination.currentPage * pagination.limit, pagination.totalArticles)}</span> of <span className="font-medium text-slate-900">{pagination.totalArticles}</span> results
                                 </span>
@@ -265,21 +221,6 @@ export default function ManageArticlesPage() {
                             </div>
                         )}
                     </div>
-
-                    {/* Mobile Pagination View (Visible on Mobile) */}
-                    {pagination.totalPages > 1 && (
-                        <div className="flex flex-col items-center gap-4 pt-2 pb-8 md:hidden">
-                            <span className="text-xs text-slate-500 font-medium">
-                                Page <span className="text-slate-900">{pagination.currentPage}</span> of <span className="text-slate-900">{pagination.totalPages}</span>
-                            </span>
-                            <PaginationComponent
-                                currentPage={pagination.currentPage}
-                                totalPages={pagination.totalPages}
-                                onPageChange={handlePageChange}
-                                activeColor="blue"
-                            />
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

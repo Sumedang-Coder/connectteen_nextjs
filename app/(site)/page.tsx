@@ -11,7 +11,6 @@ export default function HomePage() {
   }, []);
 
   const { user, isAuthenticated } = useAuthStore();
-  console.log(user, isAuthenticated);
 
   return (
     <>

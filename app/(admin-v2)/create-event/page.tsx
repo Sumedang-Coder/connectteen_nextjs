@@ -1,8 +1,28 @@
 "use client";
 
-import { useEffect, useState, useRef, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
+    Plus,
+    Bold as BoldIcon,
+    Italic as ItalicIcon,
+    Underline as UnderlineIcon,
+    Strikethrough,
+    Code,
+    Heading1,
+    Heading2,
+    List,
+    ListOrdered,
+    Quote,
+    Undo,
+    Redo,
+    Link as LinkIcon,
+    Unlink,
+    AlignLeft,
+    AlignCenter,
+    AlignRight,
+    AlignJustify,
     ChevronLeft,
     Image as ImageIcon,
     Upload,
@@ -14,17 +34,179 @@ import {
     HelpCircle,
     Layout,
     Type,
-    AlignLeft,
     ChevronRight,
     User,
     Globe,
-    Lock,
-    Plus
+    Lock
 } from "lucide-react";
 import { useEventStore } from "@/app/store/useEventStore";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { toast } from "sonner";
 import { format } from "date-fns";
+
+// Tiptap imports
+import { useEditor, EditorContent } from '@tiptap/react';
+import { BubbleMenu } from '@tiptap/react/menus';
+import { StarterKit } from '@tiptap/starter-kit';
+import { Underline } from '@tiptap/extension-underline';
+import { Link as TiptapLink } from '@tiptap/extension-link';
+import { Placeholder } from '@tiptap/extension-placeholder';
+import { BubbleMenu as BubbleMenuExtension } from '@tiptap/extension-bubble-menu';
+import { TextAlign } from '@tiptap/extension-text-align';
+
+const MenuBar = ({ editor }: { editor: any }) => {
+    if (!editor) {
+        return null;
+    }
+
+    const setLink = useCallback(() => {
+        const previousUrl = editor.getAttributes('link').href;
+        const url = window.prompt('URL', previousUrl);
+
+        if (url === null) {
+            return;
+        }
+
+        if (url === '') {
+            editor.chain().focus().extendMarkRange('link').unsetLink().run();
+            return;
+        }
+
+        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    }, [editor]);
+
+    return (
+        <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+            <button
+                onClick={() => editor.chain().focus().toggleBold().run()}
+                disabled={!editor.can().chain().focus().toggleBold().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('bold') ? 'bg-slate-200 text-indigo-600' : 'text-slate-600'}`}
+                title="Bold"
+            >
+                <BoldIcon size={16} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleItalic().run()}
+                disabled={!editor.can().chain().focus().toggleItalic().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('italic') ? 'bg-slate-200 text-indigo-600' : 'text-slate-600'}`}
+                title="Italic"
+            >
+                <ItalicIcon size={16} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleUnderline().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('underline') ? 'bg-slate-200 text-indigo-600' : 'text-slate-600'}`}
+                title="Underline"
+            >
+                <UnderlineIcon size={16} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleStrike().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('strike') ? 'bg-slate-200 text-indigo-600' : 'text-slate-600'}`}
+                title="Strike"
+            >
+                <Strikethrough size={16} />
+            </button>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            <button
+                onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-slate-200 text-indigo-600' : 'text-slate-600'}`}
+                title="H1"
+            >
+                <Heading1 size={16} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-slate-200 text-indigo-600' : 'text-slate-600'}`}
+                title="H2"
+            >
+                <Heading2 size={16} />
+            </button>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            <button
+                onClick={() => editor.chain().focus().toggleBulletList().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('bulletList') ? 'bg-slate-200 text-indigo-600' : 'text-slate-600'}`}
+                title="Bullet List"
+            >
+                <List size={16} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('orderedList') ? 'bg-slate-200 text-indigo-600' : 'text-slate-600'}`}
+                title="Ordered List"
+            >
+                <ListOrdered size={16} />
+            </button>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            <button
+                onClick={setLink}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive('link') ? 'bg-slate-200 text-indigo-600' : 'text-slate-600'}`}
+                title="Link"
+            >
+                <LinkIcon size={16} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().extendMarkRange('link').unsetLink().run()}
+                className="p-2 rounded hover:bg-slate-200 text-slate-600 active:bg-slate-300"
+                title="Unlink"
+            >
+                <Unlink size={16} />
+            </button>
+
+            <button
+                onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive({ textAlign: 'left' }) ? 'bg-slate-200 text-indigo-600' : 'text-slate-600'}`}
+                title="Align Left"
+            >
+                <AlignLeft size={16} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive({ textAlign: 'center' }) ? 'bg-slate-200 text-indigo-600' : 'text-slate-600'}`}
+                title="Align Center"
+            >
+                <AlignCenter size={16} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive({ textAlign: 'right' }) ? 'bg-slate-200 text-indigo-600' : 'text-slate-600'}`}
+                title="Align Right"
+            >
+                <AlignRight size={16} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+                className={`p-2 rounded hover:bg-slate-200 transition-colors ${editor.isActive({ textAlign: 'justify' }) ? 'bg-slate-200 text-indigo-600' : 'text-slate-600'}`}
+                title="Align Justify"
+            >
+                <AlignJustify size={16} />
+            </button>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            <button
+                onClick={() => editor.chain().focus().undo().run()}
+                className="p-2 rounded hover:bg-slate-200 text-slate-600 active:bg-slate-300"
+                title="Undo"
+            >
+                <Undo size={16} />
+            </button>
+            <button
+                onClick={() => editor.chain().focus().redo().run()}
+                className="p-2 rounded hover:bg-slate-200 text-slate-600 active:bg-slate-300"
+                title="Redo"
+            >
+                <Redo size={16} />
+            </button>
+        </div>
+    );
+};
 
 function EventEditorContent() {
     const router = useRouter();
@@ -34,16 +216,7 @@ function EventEditorContent() {
     const { user } = useAuthStore();
     const { events, event, fetchEventById, createEvent, updateEvent, loading, error } = useEventStore();
 
-    // Role guard for Viewers
-    useEffect(() => {
-        if (user && user.role === "viewer") {
-            toast.error("Account Viewer tidak memiliki izin untuk mengelola event.");
-            router.replace("/manage-events");
-        }
-    }, [user, router]);
-
     const [eventTitle, setEventTitle] = useState("");
-    const [description, setDescription] = useState("");
     const [location, setLocation] = useState("");
     const [date, setDate] = useState("");
     const [quota, setQuota] = useState<number>(0);
@@ -52,6 +225,28 @@ function EventEditorContent() {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            Underline,
+            BubbleMenuExtension,
+            TextAlign.configure({
+                types: ['heading', 'paragraph'],
+            }),
+            TiptapLink.configure({
+                openOnClick: false,
+                HTMLAttributes: {
+                    class: 'text-indigo-600 underline cursor-pointer',
+                },
+            }),
+            Placeholder.configure({
+                placeholder: 'Provide a detailed description of the event...',
+            }),
+        ],
+        content: '',
+        immediatelyRender: false,
+    });
 
     useEffect(() => {
         if (editId) {
@@ -62,25 +257,34 @@ function EventEditorContent() {
     useEffect(() => {
         if (editId && event) {
             setEventTitle(event.event_title);
-            setDescription(event.description);
             setLocation(event.location);
             setQuota(event.quota || 0);
             setStatus(event.status === "closed" ? "closed" : "open");
             setVisibility(event.visibility || "public");
-            // Format date for input[type="datetime-local"]
             if (event.date) {
                 const d = new Date(event.date);
                 const formattedDate = d.toISOString().slice(0, 16);
                 setDate(formattedDate);
             }
+            if (editor && event.description) {
+                editor.commands.setContent(event.description);
+            }
             setImagePreview(event.image_url || null);
         }
-    }, [event, editId]);
+    }, [event, editId, editor]);
 
-    // Unsaved changes warning (Close/Reload + Back Button)
+    // Role guard
+    useEffect(() => {
+        if (user && user.role === "viewer") {
+            toast.error("Account Viewer tidak memiliki izin untuk mengelola event.");
+            router.replace("/manage-events");
+        }
+    }, [user, router]);
+
+    // Unsaved changes warning
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            const hasContent = eventTitle.trim() || description.trim() || location.trim();
+            const hasContent = eventTitle.trim() || (editor && !editor.isEmpty) || location.trim();
             if (hasContent) {
                 e.preventDefault();
                 e.returnValue = "";
@@ -88,7 +292,7 @@ function EventEditorContent() {
         };
 
         const handlePopState = () => {
-             const hasContent = eventTitle.trim() || description.trim() || location.trim();
+             const hasContent = eventTitle.trim() || (editor && !editor.isEmpty) || location.trim();
              if (hasContent) {
                  if (confirm("Perubahan yang Anda buat mungkin tidak disimpan. Apakah Anda yakin ingin keluar?")) {
                     router.push("/manage-events");
@@ -106,7 +310,7 @@ function EventEditorContent() {
             window.removeEventListener("beforeunload", handleBeforeUnload);
             window.removeEventListener("popstate", handlePopState);
         };
-    }, [eventTitle, description, location, router]);
+    }, [eventTitle, editor, location, router]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -132,7 +336,8 @@ function EventEditorContent() {
     };
 
     const handleSave = async () => {
-        if (!eventTitle || !description || !location || !date) {
+        const descHtml = editor?.getHTML() || "";
+        if (!eventTitle || !descHtml || descHtml === "<p></p>" || !location || !date) {
             toast.error("Harap isi semua field wajib");
             return;
         }
@@ -154,7 +359,7 @@ function EventEditorContent() {
 
         const formData = new FormData();
         formData.append("event_title", eventTitle);
-        formData.append("description", description);
+        formData.append("description", descHtml);
         formData.append("location", location);
         formData.append("date", date);
         formData.append("quota", quota.toString());
@@ -187,16 +392,19 @@ function EventEditorContent() {
             {/* Top Bar */}
             <header className="h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200 shrink-0">
                 <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => router.back()}
-                        className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
-                    >
-                        <ChevronLeft size={20} />
-                    </button>
-                    <div className="h-6 w-px bg-slate-200 mx-2" />
-                    <span className="text-sm font-medium text-slate-500">
-                        {editId ? "Edit Event" : "Create New Event"}
-                    </span>
+                    <div className="flex items-center text-sm text-slate-500">
+                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
+                            Admin
+                        </Link>
+                        <ChevronRight size={14} className="mx-1" />
+                        <Link href="/manage-events" className="hover:text-blue-600 transition-colors">
+                            Events Management
+                        </Link>
+                        <ChevronRight size={14} className="mx-1" />
+                        <span className="text-slate-900 font-medium">
+                             {editId ? "Edit Event" : "Create New Event"}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -241,15 +449,45 @@ function EventEditorContent() {
                                     />
                                 </div>
 
-                                <div className="flex flex-col gap-2">
+                                 <div className="flex flex-col gap-2">
                                     <label className="text-sm font-bold text-slate-900 uppercase tracking-wider">Description</label>
-                                    <textarea
-                                        placeholder="Provide a detailed description of the event..."
-                                        rows={8}
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-slate-900 placeholder:text-slate-300 focus:ring-2 focus:ring-indigo-600 leading-relaxed font-medium"
-                                    />
+                                    
+                                    <div className="border border-slate-200 rounded-2xl overflow-hidden min-h-[400px] flex flex-col">
+                                        {editor && (
+                                            <BubbleMenu editor={editor}>
+                                                <div className="flex items-center gap-1 p-1 bg-white rounded-lg shadow-xl border border-slate-200">
+                                                    <button
+                                                        onClick={() => editor.chain().focus().toggleBold().run()}
+                                                        className={`p-1.5 rounded transition-all ${editor.isActive('bold') ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-slate-100 text-slate-500'}`}
+                                                    >
+                                                        <BoldIcon size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => editor.chain().focus().toggleItalic().run()}
+                                                        className={`p-1.5 rounded transition-all ${editor.isActive('italic') ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-slate-100 text-slate-500'}`}
+                                                    >
+                                                        <ItalicIcon size={14} />
+                                                    </button>
+                                                    <div className="w-px h-4 bg-slate-200 mx-0.5" />
+                                                    <button
+                                                        onClick={() => {
+                                                            const url = window.prompt('URL', editor.getAttributes('link').href)
+                                                            if (url) editor.chain().focus().setLink({ href: url }).run()
+                                                        }}
+                                                        className={`p-1.5 rounded transition-all ${editor.isActive('link') ? 'bg-indigo-100 text-indigo-600' : 'hover:bg-slate-100 text-slate-500'}`}
+                                                    >
+                                                        <LinkIcon size={14} />
+                                                    </button>
+                                                </div>
+                                            </BubbleMenu>
+                                        )}
+                                        
+                                        <MenuBar editor={editor} />
+                                        
+                                        <div className="p-4 flex-1 prose prose-slate max-w-none focus:outline-none overflow-y-auto min-h-[300px]">
+                                            <EditorContent editor={editor} className="outline-none min-h-[300px]" />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -320,10 +558,9 @@ function EventEditorContent() {
                                     )}
                                     <input
                                         type="file"
-                                        id="image"
                                         ref={fileInputRef}
                                         className="hidden"
-                                        accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+                                        accept="image/*"
                                         onChange={handleImageChange}
                                     />
                                 </div>

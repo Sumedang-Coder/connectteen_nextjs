@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
     Search,
     Plus,
@@ -14,7 +15,8 @@ import {
     ChevronLeft,
     Mail,
     KeyRound,
-    ShieldAlert
+    ShieldAlert,
+    ShieldCheck
 } from "lucide-react";
 import { useAdminStore, AdminUser } from "@/app/store/useAdminStore";
 import { useAuthStore } from "@/app/store/useAuthStore";
@@ -36,6 +38,8 @@ export default function ManageAdminsPage() {
     const [inviteEmail, setInviteEmail] = useState("");
     const [inviteRole, setInviteRole] = useState("content_editor");
     const [invitedToken, setInvitedToken] = useState<string | null>(null);
+    const [isEmailSent, setIsEmailSent] = useState(false);
+    const [lastInvitedEmail, setLastInvitedEmail] = useState("");
     const router = useRouter();
     const { user, loading: authLoading } = useAuthStore();
 
@@ -48,9 +52,12 @@ export default function ManageAdminsPage() {
         loading
     } = useAdminStore();
 
+    const isSuperAdmin = user?.role === "super_admin";
+
     useEffect(() => {
-        if (!authLoading && user && user.role !== "super_admin") {
-            toast.error("Access denied. Super Admin only.");
+        const allowedRoles = ["super_admin", "content_editor", "viewer"];
+        if (!authLoading && user && !allowedRoles.includes(user.role)) {
+            toast.error("Access denied.");
             router.replace("/dashboard");
         }
     }, [user, authLoading, router]);
@@ -58,12 +65,13 @@ export default function ManageAdminsPage() {
     const debouncedSearch = useDebounce(searchTerm, 500);
 
     useEffect(() => {
-        if (user?.role === "super_admin") {
+        const allowedRoles = ["super_admin", "content_editor", "viewer"];
+        if (user && allowedRoles.includes(user.role)) {
             fetchAdmins({ search: debouncedSearch });
         }
     }, [fetchAdmins, user, debouncedSearch]);
 
-    if (authLoading || (user && user.role !== "super_admin")) {
+    if (authLoading || (user && !["super_admin", "content_editor", "viewer"].includes(user.role))) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-50">
                 <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
@@ -72,20 +80,29 @@ export default function ManageAdminsPage() {
     }
 
     const handleInvite = async (e: React.FormEvent) => {
+        if (!isSuperAdmin) return;
         e.preventDefault();
+        const emailToInvite = inviteEmail;
         const result = await inviteAdmin(inviteEmail, inviteRole);
         if (result.success) {
-            toast.success("Invitation created successfully.");
-            if (result.token) setInvitedToken(result.token);
+            setLastInvitedEmail(emailToInvite);
+            if (result.emailSent) {
+                setIsEmailSent(true);
+                toast.success("Undangan berhasil dikirim!");
+            } else {
+                if (result.token) setInvitedToken(result.token);
+                toast.warning("Email gagal terkirim, gunakan link manual.");
+            }
             setInviteEmail("");
             fetchAdmins();
         } else {
-            toast.error("Failed to create invitation.");
+            toast.error(useAdminStore.getState().error || "Failed to create invitation.");
         }
     };
 
 
     const handleDelete = async (admin: AdminUser) => {
+        if (!isSuperAdmin) return;
         if (admin.id === user?.id) {
             toast.error("Anda tidak dapat menghapus akun Anda sendiri.");
             return;
@@ -109,7 +126,9 @@ export default function ManageAdminsPage() {
             <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center text-sm text-slate-500">
-                        <span>Security</span>
+                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
+                            Admin
+                        </Link>
                         <ChevronRight size={14} className="mx-1" />
                         <span className="text-slate-900 font-medium">Manage Administrators</span>
                     </div>
@@ -125,18 +144,23 @@ export default function ManageAdminsPage() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Admin Accounts</h2>
-                            <p className="text-slate-500 mt-1">Control who has access to the management portal.</p>
+                            <p className="text-slate-500 mt-1">
+                                {isSuperAdmin ? "Control who has access to the management portal." : "View authorized platform administrators."}
+                            </p>
                         </div>
-                        <button
-                            onClick={() => {
-                                setInvitedToken(null);
-                                setShowInviteModal(true);
-                            }}
-                            className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm"
-                        >
-                            <Plus size={20} />
-                            <span>Invite Admin</span>
-                        </button>
+                        {isSuperAdmin && (
+                            <button
+                                onClick={() => {
+                                    setInvitedToken(null);
+                                    setIsEmailSent(false);
+                                    setShowInviteModal(true);
+                                }}
+                                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-sm"
+                            >
+                                <Plus size={20} />
+                                <span>Invite Admin</span>
+                            </button>
+                        )}
                     </div>
 
                     {/* Filters & Search */}
@@ -157,13 +181,15 @@ export default function ManageAdminsPage() {
                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative">
 
                         {/* Security Notice */}
-                        <div className="bg-amber-50 border-b border-amber-200 p-4 flex items-start gap-3">
-                            <ShieldAlert className="text-amber-500 mt-0.5 shrink-0" size={20} />
-                            <div>
-                                <h4 className="text-sm font-bold text-amber-800">High-Security Area</h4>
-                                <p className="text-xs text-amber-700 mt-1">Changes made here affect systemic access. Please be absolutely certain before revoking or modifying permissions.</p>
+                        {isSuperAdmin && (
+                            <div className="bg-amber-50 border-b border-amber-200 p-4 flex items-start gap-3">
+                                <ShieldAlert className="text-amber-500 mt-0.5 shrink-0" size={20} />
+                                <div>
+                                    <h4 className="text-sm font-bold text-amber-800">High-Security Area</h4>
+                                    <p className="text-xs text-amber-700 mt-1">Changes made here affect systemic access. Please be absolutely certain before revoking or modifying permissions.</p>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
@@ -172,20 +198,24 @@ export default function ManageAdminsPage() {
                                         <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Administrator</th>
                                         <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Email Address</th>
                                         <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Access Level</th>
-                                        <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Actions</th>
+                                        {isSuperAdmin && <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Actions</th>}
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-200">
                                     {filteredAdmins.length === 0 ? (
                                         <tr>
-                                            <td colSpan={4} className="px-6 py-10 text-center text-slate-400">No administrators found.</td>
+                                            <td colSpan={isSuperAdmin ? 4 : 3} className="px-6 py-10 text-center text-slate-400">No administrators found.</td>
                                         </tr>
                                     ) : filteredAdmins.map((admin) => (
                                         <tr key={admin.id} className="group hover:bg-slate-50 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-bold">
-                                                        {(admin.name || admin.email).charAt(0).toUpperCase()}
+                                                    <div className="w-10 h-10 rounded-lg bg-blue-600 flex-shrink-0 flex items-center justify-center text-white font-bold overflow-hidden shadow-sm border border-slate-200">
+                                                        {admin.avatarUrl ? (
+                                                            <img src={admin.avatarUrl} alt={admin.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            (admin.name || admin.email).charAt(0).toUpperCase()
+                                                        )}
                                                     </div>
                                                     <div className="flex flex-col">
                                                         <span className="text-sm font-bold text-slate-900">{admin.name || "Pending Invite..."}</span>
@@ -206,17 +236,19 @@ export default function ManageAdminsPage() {
                                                     {ROLE_DISPLAY[admin.role as keyof typeof ROLE_DISPLAY] || admin.role}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <button
-                                                        onClick={() => handleDelete(admin)}
-                                                        className="p-2 rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                                                        title={admin.id === user?.id ? "Cannot delete your own account" : "Delete Account"}
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                </div>
-                                            </td>
+                                            {isSuperAdmin && (
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <button
+                                                            onClick={() => handleDelete(admin)}
+                                                            className="p-2 rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                                                            title={admin.id === user?.id ? "Cannot delete your own account" : "Delete Account"}
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -235,7 +267,7 @@ export default function ManageAdminsPage() {
                             <p className="text-sm text-slate-500 mt-1">Send an invitation to join the management portal.</p>
                         </div>
 
-                        {!invitedToken ? (
+                        {!invitedToken && !isEmailSent ? (
                             <form onSubmit={handleInvite} className="p-6 flex flex-col gap-4">
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
@@ -271,18 +303,36 @@ export default function ManageAdminsPage() {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="flex-1 px-4 py-2 text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors shadow-lg shadow-slate-900/20 disabled:opacity-50"
+                                        className="flex-1 px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-lg shadow-blue-600/20 disabled:opacity-50"
                                     >
                                         {loading ? "Sending..." : "Create Invite"}
                                     </button>
                                 </div>
                             </form>
+                        ) : isEmailSent ? (
+                            <div className="p-10 flex flex-col items-center text-center gap-4">
+                                <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mb-2">
+                                    <ShieldCheck className="text-blue-600" size={32} />
+                                </div>
+                                <div className="space-y-1">
+                                    <h4 className="text-xl font-bold text-slate-900">Email Terkirim!</h4>
+                                    <p className="text-sm text-slate-500">
+                                        Undangan telah berhasil dikirim ke <span className="font-bold text-slate-900">{lastInvitedEmail}</span>.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setShowInviteModal(false)}
+                                    className="w-full mt-6 px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-lg shadow-blue-600/20"
+                                >
+                                    Close
+                                </button>
+                            </div>
                         ) : (
                             <div className="p-6 flex flex-col gap-4">
-                                <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl text-center">
-                                    <Shield className="mx-auto text-emerald-500 mb-2" size={32} />
-                                    <h4 className="text-sm font-bold text-emerald-900">Invite Generated!</h4>
-                                    <p className="text-xs text-emerald-700 mt-1">Copy the link below and share it with the user.</p>
+                                <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl text-center">
+                                    <ShieldAlert className="mx-auto text-blue-600 mb-2" size={32} />
+                                    <h4 className="text-sm font-bold text-blue-900">Email Gagal Terkirim</h4>
+                                    <p className="text-xs text-blue-700 mt-1">Gunakan link manual di bawah untuk mengundang user.</p>
                                 </div>
                                 <div className="flex flex-col gap-1.5 mt-2">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Invitation Link</label>
@@ -298,7 +348,7 @@ export default function ManageAdminsPage() {
                                                 navigator.clipboard.writeText(url);
                                                 toast.success("Invitation link copied!");
                                             }}
-                                            className="p-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors shrink-0"
+                                            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shrink-0"
                                             title="Copy Link"
                                         >
                                             <KeyRound size={16} />
@@ -308,7 +358,7 @@ export default function ManageAdminsPage() {
                                 </div>
                                 <button
                                     onClick={() => setShowInviteModal(false)}
-                                    className="w-full mt-4 px-4 py-2 text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors shadow-lg"
+                                    className="w-full mt-4 px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-lg shadow-blue-600/20"
                                 >
                                     Close
                                 </button>
