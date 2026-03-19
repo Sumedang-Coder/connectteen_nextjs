@@ -172,7 +172,7 @@ export default function AdminV2Layout({
                 label="Secret Messages"
                 active={pathname === "/secret-messages"}
               />
-              {user?.role === "super_admin" && (
+              {user && ["super_admin", "content_editor", "viewer"].includes(user.role) && (
                 <SidebarItem
                   href="/manage-admins"
                   icon={<Shield size={20} />}
@@ -267,7 +267,7 @@ export default function AdminV2Layout({
                   label="Secret Messages"
                   active={pathname === "/secret-messages"}
                 />
-                {user?.role === "super_admin" && (
+                {user && ["super_admin", "content_editor", "viewer"].includes(user.role) && (
                   <SidebarItem
                     href="/manage-admins"
                     icon={<Shield size={20} />}
