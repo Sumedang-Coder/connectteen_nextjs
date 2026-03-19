@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { LuMail, LuRefreshCw, LuShieldCheck, LuAlertCircle } from "react-icons/lu";
+import { Mail, RefreshCw, ShieldCheck, AlertCircle } from "lucide-react";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -72,7 +72,7 @@ function VerifyEmailContent() {
             <div className="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-10 border border-slate-100 text-center">
                 <div className="flex flex-col items-center gap-4 mb-8">
                     <div className="w-20 h-20 rounded-3xl bg-blue-50 flex items-center justify-center shadow-inner mb-2">
-                        <LuMail className="text-4xl text-blue-600 animate-bounce" />
+                        <Mail className="text-4xl text-blue-600 animate-bounce" />
                     </div>
                     <div>
                         <h1 className="text-3xl font-black text-slate-900 tracking-tight">Verifikasi Email</h1>
@@ -103,7 +103,7 @@ function VerifyEmailContent() {
                         disabled={loading || otp.length !== 6}
                         className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/25 hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                        {loading ? <LuRefreshCw size={20} className="animate-spin" /> : <LuShieldCheck size={20} />}
+                        {loading ? <RefreshCw size={20} className="animate-spin" /> : <ShieldCheck size={20} />}
                         <span>Verifikasi Sekarang</span>
                     </button>
                 </form>
@@ -120,7 +120,7 @@ function VerifyEmailContent() {
                         >
                             {cooldown > 0 ? (
                                 <>
-                                    <LuAlertCircle size={16} />
+                                    <AlertCircle size={16} />
                                     <span>Kirim ulang dalam {cooldown}s</span>
                                 </>
                             ) : (
