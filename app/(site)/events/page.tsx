@@ -2,23 +2,61 @@
 
 import { useEffect, useState, useRef, useLayoutEffect, useMemo } from "react";
 import Image from "next/image";
-import { Calendar, MapPin, Users, Search } from "lucide-react";
+import { Calendar, MapPin, Users, Search, QrCode } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import DOMPurify from "dompurify";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/app/store/useAuthStore";
+import { toast, Toaster } from "sonner";
 
 import { useEventStore } from "@/app/store/useEventStore";
+import RegistrationDataModal from "./components/RegistrationDataModal";
 
 export default function Events() {
   const { events, fetchEvents, toggleRegisterEvent, loading } =
     useEventStore();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { isAuthenticated, user } = useAuthStore();
   const router = useRouter();
+  const [isDataModalOpen, setIsDataModalOpen] = useState(false);
+  const [pendingEventId, setPendingEventId] = useState<string | null>(null);
 
   const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  const handleRegisterClick = async (eventId: string) => {
+    const isGuest = user?.role === "guest";
+    const hasMissingData = !user?.name || user?.name.startsWith("Anonymous") || !user?.no_hp;
+
+    if (!isAuthenticated || isGuest || hasMissingData) {
+      setPendingEventId(eventId);
+      setIsDataModalOpen(true);
+      return;
+    }
+
+    setLoadingId(eventId);
+    await toggleRegisterEvent(eventId);
+    setLoadingId(null);
+  };
+
+  const handleDataModalSuccess = async () => {
+    if (pendingEventId) {
+      setLoadingId(pendingEventId);
+      await toggleRegisterEvent(pendingEventId);
+      setLoadingId(null);
+      setPendingEventId(null);
+    }
+  };
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [selectedEventForQR, setSelectedEventForQR] = useState<{ id: string, title: string, token: string } | null>(null);
 
   useEffect(() => {
     fetchEvents();
@@ -196,31 +234,54 @@ export default function Events() {
                       <Users className="w-4 h-4" />
                       {event.registrants_count ?? 0} Peserta
                     </Tag>
+
+                    {event.is_registered && event.attendance_token && (
+                      <Tag color="green">
+                        <QrCode className="w-4 h-4" />
+                        Tiket Tersedia
+                      </Tag>
+                    )}
+                    {event.quota > 0 && (event.registrants_count ?? 0) >= event.quota && !event.is_registered && (
+                      <Tag color="pink">
+                        Penuh
+                      </Tag>
+                    )}
                   </div>
+
+                  {/* QR TICKET BUTTON (Only if registered) */}
+                  {event.is_registered && event.attendance_token && (
+                    <button
+                      onClick={() => setSelectedEventForQR({
+                        id: event.id,
+                        title: event.event_title,
+                        token: event.attendance_token!
+                      })}
+                      className="mb-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition"
+                    >
+                      <QrCode className="w-5 h-5" />
+                      Lihat QR Tiket
+                    </button>
+                  )}
 
                   {/* BUTTON */}
                   <button
-                    disabled={isLoading}
-                    onClick={async () => {
-                      if (!isAuthenticated) {
-                        router.push("/signin");
-                        return;
-                      }
-                      setLoadingId(event.id);
-                      await toggleRegisterEvent(event.id);
-                      setLoadingId(null);
-                    }}
+                    disabled={isLoading || (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)}
+                    onClick={() => handleRegisterClick(event.id)}
                     className={`mt-auto py-3 rounded-xl font-semibold transition shadow-md
                       ${event.is_registered
                         ? "bg-red-500 hover:bg-red-600 text-white"
-                        : "bg-blue-600 hover:brightness-110 text-white"
+                        : (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)
+                          ? "bg-slate-300 cursor-not-allowed text-slate-500 shadow-none"
+                          : "bg-blue-600 hover:brightness-110 text-white"
                       }`}
                   >
                     {isLoading
                       ? "Memproses..."
                       : event.is_registered
                         ? "Batalkan"
-                        : "Register"}
+                        : (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)
+                          ? "Penuh"
+                          : "Register"}
                   </button>
                 </div>
               </div>
@@ -228,6 +289,46 @@ export default function Events() {
           })}
         </div>
       </section>
+
+      {/* QR MODAL */}
+      <Dialog open={!!selectedEventForQR} onOpenChange={(open) => !open && setSelectedEventForQR(null)}>
+        <DialogContent className="sm:max-w-md bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center">Tiket Event</DialogTitle>
+            <DialogDescription className="text-center">
+              Tunjukkan QR Code ini ke petugas untuk absensi.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="text-lg font-bold text-blue-600 mb-6 text-center">
+              {selectedEventForQR?.title}
+            </div>
+            
+            <div className="p-4 bg-white rounded-2xl shadow-lg border-2 border-slate-100">
+              {selectedEventForQR?.token && (
+                <QRCodeSVG 
+                  value={selectedEventForQR.token} 
+                  size={200}
+                  level="H"
+                  includeMargin={true}
+                />
+              )}
+            </div>
+            
+            <div className="mt-8 text-sm text-slate-500 text-center bg-slate-50 p-4 rounded-xl border border-slate-100 italic">
+              "Pesan: Pastikan Anda datang tepat waktu dan mematuhi protokol yang berlaku."
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Toaster richColors position="top-center" />
+      
+      <RegistrationDataModal 
+        isOpen={isDataModalOpen} 
+        onClose={() => setIsDataModalOpen(false)}
+        onSuccess={handleDataModalSuccess}
+      />
     </div>
   );
 }
@@ -254,13 +355,19 @@ function DescriptionWithToggle({
 
   return (
     <div>
-      <p
-        ref={textRef}
-        className={`text-sm whitespace-pre-line text-gray-600 ${isExpanded ? "" : "line-clamp-2"
-          }`}
-      >
-        {description}
-      </p>
+      {isExpanded ? (
+        <div 
+          className="text-sm prose prose-sm max-w-none text-gray-600 mb-2"
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
+        />
+      ) : (
+        <p
+          ref={textRef}
+          className="text-sm text-gray-600 line-clamp-2"
+        >
+          {stripHtml(description)}
+        </p>
+      )}
       {isOverflowing && (
         <button
           onClick={onToggle}
@@ -271,6 +378,12 @@ function DescriptionWithToggle({
       )}
     </div>
   );
+}
+
+function stripHtml(html: string) {
+  if (typeof window === "undefined") return html.replace(/<[^>]*>?/gm, '');
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || "";
 }
 
 function formatDate(date: string) {
@@ -286,12 +399,13 @@ function Tag({
   color = "blue",
 }: {
   children: React.ReactNode;
-  color?: "blue" | "purple" | "pink";
+  color?: "blue" | "purple" | "pink" | "green";
 }) {
   const map = {
     blue: "bg-blue-100 text-blue-600",
     purple: "bg-purple-100 text-purple-600",
     pink: "bg-pink-100 text-pink-600",
+    green: "bg-emerald-100 text-emerald-600",
   };
 
   return (

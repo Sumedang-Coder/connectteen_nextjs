@@ -11,6 +11,7 @@ import {
     ChevronRight
 } from "lucide-react";
 import { useAdminStore } from "@/app/store/useAdminStore";
+import AdminBreadcrumb from "@/components/AdminBreadcrumb";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -80,15 +81,14 @@ export default function DashboardPage() {
     return (
         <div className="flex flex-col h-full bg-slate-50 overflow-hidden">
             {/* Header / Breadcrumb */}
-            <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0">
+            <header className="min-h-[4rem] py-3 md:py-0 md:h-16 flex items-center justify-between px-4 md:px-8 bg-white border-b border-slate-200 shrink-0 gap-2">
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center text-sm text-slate-500">
-                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
-                            Admin
-                        </Link>
-                        <ChevronRight size={14} className="mx-1" />
-                        <span className="text-slate-900 font-medium">Dashboard</span>
-                    </div>
+                    <AdminBreadcrumb 
+                        items={[
+                            { label: "Admin", href: "/dashboard" },
+                            { label: "Dashboard" }
+                        ]}
+                    />
                 </div>
             </header>
 

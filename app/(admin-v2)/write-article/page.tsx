@@ -35,6 +35,7 @@ import { useArticleStore } from "@/app/store/useArticleStore";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useAuthStore } from "@/app/store/useAuthStore";
+import AdminBreadcrumb from "@/components/AdminBreadcrumb";
 
 // Tiptap imports
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -384,17 +385,13 @@ function ArticleEditor() {
             {/* Standard Header / Breadcrumb */}
             <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0">
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center text-sm text-slate-500">
-                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
-                            Admin
-                        </Link>
-                        <ChevronRight size={14} className="mx-1" />
-                        <Link href="/manage-articles" className="hover:text-blue-600 transition-colors">
-                            Articles
-                        </Link>
-                        <ChevronRight size={14} className="mx-1" />
-                        <span className="text-slate-900 font-medium">{editId ? "Edit Article" : "Create New"}</span>
-                    </div>
+                    <AdminBreadcrumb
+                        items={[
+                            { label: "Admin", href: "/dashboard" },
+                            { label: "Articles", href: "/manage-articles" },
+                            { label: editId ? "Edit Article" : "Create New" }
+                        ]}
+                    />
                 </div>
 
                 <div className="flex items-center gap-3">

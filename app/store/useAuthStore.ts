@@ -12,6 +12,7 @@ interface AuthState {
   resendVerification: (email: string) => Promise<{ success: boolean; message: string }>;
   forgotPassword: (email: string) => Promise<{ success: boolean; message: string }>;
   resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
+  updateProfile: (data: { name: string; no_hp: string }) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<void>;
 }
 
@@ -93,7 +94,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  resetPassword: async (token, newPassword) => {
+  resetPassword: async (token: string, newPassword: string) => {
     try {
       set({ loading: true });
       const res = await api.post("/auth/reset-password", { token, newPassword });
@@ -104,6 +105,24 @@ export const useAuthStore = create<AuthState>((set) => ({
       return { 
         success: false, 
         message: error.response?.data?.message || "Password reset failed" 
+      };
+    }
+  },
+
+  updateProfile: async (data: { name: string; no_hp: string }) => {
+    try {
+      set({ loading: true });
+      const res = await api.put("/auth/me", data);
+      set({ 
+        user: res.data.user, 
+        loading: false 
+      });
+      return { success: true, message: res.data.message };
+    } catch (error: any) {
+      set({ loading: false });
+      return { 
+        success: false, 
+        message: error.response?.data?.message || "Update profile failed" 
       };
     }
   },

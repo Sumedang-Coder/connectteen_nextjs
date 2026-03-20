@@ -19,7 +19,8 @@ import {
     ChevronRight as ChevronRightIcon,
     Eye,
     Globe as GlobeIcon,
-    Lock as LockIcon
+    Lock as LockIcon,
+    CheckCircle2
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -28,6 +29,7 @@ import { useAuthStore } from "@/app/store/useAuthStore";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import PaginationComponent from "@/components/PaginationComponent";
+import AdminBreadcrumb from "@/components/AdminBreadcrumb";
 
 
 export default function ManageEventsPage() {
@@ -81,17 +83,14 @@ export default function ManageEventsPage() {
     return (
         <div className="flex flex-col h-full overflow-hidden bg-slate-50">
             {/* Header/Top Bar */}
-            <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0">
+            <header className="min-h-[4rem] py-3 md:py-0 md:h-16 flex items-center justify-between px-4 md:px-8 bg-white border-b border-slate-200 shrink-0">
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center text-sm text-slate-500">
-                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
-                            Admin
-                        </Link>
-                        <ChevronRight size={14} className="mx-1" />
-                        <span className="text-slate-900 font-medium">Events Management</span>
-                    </div>
-                </div>
-                <div className="flex items-center gap-4">
+                    <AdminBreadcrumb 
+                        items={[
+                            { label: "Admin", href: "/dashboard" },
+                            { label: "Events Management" }
+                        ]}
+                    />
                 </div>
             </header>
 
@@ -154,6 +153,7 @@ export default function ManageEventsPage() {
                                         <th className="px-6 py-5">Event Details</th>
                                         <th className="px-6 py-5">Venue & Date</th>
                                         <th className="px-6 py-5 text-center">Registrants</th>
+                                        <th className="px-6 py-5 text-center">Kehadiran</th>
                                         <th className="px-6 py-5">Status</th>
                                         <th className="px-6 py-5">Visibility</th>
                                         <th className="px-6 py-5 text-right">Actions</th>
@@ -162,7 +162,7 @@ export default function ManageEventsPage() {
                                 <tbody className="divide-y divide-slate-100">
                                     {events.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} className="px-6 py-20 text-center text-slate-400 font-medium">No events found.</td>
+                                            <td colSpan={7} className="px-6 py-20 text-center text-slate-400 font-medium">No events found.</td>
                                         </tr>
                                     ) : events.map((event) => (
                                         <tr key={event.id} className="group hover:bg-indigo-50/30 transition-colors">
@@ -202,6 +202,16 @@ export default function ManageEventsPage() {
                                                     </span>
                                                     <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                                                         {event.quota > 0 ? "Quota Filled" : "Unlimited"}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                <div className="inline-flex flex-col items-center">
+                                                    <span className="text-sm font-bold text-emerald-600">
+                                                        {event.attended_count || 0}
+                                                    </span>
+                                                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                                                        Hadir
                                                     </span>
                                                 </div>
                                             </td>
