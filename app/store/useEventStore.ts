@@ -10,22 +10,29 @@ export interface Event {
   description: string;
   location: string;
   date: string;
-  // Properti baru dari Dev 1
   quota: number;
   status: "open" | "full" | "closed";
   visibility: "public" | "private";
   image_url?: string;
   registrants_count?: number;
+  attended_count?: number;
   is_registered?: boolean;
+  attendance_token?: string;
+  is_attended?: boolean;
   created_at?: string;
   updated_at?: string;
 }
 
 export interface Registrant {
+  registrant_id: string;
   id: string;
   name: string;
   email: string;
-  phone?: string;
+  no_hp?: string;
+  avatarUrl?: string;
+  is_attended?: boolean;
+  attended_at?: string;
+  attendance_token?: string;
   registered_at?: string;
 }
 
@@ -52,6 +59,8 @@ interface EventState {
   };
   registrantsPagination: {
     totalRegistrants: number;
+    totalAttended: number;
+    totalAbsent: number;
     totalPages: number;
     currentPage: number;
     limit: number;
@@ -100,6 +109,8 @@ export const useEventStore = create<EventState>((set, get) => ({
   },
   registrantsPagination: {
     totalRegistrants: 0,
+    totalAttended: 0,
+    totalAbsent: 0,
     totalPages: 0,
     currentPage: 1,
     limit: 10,
@@ -119,6 +130,9 @@ export const useEventStore = create<EventState>((set, get) => ({
       const newData: Event[] = (res.data.data || []).map((e: any) => ({
         ...e,
         is_registered: e.isRegistered,
+        attendance_token: e.attendance_token || undefined,
+        is_attended: e.is_attended || false,
+        attended_count: e.attended_count || 0,
       }));
 
       const apiPagination = res.data.pagination;
@@ -199,6 +213,7 @@ export const useEventStore = create<EventState>((set, get) => ({
             ? {
                 ...e,
                 is_registered: eventData.isRegistered,
+                attendance_token: eventData.attendance_token,
                 registrants_count:
                   eventData.registrants_count ?? e.registrants_count,
               }
@@ -275,6 +290,8 @@ export const useEventStore = create<EventState>((set, get) => ({
           registrants: res.data.data || [],
           registrantsPagination: res.data.pagination || {
             totalRegistrants: (res.data.data || []).length,
+            totalAttended: 0,
+            totalAbsent: 0,
             totalPages: 1,
             currentPage: 1,
             limit: 10,

@@ -19,6 +19,7 @@ import PaginationComponent from "@/components/PaginationComponent";
 import { useMessageStore } from "@/app/store/useMessageStore";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { useDebounce } from "@/app/hooks/useDebounce";
+import AdminBreadcrumb from "@/components/AdminBreadcrumb";
 
 export default function SecretMessagesPage() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -53,15 +54,15 @@ export default function SecretMessagesPage() {
     return (
         <div className="flex flex-col h-full bg-slate-50 overflow-hidden font-display selection:bg-blue-600/10 selection:text-blue-600">
             {/* Standard Header / Breadcrumb */}
-            <header className="h-16 flex items-center justify-between px-8 bg-white border-b border-slate-200 shrink-0">
+            {/* Standard Header / Breadcrumb */}
+            <header className="min-h-[4rem] py-3 md:py-0 md:h-16 flex items-center justify-between px-4 md:px-8 bg-white border-b border-slate-200 shrink-0 gap-2">
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center text-sm text-slate-500">
-                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
-                            Admin
-                        </Link>
-                        <ChevronRight size={14} className="mx-1" />
-                        <span className="text-slate-900 font-medium">Private Inbox</span>
-                    </div>
+                    <AdminBreadcrumb
+                        items={[
+                            { label: "Admin", href: "/dashboard" },
+                            { label: "Private Inbox" }
+                        ]}
+                    />
                 </div>
             </header>
 
@@ -75,16 +76,16 @@ export default function SecretMessagesPage() {
                 </div>
             )}
 
-            <main className="flex-1 overflow-y-auto px-4 py-8 lg:px-12">
+            <main className="flex-1 overflow-y-auto px-4 py-8 lg:px-12 scrollbar-hide">
                 <div className="mx-auto max-w-5xl">
                     {/* Header Section */}
-                    <header className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-                        <div>
-                            <h2 className="text-3xl font-black tracking-tight text-slate-900 md:text-4xl text-transparent bg-clip-text bg-gradient-to-br from-slate-900 to-slate-600">Admin Private Inbox</h2>
-                            <p className="mt-2 text-slate-500 font-medium">Access confidential communications sent directly to you.</p>
+                    <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                        <div className="flex-1">
+                            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 md:text-4xl text-transparent bg-clip-text bg-gradient-to-br from-slate-900 to-slate-600">Admin Private Inbox</h2>
+                            <p className="mt-2 text-sm sm:text-base text-slate-500 font-medium">Access confidential communications sent directly to you.</p>
                         </div>
-                        <div className="flex items-center gap-3 bg-white p-1.5 rounded-xl shadow-sm border border-slate-200/60">
-                            <span className="pl-2 text-xs font-bold uppercase tracking-wider text-slate-400">Sort by</span>
+                        <div className="flex items-center gap-3 bg-white p-1.5 rounded-xl shadow-sm border border-slate-200/60 self-start lg:self-auto">
+                            <span className="pl-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Sort by</span>
                             <div className="h-4 w-px bg-slate-200"></div>
                             <select
                                 value={sortBy}
@@ -92,7 +93,7 @@ export default function SecretMessagesPage() {
                                     setSortBy(e.target.value);
                                     setCurrentPage(1);
                                 }}
-                                className="border-none bg-transparent py-1.5 pl-2 pr-8 text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer appearance-none"
+                                className="border-none bg-transparent py-1 pl-1 pr-6 text-xs sm:text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer appearance-none"
                             >
                                 <option value="-createdAt">Newest First</option>
                                 <option value="createdAt">Oldest First</option>
@@ -102,20 +103,20 @@ export default function SecretMessagesPage() {
                     </header>
 
                     {/* Search Bar */}
-                    <div className="mb-8 group focus-within:ring-2 focus-within:ring-blue-500/20 transition-all rounded-2xl bg-white p-2 shadow-sm border border-slate-200/60">
+                    <div className="mb-8 group focus-within:ring-2 focus-within:ring-blue-500/20 transition-all rounded-2xl bg-white p-1.5 shadow-sm border border-slate-200/60">
                         <div className="relative flex w-full items-center">
-                            <Search className="absolute left-4 text-slate-400 transition-colors group-focus-within:text-blue-500" size={20} />
+                            <Search className="absolute left-4 text-slate-400 transition-colors group-focus-within:text-blue-500" size={18} />
                             <input
                                 type="text"
                                 placeholder="Search by message content..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="h-12 w-full rounded-xl border-none bg-transparent pl-12 pr-4 text-slate-900 placeholder-slate-400 focus:ring-0 font-medium"
+                                className="h-10 sm:h-12 w-full rounded-xl border-none bg-transparent pl-12 pr-4 text-sm sm:text-base text-slate-900 placeholder-slate-400 focus:ring-0 font-medium"
                             />
                             {searchTerm && (
                                 <button
                                     onClick={() => setSearchTerm("")}
-                                    className="mr-2 px-3 py-1 text-xs font-bold text-slate-400 hover:text-slate-600 uppercase tracking-wider transition-colors"
+                                    className="mr-2 px-3 py-1 text-[10px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-wider transition-colors"
                                 >
                                     Clear
                                 </button>
@@ -124,7 +125,7 @@ export default function SecretMessagesPage() {
                     </div>
 
                     {/* Messages List */}
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                         {allMessages.length === 0 ? (
                             !loading && (
                                 <div className="p-20 flex flex-col items-center justify-center text-center bg-slate-50/30">
@@ -137,36 +138,36 @@ export default function SecretMessagesPage() {
                             <div key={msg.id} className="relative group border-b border-slate-100 last:border-b-0">
                                 <Link
                                     href={`/secret-messages/${msg.id}`}
-                                    className="flex items-center gap-4 px-6 py-4 transition-all hover:bg-slate-50/80"
+                                    className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-4 sm:px-6 py-5 transition-all hover:bg-slate-50/80"
                                 >
-                                    <div className="flex-1 min-w-0 pr-12">
-                                        <div className="flex items-center justify-between gap-4 mb-0.5">
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                <div className="flex flex-col">
-                                                    <span className="text-sm font-bold text-slate-900 truncate">
-                                                        To: {msg.recipient_name}
-                                                    </span>
-                                                    <span className="text-[11px] font-medium text-slate-400 truncate">
-                                                        From: {msg.sender_name || "Unknown"}
-                                                    </span>
-                                                </div>
-                                                {(msg.song_name || msg.song_artist) && (
-                                                    <div className="flex items-center gap-1 text-[10px] font-medium text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 shrink-0">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-start justify-between gap-4 mb-2 sm:mb-1">
+                                            <div className="flex flex-col gap-0.5 min-w-0">
+                                                <span className="text-xs sm:text-sm font-bold text-slate-900 truncate pr-4">
+                                                    To: {msg.recipient_name}
+                                                </span>
+                                                <span className="text-[10px] sm:text-[11px] font-medium text-slate-400 truncate pr-4">
+                                                    From: {msg.sender_name || "Unknown"}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-2 shrink-0">
+                                                <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-tight whitespace-nowrap bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                                                    {msg.created_at ? format(new Date(msg.created_at), "MMM d") : "Today"}
+                                                </span>
+                                                {msg.song_name && (
+                                                    <div className="flex items-center gap-1 text-[9px] font-bold text-blue-600 bg-blue-50/50 px-1.5 py-0.5 rounded border border-blue-100 shrink-0">
                                                         <Music size={10} />
-                                                        <span className="truncate max-w-[100px]">{msg.song_name}</span>
+                                                        <span className="truncate max-w-[80px] sm:max-w-[150px]">{msg.song_name}</span>
                                                     </div>
                                                 )}
                                             </div>
-                                            <span className="text-[11px] font-medium text-slate-400 shrink-0 uppercase tracking-tight">
-                                                {msg.created_at ? format(new Date(msg.created_at), "MMM d") : "Today"}
-                                            </span>
                                         </div>
-                                        <p className="text-sm text-slate-500 line-clamp-1 group-hover:text-slate-700 transition-colors">
+                                        <p className="text-xs sm:text-sm text-slate-500 line-clamp-2 md:line-clamp-1 group-hover:text-slate-700 transition-colors mt-1 pr-8">
                                             {msg.message}
                                         </p>
                                     </div>
-                                    <div className="text-slate-300 group-hover:text-blue-500 transition-colors">
-                                        <ChevronRight size={16} />
+                                    <div className="hidden lg:block text-slate-300 group-hover:text-blue-500 transition-colors pl-4">
+                                        <ChevronRight size={18} />
                                     </div>
                                 </Link>
 

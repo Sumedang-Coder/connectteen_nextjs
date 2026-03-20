@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { useEventStore } from "@/app/store/useEventStore";
 import { useAuthStore } from "@/app/store/useAuthStore";
+import AdminBreadcrumb from "@/components/AdminBreadcrumb";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -390,34 +391,28 @@ function EventEditorContent() {
     return (
         <div className="flex flex-col h-full bg-slate-50 overflow-hidden">
             {/* Top Bar */}
-            <header className="h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200 shrink-0">
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center text-sm text-slate-500">
-                        <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
-                            Admin
-                        </Link>
-                        <ChevronRight size={14} className="mx-1" />
-                        <Link href="/manage-events" className="hover:text-blue-600 transition-colors">
-                            Events Management
-                        </Link>
-                        <ChevronRight size={14} className="mx-1" />
-                        <span className="text-slate-900 font-medium">
-                             {editId ? "Edit Event" : "Create New Event"}
-                        </span>
-                    </div>
+            <header className="min-h-[4rem] py-3 md:py-0 md:h-16 flex flex-col md:flex-row items-center justify-between px-4 md:px-6 bg-white border-b border-slate-200 shrink-0 gap-3">
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                    <AdminBreadcrumb 
+                        items={[
+                            { label: "Admin", href: "/dashboard" },
+                            { label: "Events Management", href: "/manage-events" },
+                            { label: editId ? "Edit Event" : "Create New Event" }
+                        ]}
+                    />
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 md:gap-3 shrink-0 w-full md:w-auto justify-end">
                     <button
                         onClick={() => router.push("/manage-events")}
-                        className="px-6 py-2 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors"
+                        className="flex-1 md:flex-none px-4 md:px-6 py-2 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors text-xs md:text-sm"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={loading}
-                        className="flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white font-semibold text-sm rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-500/20 disabled:opacity-50"
+                        className="flex-[2] md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-2 bg-indigo-600 text-white font-semibold text-xs md:text-sm rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-500/20 disabled:opacity-50"
                     >
                         {loading ? "Saving..." : editId ? "Save Changes" : "Create Event"}
                     </button>

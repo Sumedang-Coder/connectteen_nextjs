@@ -17,7 +17,8 @@ import {
   Bell,
   HelpCircle,
   Shield,
-  User
+  User,
+  QrCode
 } from "lucide-react";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { useRouter } from "next/navigation";
