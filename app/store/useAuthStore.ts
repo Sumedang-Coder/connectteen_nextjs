@@ -1,5 +1,8 @@
 import { create } from "zustand";
 import api from "@/lib/axios";
+import { useMessageStore } from "./useMessageStore";
+import { useArticleStore } from "./useArticleStore";
+import { useEventStore } from "./useEventStore";
 
 interface AuthState {
   user: any | null;
@@ -136,6 +139,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: false,
         loading: false,
       });
+
+      // Clear other stores
+      useMessageStore.getState().resetStore();
+      useArticleStore.getState().resetStore();
+      useEventStore.getState().resetStore();
     } catch (error) {
       console.error("Logout failed:", error);
     }

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { LuUser } from "react-icons/lu";
 import { FcGoogle } from "react-icons/fc";
 import { useAuthStore } from "@/app/store/useAuthStore";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -16,16 +16,24 @@ export default function Auth({ onClick }: AuthProps) {
   const [mounted, setMounted] = useState(false);
   const { loginGuest, loading, isAuthenticated } = useAuthStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Save callbackUrl to localStorage if present in URL
+    const callbackUrl = searchParams.get("callbackUrl");
+    if (callbackUrl) {
+      localStorage.setItem("callbackUrl", callbackUrl);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/");
+      const callbackUrl = searchParams.get("callbackUrl") || localStorage.getItem("callbackUrl") || "/";
+      localStorage.removeItem("callbackUrl");
+      router.push(callbackUrl);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, searchParams]);
 
   const handleGuestLogin = async () => {
     toast.loading("Masuk sebagai tamu...", { id: "guest-login" });

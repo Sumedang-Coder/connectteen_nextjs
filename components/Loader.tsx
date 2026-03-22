@@ -30,33 +30,12 @@ const Loader: React.FC<LoaderProps> = ({
       aria-label={text}
     >
       <div className="relative flex items-center justify-center">
-        
         <div
           className={`
-            absolute rounded-full blur-xl
-            bg-linear-to-br from-cyan-400/50 to-blue-500/50
+            rounded-full animate-spin border-slate-200 border-t-blue-500
             ${sizeClasses[size]}
-            animate-pulse
           `}
         />
-        <div
-          className={`
-            relative rounded-full
-            bg-linear-to-tr from-cyan-400 via-blue-500 to-cyan-400
-            shadow-lg shadow-blue-500/30
-            ${sizeClasses[size]}
-            animate-spin
-          `
-          }
-        >
-          {/* 3. Lingkaran Dalam (Transparent Hole) */}
-          <div 
-            className={`
-              absolute inset-[3px] rounded-full 
-              bg-white dark:bg-gray-900 
-            `} 
-          />
-        </div>
       </div>
 
       {text && (

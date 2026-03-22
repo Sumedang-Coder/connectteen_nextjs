@@ -30,20 +30,7 @@ export function SendPage() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const loadingAuth = useAuthStore((s) => s.loading);
-
-  const [showLoginModal, setShowLoginModal] = useState(false);
-
-  useEffect(() => {
-    if (!loadingAuth && !isAuthenticated) {
-      setShowLoginModal(true);
-    }
-  }, [loadingAuth, isAuthenticated]);
-
-
-
-  if (loadingAuth) {
-    return <Loader size="sm" fullScreen />;
-  }
+  const loginGuest = useAuthStore((s) => s.loginGuest);
 
   const handleSearchSongs = async (query: string) => {
     if (!query) return setSongs([]);
@@ -60,11 +47,19 @@ export function SendPage() {
     }
   };
 
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleSearchSongs(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  if (loadingAuth) {
+    return <Loader size="sm" fullScreen />;
+  }
+
   const handleSendMessage = async () => {
-    if (!isAuthenticated) {
-      setShowLoginModal(true);
-      return;
-    }
 
     if (
       !recipient ||
@@ -80,6 +75,15 @@ export function SendPage() {
     setLoadingSend(true);
 
     try {
+      if (!isAuthenticated) {
+        const success = await loginGuest();
+        if (!success) {
+          alert("Gagal membuat sesi guest otomatis. Silakan coba lagi.");
+          setLoadingSend(false);
+          return;
+        }
+      }
+
       setLastRecipient(recipient);
 
       await sendMessage({
@@ -110,13 +114,7 @@ export function SendPage() {
   };
 
 
-  // Debounce search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      handleSearchSongs(searchQuery);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+
 
   return (
     <div className="min-h-screen bg-blue-500">
@@ -315,47 +313,6 @@ export function SendPage() {
             {loadingSend ? "Sending..." : <><Send className="mr-2 w-5 h-5" /> Send Message</>}
           </Button>
         </div>
-
-        {showLoginModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="w-full max-w-[380px] bg-white rounded-2xl shadow-2xl p-8 text-center">
-
-              {/* Icon */}
-              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100">
-                <Lock className="w-6 h-6 text-blue-600" />
-              </div>
-
-              {/* Title */}
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Kamu belum Login
-              </h2>
-
-              {/* Description */}
-              <p className="text-sm text-gray-600 leading-relaxed mb-6">
-                Kalo mau kirim pesan Login dulu yaa
-              </p>
-
-              {/* Buttons */}
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1 rounded-xl"
-                  onClick={() => router.back()}
-                >
-                  Kembali
-                </Button>
-
-                <Button
-                  className="flex-1 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white"
-                  onClick={() => router.push("/signin")}
-                >
-                  Sign In
-                </Button>
-              </div>
-
-            </div>
-          </div>
-        )}
 
         {showSentModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">

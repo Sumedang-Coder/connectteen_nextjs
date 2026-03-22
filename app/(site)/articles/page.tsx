@@ -6,6 +6,7 @@ import { ArrowRight, Clock, Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { useArticleStore, Article } from "@/app/store/useArticleStore"
+import { useAuthStore } from "@/app/store/useAuthStore"
 import Loader from "@/components/Loader"
 
 const stripHtml = (html: string) => {
@@ -15,7 +16,6 @@ const stripHtml = (html: string) => {
 export default function ArticlesPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
-
   const {
     articles,
     fetchArticles,
@@ -24,11 +24,12 @@ export default function ArticlesPage() {
     hasMore,
     isFetching,
   } = useArticleStore()
+  const { isAuthenticated } = useAuthStore()
 
   useEffect(() => {
     resetArticles()
     fetchArticles({ page: 1, limit: 6, search: "" })
-  }, [])
+  }, [isAuthenticated])
 
   if (isFetching && articles.length === 0) {
     return <Loader fullScreen size="sm" />

@@ -3,6 +3,9 @@
 import dynamic from 'next/dynamic'
 import { cn } from '@/lib/utils'
 import { Header } from '../organisms/header/Header'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/app/store/useAuthStore'
 
 interface SiteLayoutProps {
   className?: string
@@ -27,6 +30,19 @@ const Footer = dynamic(
 )
 
 export const SiteLayout = ({ children, className }: SiteLayoutProps) => {
+  const router = useRouter()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const callbackUrl = localStorage.getItem("callbackUrl")
+      if (callbackUrl) {
+        localStorage.removeItem("callbackUrl")
+        router.push(callbackUrl)
+      }
+    }
+  }, [isAuthenticated, router])
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />

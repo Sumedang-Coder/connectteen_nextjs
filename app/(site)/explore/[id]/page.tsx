@@ -29,7 +29,7 @@ type Comment = {
 export default function MessageDetailPage() {
 
   const { id } = useParams();
-  const { selectedMessage, fetchMessageById, reactToMessage, addComment, addReply, deleteMessage } = useMessageStore();
+  const { selectedMessage, fetchMessageById, reactToMessage, addComment, addReply, deleteMessage, deleteComment, deleteReply } = useMessageStore();
   const { user } = useAuthStore();
   const isAdmin = user && ["super_admin", "content_editor"].includes(user.role);
 
@@ -56,14 +56,12 @@ export default function MessageDetailPage() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-
     if (id) fetchMessageById(id as string);
 
     return () => {
       useMessageStore.setState({ selectedMessage: null })
     }
-
-  }, [id, fetchMessageById]);
+  }, [id, fetchMessageById, isAuthenticated]);
 
   if (!selectedMessage) {
     return <Loader size="sm" fullScreen />
@@ -276,7 +274,7 @@ export default function MessageDetailPage() {
                 variant="outline" 
                 size="sm" 
                 className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50"
-                onClick={() => router.push("/signin")}
+                onClick={() => router.push(`/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`)}
               >
                 Sign In Sekarang
               </Button>
@@ -315,6 +313,19 @@ export default function MessageDetailPage() {
                         </button>
                       )}
 
+                      {isAuthenticated && (user?.id === c.userId || isAdmin) && (
+                        <button
+                          onClick={async () => {
+                            if (confirm("Hapus komentar ini?")) {
+                              await deleteComment(selectedMessage.id, c._id);
+                            }
+                          }}
+                          className="text-xs font-medium text-red-500 hover:text-red-600 transition flex items-center gap-1"
+                        >
+                          <Trash2 className="h-3 w-3" /> Hapus
+                        </button>
+                      )}
+
                       {c.replies && c.replies.length > 0 && (
                         <button
                           onClick={() => toggleReplies(c._id)}
@@ -340,7 +351,21 @@ export default function MessageDetailPage() {
 
                     <div className="bg-gray-100 p-2 rounded-xl grow">
 
-                      <p className="text-xs font-bold text-blue-600">{r.name}</p>
+                      <div className="flex items-center justify-between mb-0.5">
+                        <p className="text-xs font-bold text-blue-600">{r.name}</p>
+                        {isAuthenticated && (user?.id === r.userId || isAdmin) && (
+                          <button
+                            onClick={async () => {
+                              if (confirm("Hapus balasan ini?")) {
+                                await deleteReply(selectedMessage.id, c._id, r._id);
+                              }
+                            }}
+                            className="text-gray-400 hover:text-red-500 transition"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        )}
+                      </div>
 
                       <p className="text-sm text-gray-700">{r.message}</p>
 
@@ -411,7 +436,7 @@ export default function MessageDetailPage() {
 
                   <Button
                     className="flex-1 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white"
-                    onClick={() => router.push("/signin")}
+                    onClick={() => router.push(`/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`)}
                   >
                     Sign In
                   </Button>
