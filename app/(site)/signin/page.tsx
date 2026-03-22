@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { LuUser } from "react-icons/lu";
 import { FcGoogle } from "react-icons/fc";
 import { useAuthStore } from "@/app/store/useAuthStore";
@@ -12,7 +12,7 @@ interface AuthProps {
   onClick?: () => void;
 }
 
-export default function Auth({ onClick }: AuthProps) {
+function AuthContent({ onClick }: AuthProps) {
   const [mounted, setMounted] = useState(false);
   const { loginGuest, loading, isAuthenticated } = useAuthStore();
   const router = useRouter();
@@ -116,5 +116,20 @@ export default function Auth({ onClick }: AuthProps) {
 
       </div>
     </div>
+  );
+}
+
+export default function Auth(props: AuthProps) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-500 font-medium animate-pulse">Memuat halaman...</p>
+        </div>
+      </div>
+    }>
+      <AuthContent {...props} />
+    </Suspense>
   );
 }
