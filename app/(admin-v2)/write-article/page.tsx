@@ -265,13 +265,7 @@ function ArticleEditor() {
         }
     }, [editId, fetchArticleById]);
 
-    // Role guard for Viewers
-    useEffect(() => {
-        if (user && user.role === "viewer") {
-            toast.error("Account Viewer tidak memiliki izin untuk menulis artikel.");
-            router.replace("/manage-articles");
-        }
-    }, [user, router]);
+    // Role guard for Viewers is handled in layout.tsx
 
     useEffect(() => {
         if (editId && article) {
@@ -286,8 +280,9 @@ function ArticleEditor() {
 
     // Unsaved changes warning
     useEffect(() => {
+        const hasContent = title.trim() || (editor && !editor.isEmpty);
+
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            const hasContent = title.trim() || (editor && !editor.isEmpty);
             if (hasContent) {
                 e.preventDefault();
                 e.returnValue = "";
@@ -295,7 +290,6 @@ function ArticleEditor() {
         };
 
         const handlePopState = () => {
-             const hasContent = title.trim() || (editor && !editor.isEmpty);
              if (hasContent) {
                  if (confirm("Perubahan yang Anda buat mungkin tidak disimpan. Apakah Anda yakin ingin keluar?")) {
                     router.push("/manage-articles");
@@ -305,13 +299,29 @@ function ArticleEditor() {
              }
         };
 
+        const handleAnchorClick = (e: MouseEvent) => {
+            const target = (e.target as HTMLElement).closest('a');
+            if (!target) return;
+            
+            if (target.href && target.href !== window.location.href && target.target !== '_blank') {
+                if (hasContent) {
+                    if (!window.confirm("Perubahan yang Anda buat mungkin tidak disimpan. Apakah Anda yakin ingin keluar?")) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                }
+            }
+        };
+
         window.addEventListener("beforeunload", handleBeforeUnload);
         window.addEventListener("popstate", handlePopState);
+        document.addEventListener("click", handleAnchorClick, { capture: true });
         window.history.pushState(null, "", window.location.href);
 
         return () => {
             window.removeEventListener("beforeunload", handleBeforeUnload);
             window.removeEventListener("popstate", handlePopState);
+            document.removeEventListener("click", handleAnchorClick, { capture: true });
         };
     }, [title, editor, router]);
 
@@ -344,6 +354,10 @@ function ArticleEditor() {
             toast.error("Please fill in the title and content");
             return;
         }
+        if (!imageFile && !editId) {
+            toast.error("Harap unggah cover gambar artikel");
+            return;
+        }
 
         const formData = new FormData();
         formData.append("title", title);
@@ -361,6 +375,12 @@ function ArticleEditor() {
 
         if (success) {
             toast.success(editId ? "Article updated!" : "Article published!");
+            if (!editId) {
+                setTitle("");
+                setImageFile(null);
+                setImagePreview(null);
+                editor?.commands.clearContent(true);
+            }
             router.push("/manage-articles");
         } else {
             const errorMsg = useArticleStore.getState().error;
@@ -378,7 +398,7 @@ function ArticleEditor() {
         }
     };
 
-    if (user?.role === "viewer") return null;
+    // Role guard for Viewers is handled in layout.tsx
 
     return (
         <div className="flex flex-col h-full bg-slate-50 overflow-hidden font-display selection:bg-blue-600/10 selection:text-blue-600">

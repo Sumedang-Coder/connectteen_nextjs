@@ -274,18 +274,13 @@ function EventEditorContent() {
         }
     }, [event, editId, editor]);
 
-    // Role guard
-    useEffect(() => {
-        if (user && user.role === "viewer") {
-            toast.error("Account Viewer tidak memiliki izin untuk mengelola event.");
-            router.replace("/manage-events");
-        }
-    }, [user, router]);
+    // Role guard for Viewers is handled in layout.tsx
 
     // Unsaved changes warning
     useEffect(() => {
+        const hasContent = eventTitle.trim() || (editor && !editor.isEmpty) || location.trim();
+
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            const hasContent = eventTitle.trim() || (editor && !editor.isEmpty) || location.trim();
             if (hasContent) {
                 e.preventDefault();
                 e.returnValue = "";
@@ -293,7 +288,6 @@ function EventEditorContent() {
         };
 
         const handlePopState = () => {
-             const hasContent = eventTitle.trim() || (editor && !editor.isEmpty) || location.trim();
              if (hasContent) {
                  if (confirm("Perubahan yang Anda buat mungkin tidak disimpan. Apakah Anda yakin ingin keluar?")) {
                     router.push("/manage-events");
@@ -303,13 +297,29 @@ function EventEditorContent() {
              }
         };
 
+        const handleAnchorClick = (e: MouseEvent) => {
+            const target = (e.target as HTMLElement).closest('a');
+            if (!target) return;
+            
+            if (target.href && target.href !== window.location.href && target.target !== '_blank') {
+                if (hasContent) {
+                    if (!window.confirm("Perubahan yang Anda buat mungkin tidak disimpan. Apakah Anda yakin ingin keluar?")) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                }
+            }
+        };
+
         window.addEventListener("beforeunload", handleBeforeUnload);
         window.addEventListener("popstate", handlePopState);
+        document.addEventListener("click", handleAnchorClick, { capture: true });
         window.history.pushState(null, "", window.location.href);
 
         return () => {
             window.removeEventListener("beforeunload", handleBeforeUnload);
             window.removeEventListener("popstate", handlePopState);
+            document.removeEventListener("click", handleAnchorClick, { capture: true });
         };
     }, [eventTitle, editor, location, router]);
 
@@ -386,7 +396,7 @@ function EventEditorContent() {
         }
     };
 
-    if (user?.role === "viewer") return null;
+    // Role guard for Viewers is handled in layout.tsx
 
     return (
         <div className="flex flex-col h-full bg-slate-50 overflow-hidden">
@@ -492,6 +502,7 @@ function EventEditorContent() {
                                             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                             <input
                                                 type="text"
+                                                maxLength={200}
                                                 placeholder="Location..."
                                                 value={location}
                                                 onChange={(e) => setLocation(e.target.value)}
@@ -577,7 +588,7 @@ function EventEditorContent() {
                                             min="0"
                                             placeholder="Unlimited = 0"
                                             value={quota}
-                                            onChange={(e) => setQuota(parseInt(e.target.value) || 0)}
+                                            onChange={(e) => setQuota(Math.max(0, parseInt(e.target.value) || 0))}
                                             className="w-full pl-9 pr-3 py-2 bg-slate-50 border-none rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-indigo-600 font-medium"
                                         />
                                     </div>

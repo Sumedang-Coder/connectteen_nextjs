@@ -9,9 +9,9 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import MusicPlayerCard from "@/components/MusicPlayerCard";
-import { ArrowLeft, Loader2, MessageCircle } from "lucide-react";
+import { ArrowLeft, Loader2, MessageCircle, Trash2, Lock } from "lucide-react";
+import { toast } from "sonner";
 import { useAuthStore } from "@/app/store/useAuthStore";
-import { Lock } from "lucide-react";
 
 type Reply = {
   id: number;
@@ -29,7 +29,9 @@ type Comment = {
 export default function MessageDetailPage() {
 
   const { id } = useParams();
-  const { selectedMessage, fetchMessageById, reactToMessage, addComment, addReply } = useMessageStore();
+  const { selectedMessage, fetchMessageById, reactToMessage, addComment, addReply, deleteMessage } = useMessageStore();
+  const { user } = useAuthStore();
+  const isAdmin = user && ["super_admin", "content_editor"].includes(user.role);
 
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -76,6 +78,19 @@ export default function MessageDetailPage() {
     }
     if (selectedMessage) {
       reactToMessage(selectedMessage.id, type);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedMessage) return;
+    if (confirm("Are you sure you want to delete this secret message?")) {
+      try {
+        await deleteMessage(selectedMessage.id);
+        toast.success("Message deleted successfully");
+        router.push("/explore");
+      } catch (err) {
+        toast.error("Failed to delete message");
+      }
     }
   };
 
@@ -135,6 +150,17 @@ export default function MessageDetailPage() {
           />
           Kembali
         </Button>
+
+        {isAdmin && (
+          <Button
+            onClick={handleDelete}
+            variant="destructive"
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-medium shadow-lg ml-4"
+          >
+            <Trash2 size={18} />
+            Hapus Pesan
+          </Button>
+        )}
 
         {/* MESSAGE CARD */}
         <Card className="overflow-hidden rounded-3xl border border-white/40 shadow-2xl bg-white/90 backdrop-blur">

@@ -25,6 +25,9 @@ import { toast } from "sonner";
 import { useEventStore } from "@/app/store/useEventStore";
 import { useDebounce } from "@/app/hooks/useDebounce";
 import PaginationComponent from "@/components/PaginationComponent";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Scan result type
 interface ScanResult {
@@ -200,6 +203,78 @@ export default function EventRegistrantsPage() {
         }
     };
 
+    const [isExportOpen, setIsExportOpen] = useState(false);
+    const exportRef = useRef<HTMLDivElement>(null);
+
+    // Close export dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (exportRef.current && !exportRef.current.contains(event.target as Node)) {
+                setIsExportOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const handleExport = async (type: 'excel' | 'pdf') => {
+        setIsExportOpen(false);
+        if (!event) {
+            toast.error("Tidak ada data untuk diekspor");
+            return;
+        }
+
+        try {
+            toast.loading("Mempersiapkan data ekspor...");
+            // Fetch all registrants for export bypassing pagination
+            const res = await api.get(`/events/${id}/registrants`, { params: { limit: 10000, page: 1 } });
+            const exportDatas = res.data.data;
+
+            if (!exportDatas || exportDatas.length === 0) {
+                toast.dismiss();
+                toast.error("Tidak ada data registran untuk diekspor");
+                return;
+            }
+
+            const formattedData = exportDatas.map((r: any, index: number) => ({
+                "No": index + 1,
+                "Nama Peserta": r.name || "Anonymous",
+                "Email": r.email || "N/A",
+                "No. HP": r.no_hp || "-",
+                "Status Kehadiran": r.is_attended ? "Hadir" : "Belum Hadir",
+                "Waktu Hadir": r.is_attended && r.attended_at ? format(new Date(r.attended_at), 'HH:mm:ss, dd MMM yyyy') : "-"
+            }));
+
+            const filename = `Peserta_${event.event_title.replace(/[^a-zA-Z0-9]/g, '_')}`;
+
+            toast.dismiss();
+
+            if (type === 'excel') {
+                const worksheet = XLSX.utils.json_to_sheet(formattedData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Registrants");
+                XLSX.writeFile(workbook, `${filename}.xlsx`);
+                toast.success("Berhasil mengekspor ke Excel");
+            } else if (type === 'pdf') {
+                const doc = new jsPDF('landscape');
+                doc.text(`Data Peserta: ${event.event_title}`, 14, 15);
+                autoTable(doc, {
+                    startY: 20,
+                    head: [["No", "Nama Peserta", "Email", "No. HP", "Status", "Waktu Hadir"]],
+                    body: formattedData.map((d: any) => [d["No"], d["Nama Peserta"], d["Email"], d["No. HP"], d["Status Kehadiran"], d["Waktu Hadir"]]),
+                    theme: 'striped',
+                    headStyles: { fillColor: [37, 99, 235] }
+                });
+                doc.save(`${filename}.pdf`);
+                toast.success("Berhasil mengekspor ke PDF");
+            }
+        } catch (error) {
+            console.error("Export Error:", error);
+            toast.dismiss();
+            toast.error("Gagal mengekspor data");
+        }
+    };
+
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
     };
@@ -236,13 +311,21 @@ export default function EventRegistrantsPage() {
                         <QrCode size={16} />
                         <span className="hidden sm:inline">Scan Attendance</span>
                     </button>
-                    <button
-                        onClick={() => toast.info("Data export will be available in the next update.")}
-                        className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                    >
-                        <Download size={16} />
-                        <span>Export CSV</span>
-                    </button>
+                    <div className="relative z-40" ref={exportRef}>
+                        <button
+                            onClick={() => setIsExportOpen(!isExportOpen)}
+                            className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
+                        >
+                            <Download size={16} />
+                            <span>Export Data</span>
+                        </button>
+                        {isExportOpen && (
+                            <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl flex flex-col p-2 animate-in fade-in zoom-in duration-200">
+                                <button onClick={() => handleExport('excel')} className="text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">Export to Excel</button>
+                                <button onClick={() => handleExport('pdf')} className="text-left px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition-colors">Export to PDF</button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </header>
 
