@@ -31,7 +31,7 @@ export function RecentPosts() {
 
 
   return (
-    <section className="relative px-6 pt-10 pb-16 bg-linear-to-b from-white/20 to-white animate-fade-in">
+    <section className="relative px-6 pt-10 pb-16 bg-slate-50 animate-fade-in">
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="text-center mb-12">
           <h2 className="mb-4 text-transparent text-3xl bg-clip-text bg-blue-500 drop-shadow-md">

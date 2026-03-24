@@ -89,7 +89,6 @@ export default function ArticlesPage() {
               : `${articles.length} Artikel Tersedia`}
           </h2>
         </div>
-
         {/* EMPTY */}
         {articles.length === 0 ? (
           <div className="py-24 text-center animate-fade-in flex flex-col items-center">
