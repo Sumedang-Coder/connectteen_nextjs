@@ -94,11 +94,10 @@ export default function ExplorePage() {
         </div>
       </section>
 
-      {/* ================= CONTENT (Menggunakan Grid & Pagination Anda) ================= */}
       <main className="px-6 lg:px-20 pb-20">
         <div className="max-w-7xl mx-auto animate-fade-in">
           <h2 className="text-2xl font-extrabold mb-10">
-            ✨ Recent Explorations
+             Recent Explorations
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-15 gap-8">

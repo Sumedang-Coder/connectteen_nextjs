@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { toast, Toaster } from "sonner";
+import Loader from "@/components/Loader";
 
 import { useEventStore } from "@/app/store/useEventStore";
 import RegistrationDataModal from "./components/RegistrationDataModal";
@@ -55,30 +56,20 @@ export default function Events() {
   };
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedEventForQR, setSelectedEventForQR] = useState<{ id: string, title: string, token: string } | null>(null);
+
+  const handleSearch = async () => {
+    await fetchEvents({ search: searchQuery });
+  };
 
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-    }, 500);
+  if (loading && events.length === 0) {
+    return <Loader size="sm" fullScreen />;
+  }
 
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  const filteredEvents = useMemo(() => {
-    if (!debouncedQuery) return events;
-
-    return events.filter((event) =>
-      event.event_title
-        .toLowerCase()
-        .includes(debouncedQuery.toLowerCase())
-    );
-  }, [events, debouncedQuery]);
 
   const toggleExpand = (eventId: string) => {
     setExpandedEvents((prev) => {
@@ -92,8 +83,15 @@ export default function Events() {
     });
   };
 
+
   return (
-    <div className="bg-slate-50 dark:bg-slate-950 min-h-screen">
+    <div className="bg-slate-50 min-h-screen relative">
+
+      {loading && events.length > 0 && (
+        <div className="absolute inset-0 z-10 bg-white backdrop-blur-sm flex items-center justify-center">
+          <Loader size="sm" />
+        </div>
+      )}
       {/* HERO */}
       <section className="relative bg-linear-to-r from-cyan-500 to-blue-600 py-24 px-6 overflow-hidden">
         <div className="max-w-4xl animate-fade-in mx-auto text-center">
@@ -113,7 +111,7 @@ export default function Events() {
                 className="w-full px-4 py-3 outline-none text-gray-700"
               />
               <button
-                onClick={() => setDebouncedQuery(searchQuery)}
+                onClick={handleSearch}
                 className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:brightness-110 transition"
               >
                 Cari
@@ -122,6 +120,7 @@ export default function Events() {
           </div>
         </div>
       </section>
+
 
       {/* EVENTS */}
       <section className="max-w-7xl mx-auto px-6 py-16">
@@ -132,162 +131,127 @@ export default function Events() {
           </p>
         </div>
 
-        <Link href="/events/live-doodles">
-          <div className="max-w-lg mb-10 mx-auto cursor-pointer rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-xl transition-all group">
-
-            {/* IMAGE */}
-            <div className="h-72 relative overflow-hidden">
-              <Image
-                src="/img/doodles_new.png"
-                alt="Send Message"
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
+        {/* EMPTY STATE */}
+        {!loading && events.length === 0 && (
+          <div className="py-24 text-center animate-fade-in flex flex-col items-center">
+            <div className="w-40 h-40 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
+              <Search className="w-12 h-12 text-slate-300" />
             </div>
-
-            {/* CONTENT */}
-            <div className="p-6 flex items-center justify-between">
-
-              <div>
-                <h3 className="text-xl md:text-2xl font-bold mb-2 group-hover:text-blue-600 transition">
-                  Live Doodles Photo
-                </h3>
-
-                <p className="text-slate-600 dark:text-slate-400 text-sm md:text-base">
-                  Tuliskan pesan mu di Event ini.
-                </p>
-
-                <div className="flex flex-wrap gap-2 mt-4 mb-6">
-                    <Tag>
-                      <Calendar className="w-4 h-4" />
-                      8 Maret 2026
-                    </Tag>
-
-                    <Tag color="purple">
-                      <MapPin className="w-4 h-4" />
-                      Sumedang Creative Center
-                    </Tag>
-
-                  </div>
-
-              </div>
-
-            </div>
-
-          </div>
-        </Link>
-
-        {/* Empty State */}
-        {!loading && filteredEvents.length === 0 && (
-          <div className="text-center py-20 text-gray-500">
-            Tidak ada event ditemukan.
+            <h3 className="text-xl font-bold mb-2">
+              Event tidak ditemukan
+            </h3>
+            <p className="text-slate-500">
+              Coba kata kunci lain atau lihat event terbaru.
+            </p>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-15 gap-8">
-          {filteredEvents.map((event) => {
-            const isLoading = loadingId === event.id;
-            const isExpanded = expandedEvents.has(event.id);
+        {events.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-15 gap-8">
+            {events.map((event) => {
+              const isLoading = loadingId === event.id;
+              const isExpanded = expandedEvents.has(event.id);
 
-            return (
-              <div
-                key={event.id}
-                className="bg-white animate-fade-in dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col hover:shadow-xl transition-all group"
-              >
-                {/* IMAGE */}
-                <div className="h-56 relative overflow-hidden">
-                  {event.image_url && (
-                    <Image
-                      src={event.image_url}
-                      alt={event.event_title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                  )}
-                </div>
-
-                {/* CONTENT */}
-                <div className="p-6 flex flex-col flex-1">
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600 transition">
-                    {event.event_title}
-                  </h3>
-
-                  <DescriptionWithToggle
-                    description={event.description}
-                    isExpanded={isExpanded}
-                    onToggle={() => toggleExpand(event.id)}
-                  />
-
-                  {/* TAG INFO */}
-                  <div className="flex flex-wrap gap-2 mt-4 mb-6">
-                    <Tag>
-                      <Calendar className="w-4 h-4" />
-                      {formatDate(event.date)}
-                    </Tag>
-
-                    <Tag color="purple">
-                      <MapPin className="w-4 h-4" />
-                      {event.location}
-                    </Tag>
-
-                    <Tag color="pink">
-                      <Users className="w-4 h-4" />
-                      {event.registrants_count ?? 0} Peserta
-                    </Tag>
-
-                    {event.is_registered && event.attendance_token && (
-                      <Tag color="green">
-                        <QrCode className="w-4 h-4" />
-                        Tiket Tersedia
-                      </Tag>
-                    )}
-                    {event.quota > 0 && (event.registrants_count ?? 0) >= event.quota && !event.is_registered && (
-                      <Tag color="pink">
-                        Penuh
-                      </Tag>
+              return (
+                <div
+                  key={event.id}
+                  className="bg-white animate-fade-in dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col hover:shadow-xl transition-all group"
+                >
+                  {/* IMAGE */}
+                  <div className="h-56 relative overflow-hidden">
+                    {event.image_url && (
+                      <Image
+                        src={event.image_url}
+                        alt={event.event_title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
                     )}
                   </div>
 
-                  {/* QR TICKET BUTTON (Only if registered) */}
-                  {event.is_registered && event.attendance_token && (
-                    <button
-                      onClick={() => setSelectedEventForQR({
-                        id: event.id,
-                        title: event.event_title,
-                        token: event.attendance_token!
-                      })}
-                      className="mb-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition"
-                    >
-                      <QrCode className="w-5 h-5" />
-                      Lihat QR Tiket
-                    </button>
-                  )}
+                  {/* CONTENT */}
+                  <div className="p-6 flex flex-col flex-1">
+                    <h3 className="text-xl font-bold mb-2 group-hover:text-blue-600 transition">
+                      {event.event_title}
+                    </h3>
 
-                  {/* BUTTON */}
-                  <button
-                    disabled={isLoading || (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)}
-                    onClick={() => handleRegisterClick(event.id)}
-                    className={`mt-auto py-3 rounded-xl font-semibold transition shadow-md
+                    <DescriptionWithToggle
+                      description={event.description}
+                      isExpanded={isExpanded}
+                      onToggle={() => toggleExpand(event.id)}
+                    />
+
+                    {/* TAG INFO */}
+                    <div className="flex flex-wrap gap-2 mt-4 mb-6">
+                      <Tag>
+                        <Calendar className="w-4 h-4" />
+                        {formatDate(event.date)}
+                      </Tag>
+
+                      <Tag color="purple">
+                        <MapPin className="w-4 h-4" />
+                        {event.location}
+                      </Tag>
+
+                      <Tag color="pink">
+                        <Users className="w-4 h-4" />
+                        {event.registrants_count ?? 0} Peserta
+                      </Tag>
+
+                      {event.is_registered && event.attendance_token && (
+                        <Tag color="green">
+                          <QrCode className="w-4 h-4" />
+                          Tiket Tersedia
+                        </Tag>
+                      )}
+                      {event.quota > 0 && (event.registrants_count ?? 0) >= event.quota && !event.is_registered && (
+                        <Tag color="pink">
+                          Penuh
+                        </Tag>
+                      )}
+                    </div>
+
+                    {/* QR TICKET BUTTON (Only if registered) */}
+                    {event.is_registered && event.attendance_token && (
+                      <button
+                        onClick={() => setSelectedEventForQR({
+                          id: event.id,
+                          title: event.event_title,
+                          token: event.attendance_token!
+                        })}
+                        className="mb-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition"
+                      >
+                        <QrCode className="w-5 h-5" />
+                        Lihat QR Tiket
+                      </button>
+                    )}
+
+                    {/* BUTTON */}
+                    <button
+                      disabled={isLoading || (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)}
+                      onClick={() => handleRegisterClick(event.id)}
+                      className={`mt-auto py-3 rounded-xl font-semibold transition shadow-md
                       ${event.is_registered
-                        ? "bg-red-500 hover:bg-red-600 text-white"
-                        : (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)
-                          ? "bg-slate-300 cursor-not-allowed text-slate-500 shadow-none"
-                          : "bg-blue-600 hover:brightness-110 text-white"
-                      }`}
-                  >
-                    {isLoading
-                      ? "Memproses..."
-                      : event.is_registered
-                        ? "Batalkan"
-                        : (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)
-                          ? "Penuh"
-                          : "Register"}
-                  </button>
+                          ? "bg-red-500 hover:bg-red-600 text-white"
+                          : (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)
+                            ? "bg-slate-300 cursor-not-allowed text-slate-500 shadow-none"
+                            : "bg-blue-600 hover:brightness-110 text-white"
+                        }`}
+                    >
+                      {isLoading
+                        ? "Memproses..."
+                        : event.is_registered
+                          ? "Batalkan"
+                          : (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)
+                            ? "Penuh"
+                            : "Register"}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* QR MODAL */}
@@ -299,23 +263,23 @@ export default function Events() {
               Tunjukkan QR Code ini ke petugas untuk absensi.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="flex flex-col items-center justify-center py-8">
             <div className="text-lg font-bold text-blue-600 mb-6 text-center">
               {selectedEventForQR?.title}
             </div>
-            
+
             <div className="p-4 bg-white rounded-2xl shadow-lg border-2 border-slate-100">
               {selectedEventForQR?.token && (
-                <QRCodeSVG 
-                  value={selectedEventForQR.token} 
+                <QRCodeSVG
+                  value={selectedEventForQR.token}
                   size={200}
                   level="H"
                   includeMargin={true}
                 />
               )}
             </div>
-            
+
             <div className="mt-8 text-sm text-slate-500 text-center bg-slate-50 p-4 rounded-xl border border-slate-100 italic">
               "Pesan: Pastikan Anda datang tepat waktu dan mematuhi protokol yang berlaku."
             </div>
@@ -323,9 +287,9 @@ export default function Events() {
         </DialogContent>
       </Dialog>
       <Toaster richColors position="top-center" />
-      
-      <RegistrationDataModal 
-        isOpen={isDataModalOpen} 
+
+      <RegistrationDataModal
+        isOpen={isDataModalOpen}
         onClose={() => setIsDataModalOpen(false)}
         onSuccess={handleDataModalSuccess}
       />
@@ -356,7 +320,7 @@ function DescriptionWithToggle({
   return (
     <div>
       {isExpanded ? (
-        <div 
+        <div
           className="text-sm prose prose-sm max-w-none text-gray-600 mb-2"
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
         />
