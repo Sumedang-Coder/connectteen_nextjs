@@ -46,7 +46,8 @@ export default function AdminSigninPage() {
                 toast.error(res.data.message || "Login failed");
             }
         } catch (err: any) {
-            toast.error(err?.response?.data?.message || "Invalid credentials");
+            const errorMessage = err?.response?.data?.message || err?.response?.data || "Invalid credentials";
+            toast.error(typeof errorMessage === 'string' ? errorMessage : "Terlalu banyak percobaan, silakan coba lagi nanti.");
         } finally {
             setLoading(false);
         }

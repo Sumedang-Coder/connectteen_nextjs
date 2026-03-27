@@ -64,6 +64,8 @@ export default function ManageProfilePage() {
         }
     };
 
+    const [isResetSent, setIsResetSent] = useState(false);
+
     const handleRequestReset = async () => {
         if (!user?.email) return;
         
@@ -72,8 +74,8 @@ export default function ManageProfilePage() {
         setLoading(false);
 
         if (res.success) {
-            toast.success("Link reset password telah dikirim ke email Anda.");
-            // No automatic redirect since it's link-based, they need to check email.
+            toast.success("Link reset password telah dikirim!");
+            setIsResetSent(true);
         } else {
             toast.error(res.message);
         }
@@ -237,8 +239,16 @@ export default function ManageProfilePage() {
                                     className="w-full py-4 bg-slate-50 border-2 border-slate-200 text-slate-900 rounded-2xl font-bold hover:bg-slate-100 hover:border-slate-300 transition-all flex items-center justify-center gap-2"
                                 >
                                     <Mail size={18} />
-                                    Kirim Link Reset Password
+                                    {isResetSent ? "Kirim Ulang Link Reset" : "Kirim Link Reset Password"}
                                 </button>
+                                {isResetSent && (
+                                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
+                                        <p className="text-xs text-amber-700 font-bold flex items-start gap-2">
+                                            <span className="text-sm">⚠️</span>
+                                            <span>Email terkirim! Jika tidak menemukannya, silakan cek folder <strong>Spam</strong> atau <strong>Junk</strong> admin@connectteenedu.com.</span>
+                                        </p>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="flex items-center justify-end gap-3 pt-2">

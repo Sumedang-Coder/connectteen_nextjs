@@ -26,6 +26,7 @@ function ResetPasswordForm() {
         confirmPassword: ""
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
     useEffect(() => {
@@ -46,15 +47,20 @@ function ResetPasswordForm() {
             return toast.error("Password minimal 6 karakter");
         }
 
-        const res = await resetPassword(token || "", formData.password);
-        if (res.success) {
-            toast.success("Password berhasil diperbarui!");
-            setIsSuccess(true);
-            setTimeout(() => {
-                router.push("/signin-admin");
-            }, 3000);
-        } else {
-            toast.error(res.message);
+        setIsSubmitting(true);
+        try {
+            const res = await resetPassword(token || "", formData.password);
+            if (res.success) {
+                toast.success("Password berhasil diperbarui!");
+                setIsSuccess(true);
+                setTimeout(() => {
+                    router.push("/signin-admin");
+                }, 3000);
+            } else {
+                toast.error(res.message);
+            }
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -132,10 +138,10 @@ function ResetPasswordForm() {
 
                 <button
                     type="submit"
-                    disabled={loading || !token}
+                    disabled={isSubmitting || !token}
                     className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black shadow-xl shadow-slate-900/10 hover:bg-slate-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 group"
                 >
-                    {loading ? (
+                    {isSubmitting ? (
                         <Loader2 className="animate-spin" size={20} />
                     ) : (
                         <span>Simpan Password Baru</span>

@@ -10,7 +10,7 @@ interface AuthState {
   loading: boolean;
 
   setUser: (user: any) => void;
-  loginGuest: () => Promise<boolean>;
+  loginGuest: () => Promise<{ success: boolean; message?: string }>;
   verifyEmail: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
   resendVerification: (email: string) => Promise<{ success: boolean; message: string }>;
   forgotPassword: (email: string) => Promise<{ success: boolean; message: string }>;
@@ -33,8 +33,6 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   loginGuest: async () => {
     try {
-      set({ loading: true });
-
       const res = await api.post("/auth/guest/login");
       const data = res.data;
 
@@ -43,11 +41,14 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         loading: false,
       });
-      return true;
+      return { success: true };
     } catch (error: any) {
       console.error("Guest login failed:", error);
       set({ loading: false });
-      return false;
+      return { 
+        success: false, 
+        message: error.response?.data?.message || "Gagal masuk sebagai tamu. Silakan coba lagi."
+      };
     }
   },
 
@@ -84,12 +85,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   forgotPassword: async (email) => {
     try {
-      set({ loading: true });
       const res = await api.post("/auth/forgot-password", { email });
-      set({ loading: false });
       return { success: true, message: res.data.message };
     } catch (error: any) {
-      set({ loading: false });
       return { 
         success: false, 
         message: error.response?.data?.message || "Forgot password request failed" 
@@ -99,12 +97,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   resetPassword: async (token: string, newPassword: string) => {
     try {
-      set({ loading: true });
       const res = await api.post("/auth/reset-password", { token, newPassword });
-      set({ loading: false });
       return { success: true, message: res.data.message };
     } catch (error: any) {
-      set({ loading: false });
       return { 
         success: false, 
         message: error.response?.data?.message || "Password reset failed" 

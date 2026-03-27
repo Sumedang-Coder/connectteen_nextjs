@@ -319,6 +319,9 @@ export default function ManageAdminsPage() {
                                     <p className="text-sm text-slate-500">
                                         Undangan telah berhasil dikirim ke <span className="font-bold text-slate-900">{lastInvitedEmail}</span>.
                                     </p>
+                                    <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mt-3 font-semibold">
+                                        ⚠️ Jika tidak menemukan email, coba cek folder <strong>Spam</strong> atau <strong>Junk</strong>.
+                                    </p>
                                 </div>
                                 <button
                                     onClick={() => setShowInviteModal(false)}
