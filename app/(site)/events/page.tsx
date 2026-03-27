@@ -66,6 +66,10 @@ export default function Events() {
     fetchEvents();
   }, [fetchEvents, isAuthenticated]);
 
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => event.visibility !== "private");
+  }, [events]);
+
   if (loading && events.length === 0) {
     return <Loader size="sm" fullScreen />;
   }
@@ -132,23 +136,23 @@ export default function Events() {
         </div>
 
         {/* EMPTY STATE */}
-        {!loading && events.length === 0 && (
+        {!loading && filteredEvents.length === 0 && (
           <div className="py-24 text-center animate-fade-in flex flex-col items-center">
             <div className="w-40 h-40 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
               <Search className="w-12 h-12 text-slate-300" />
             </div>
             <h3 className="text-xl font-bold mb-2">
-              Event tidak ditemukan
+              Belum ada event
             </h3>
             <p className="text-slate-500">
-              Coba kata kunci lain atau lihat event terbaru.
+              Coba kata kunci lain atau lihat event terbaru nanti.
             </p>
           </div>
         )}
 
-        {events.length > 0 && (
+        {filteredEvents.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-15 gap-8">
-            {events.map((event) => {
+            {filteredEvents.map((event) => {
               const isLoading = loadingId === event.id;
               const isExpanded = expandedEvents.has(event.id);
 
@@ -228,23 +232,27 @@ export default function Events() {
 
                     {/* BUTTON */}
                     <button
-                      disabled={isLoading || (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)}
+                      disabled={isLoading || event.status === "closed" || (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)}
                       onClick={() => handleRegisterClick(event.id)}
                       className={`mt-auto py-3 rounded-xl font-semibold transition shadow-md
-                      ${event.is_registered
-                          ? "bg-red-500 hover:bg-red-600 text-white"
-                          : (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)
-                            ? "bg-slate-300 cursor-not-allowed text-slate-500 shadow-none"
-                            : "bg-blue-600 hover:brightness-110 text-white"
+                      ${event.status === "closed"
+                          ? "bg-slate-300 cursor-not-allowed text-slate-500 shadow-none"
+                          : event.is_registered
+                            ? "bg-red-500 hover:bg-red-600 text-white"
+                            : (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)
+                              ? "bg-slate-300 cursor-not-allowed text-slate-500 shadow-none"
+                              : "bg-blue-600 hover:brightness-110 text-white"
                         }`}
                     >
                       {isLoading
                         ? "Memproses..."
-                        : event.is_registered
-                          ? "Batalkan"
-                          : (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)
-                            ? "Penuh"
-                            : "Register"}
+                        : event.status === "closed"
+                          ? "Tutup"
+                          : event.is_registered
+                            ? "Batalkan"
+                            : (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)
+                              ? "Penuh"
+                              : "Register"}
                     </button>
                   </div>
                 </div>
