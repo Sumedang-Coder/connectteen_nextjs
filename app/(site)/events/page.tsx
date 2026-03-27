@@ -31,18 +31,27 @@ export default function Events() {
 
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  const handleRegisterClick = async (eventId: string) => {
+  const handleRegisterClick = async (event: any) => {
     const isGuest = user?.role === "guest";
-    const hasMissingData = !user?.name || user?.name.startsWith("Anonymous") || !user?.no_hp;
+    const hasMissingData =
+      !user?.name || user?.name.startsWith("Anonymous") || !user?.no_hp;
+
+
+    if (event.is_registered) {
+      setLoadingId(event.id);
+      await toggleRegisterEvent(event.id);
+      setLoadingId(null);
+      return;
+    }
 
     if (!isAuthenticated || isGuest || hasMissingData) {
-      setPendingEventId(eventId);
+      setPendingEventId(event.id);
       setIsDataModalOpen(true);
       return;
     }
 
-    setLoadingId(eventId);
-    await toggleRegisterEvent(eventId);
+    setLoadingId(event.id);
+    await toggleRegisterEvent(event.id);
     setLoadingId(null);
   };
 
@@ -92,7 +101,7 @@ export default function Events() {
     <div className="bg-slate-50 min-h-screen relative">
 
       {loading && events.length > 0 && (
-        <div className="absolute inset-0 z-10 bg-white backdrop-blur-sm flex items-center justify-center">
+        <div className="absolute inset-0 z-10 bg-white backdrop-blur-sm flex justify-center">
           <Loader size="sm" />
         </div>
       )}
@@ -233,7 +242,7 @@ export default function Events() {
                     {/* BUTTON */}
                     <button
                       disabled={isLoading || event.status === "closed" || (!event.is_registered && event.quota > 0 && (event.registrants_count ?? 0) >= event.quota)}
-                      onClick={() => handleRegisterClick(event.id)}
+                      onClick={() => handleRegisterClick(event)}
                       className={`mt-auto py-3 rounded-xl font-semibold transition shadow-md
                       ${event.status === "closed"
                           ? "bg-slate-300 cursor-not-allowed text-slate-500 shadow-none"

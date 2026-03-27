@@ -145,7 +145,7 @@ export function Header() {
               onClick={() => handleNavClick("/")}
               className={`cursor-pointer font-medium ${isActive("/")}`}
             >
-              Homezzz
+              Home
             </span>
 
             {/* MESSAGE DROPDOWN (HOVER ONLY) */}
