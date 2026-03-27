@@ -282,7 +282,7 @@ export default function ArticleDetailPage() {
                         </button>
                       )}
 
-                      {isAuthenticated && (user?.id === c.userId || isAdmin) && (
+                      {isAuthenticated && (user?.id === c.userId || user?._id === c.userId || isAdmin) && (
                         <button
                           onClick={async () => {
                             if (article && confirm("Hapus komentar ini?")) {
@@ -320,7 +320,7 @@ export default function ArticleDetailPage() {
                     <div className="bg-gray-100 p-2 rounded-2xl rounded-tl-none grow border border-white">
                       <div className="flex items-center justify-between mb-0.5">
                         <p className="text-xs font-bold text-blue-600">{r.name}</p>
-                        {isAuthenticated && (user?.id === r.userId || isAdmin) && (
+                        {isAuthenticated && (user?.id === r.userId || user?._id === r.userId || isAdmin) && (
                           <button
                             onClick={async () => {
                               if (article && confirm("Hapus balasan ini?")) {
