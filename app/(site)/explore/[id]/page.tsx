@@ -312,7 +312,7 @@ export default function MessageDetailPage() {
                         </button>
                       )}
 
-                      {isAuthenticated && (user?.id === c.userId || user?._id === c.userId || isAdmin) && (
+                      {isAuthenticated && (isAdmin || (user?.id && String(user.id) === String(c.userId)) || (user?._id && String(user._id) === String(c.userId))) && (
                         <button
                           onClick={async () => {
                             if (confirm("Hapus komentar ini?")) {
@@ -352,7 +352,7 @@ export default function MessageDetailPage() {
 
                       <div className="flex items-center justify-between mb-0.5">
                         <p className="text-xs font-bold text-blue-600">{r.name}</p>
-                        {isAuthenticated && (user?.id === r.userId || user?._id === r.userId || isAdmin) && (
+                        {isAuthenticated && (isAdmin || (user?.id && String(user.id) === String(r.userId)) || (user?._id && String(user._id) === String(r.userId))) && (
                           <button
                             onClick={async () => {
                               if (confirm("Hapus balasan ini?")) {
