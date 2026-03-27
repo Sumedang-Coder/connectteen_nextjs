@@ -6,23 +6,11 @@ import { ArrowLeft, Clock, Loader2, MessageCircle, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { useArticleStore } from "@/app/store/useArticleStore"
+import { useAuthStore } from "@/app/store/useAuthStore"
 import Loader from "@/components/Loader"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuthStore } from "@/app/store/useAuthStore"
-import { Lock } from "lucide-react"
-
-type Reply = {
-  id: number
-  name: string
-  message: string
-}
-
-type Comment = {
-  id: number
-  name: string
-  message: string
-  replies: Reply[]
-}
+import { Lock as LockIcon } from "lucide-react"
+import NotFound from "@/components/NotFound"
 
 export default function ArticleDetailPage() {
 
@@ -31,7 +19,7 @@ export default function ArticleDetailPage() {
 
   const { article, fetchArticleById, loading, error, reactToArticle, fetchComments, addComment, addReply, deleteComment, deleteReply } = useArticleStore()
   const { user } = useAuthStore()
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const isAuthenticated = useAuthStore((s: any) => s.isAuthenticated)
   const isAdmin = user && ["super_admin", "content_editor"].includes(user.role)
 
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
@@ -62,7 +50,18 @@ export default function ArticleDetailPage() {
     }
   }, [id, isAuthenticated])
 
-  if (loading || !article) return <Loader size="sm" fullScreen />
+  if (loading) return <Loader size="sm" fullScreen />
+  
+  if (!article) {
+    return (
+      <NotFound 
+        title="Artikel Tidak Ditemukan"
+        message="Duh, sepertinya artikel yang kamu cari tidak ada atau sudah dihapus oleh penulisnya."
+        backLink="/articles"
+        backText="Lihat Artikel Lain"
+      />
+    )
+  }
 
   const handleReaction = (type: string) => {
     if (!isAuthenticated) {
@@ -242,7 +241,7 @@ export default function ArticleDetailPage() {
             ) : (
               <div className="bg-gray-50 border border-dashed border-gray-300 rounded-2xl p-8 text-center space-y-3 w-full">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                  <Lock size={20} />
+                  <LockIcon size={20} />
                 </div>
                 <p className="text-sm text-gray-500">Silakan login untuk memberikan komentar</p>
                 <Button
@@ -385,7 +384,7 @@ export default function ArticleDetailPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="w-full max-w-[380px] bg-white rounded-2xl shadow-2xl p-8 text-center">
             <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100">
-              <Lock className="w-6 h-6 text-blue-600" />
+              <LockIcon className="w-6 h-6 text-blue-600" />
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Kamu belum Login</h2>
             <p className="text-sm text-gray-600 leading-relaxed mb-6">Kalo mau kasih reaksi Login dulu yaa</p>
