@@ -7,21 +7,27 @@ import { Mail, ShieldCheck, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function ForgotPasswordPage() {
-    const { forgotPassword, loading } = useAuthStore();
+    const { forgotPassword } = useAuthStore();
     const [email, setEmail] = useState("");
     const [isSent, setIsSent] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!email) return toast.error("Masukkan email admin Anda");
 
-        const res = await forgotPassword(email.trim().toLowerCase());
-        if (res.success) {
-            toast.success("Link reset telah dikirim!");
-            setIsSent(true);
-        } else {
-            toast.error(res.message);
+        setIsSubmitting(true);
+        try {
+            const res = await forgotPassword(email.trim().toLowerCase());
+            if (res.success) {
+                setIsSent(true);
+                toast.success("Link reset telah dikirim!");
+            } else {
+                toast.error(res.message);
+            }
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -58,10 +64,10 @@ export default function ForgotPasswordPage() {
 
                             <button
                                 type="submit"
-                                disabled={loading}
+                                disabled={isSubmitting}
                                 className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black shadow-xl shadow-slate-900/10 hover:bg-slate-800 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2 group"
                             >
-                                {loading ? (
+                                {isSubmitting ? (
                                     <Loader2 className="animate-spin" size={20} />
                                 ) : (
                                     <>
@@ -81,8 +87,11 @@ export default function ForgotPasswordPage() {
                                 <p className="text-sm text-slate-500 font-medium leading-relaxed">
                                     Silakan periksa kotak masuk email <strong>{email}</strong> untuk melanjutkan pengaturan ulang kata sandi.
                                 </p>
+                                <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mt-3 font-semibold">
+                                    ⚠️ Jika tidak menemukan email, coba cek folder <strong>Spam</strong> atau <strong>Junk</strong> Anda.
+                                </p>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => setIsSent(false)}
                                 className="text-xs font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest"
                             >
@@ -93,8 +102,8 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 <div className="text-center">
-                    <Link 
-                        href="/signin-admin" 
+                    <Link
+                        href="/signin-admin"
                         className="inline-flex items-center gap-2 text-xs font-black text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-widest"
                     >
                         <ArrowLeft size={16} />
