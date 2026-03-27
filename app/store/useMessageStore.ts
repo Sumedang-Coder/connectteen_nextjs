@@ -70,8 +70,11 @@ interface MessageState {
   resetAllMessages: () => void;
   reactToMessage: (id: string, type: string) => Promise<void>;
   addComment: (id: string, name: string, message: string) => Promise<void>;
+  deleteComment: (messageId: string, commentId: string) => Promise<void>;
   fetchComments: (id: string) => Promise<any[]>;
   addReply: (commentId: string, name: string, message: string) => Promise<void>;
+  deleteReply: (messageId: string, commentId: string, replyId: string) => Promise<void>;
+  resetStore: () => void;
 }
 
 export const useMessageStore = create<MessageState>((set, get) => ({
@@ -307,6 +310,21 @@ export const useMessageStore = create<MessageState>((set, get) => ({
     }
   },
 
+  deleteComment: async (messageId: string, commentId: string) => {
+    try {
+      const res = await api.delete(`/comments/${commentId}`);
+      if (res.data.success) {
+        set((state) => ({
+          selectedMessage: state.selectedMessage 
+            ? { ...state.selectedMessage, comments: state.selectedMessage.comments?.filter((c: any) => c._id !== commentId) }
+            : null
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to delete comment:", err);
+    }
+  },
+
   fetchComments: async (id) => {
     try {
       const res = await api.get(`/messages/${id}/comments`);
@@ -339,6 +357,50 @@ export const useMessageStore = create<MessageState>((set, get) => ({
     } catch (err) {
       console.error("Failed to add reply:", err);
     }
+  },
+
+  deleteReply: async (messageId: string, commentId: string, replyId: string) => {
+    try {
+      const res = await api.delete(`/comments/${commentId}/reply/${replyId}`);
+      if (res.data.success) {
+        set((state) => {
+          if (!state.selectedMessage || state.selectedMessage.id !== messageId) return state;
+          
+          const newComments = state.selectedMessage.comments?.map((c: any) => {
+            if (c._id === commentId) {
+              return { ...c, replies: c.replies.filter((r: any) => r._id !== replyId) };
+            }
+            return c;
+          });
+
+          return {
+            selectedMessage: { ...state.selectedMessage, comments: newComments }
+          };
+        });
+      }
+    } catch (err) {
+      console.error("Failed to delete reply:", err);
+    }
+  },
+
+  resetStore: () => {
+    set({
+      messages: [],
+      allMessages: [],
+      myMessages: [],
+      selectedMessage: null,
+      loading: false,
+      page: 1,
+      hasMore: true,
+      isFetching: false,
+      pagination: {
+        totalMessages: 0,
+        totalPages: 1,
+        currentPage: 1,
+        limit: 10,
+      },
+      error: null,
+    });
   },
 
   resetAllMessages: () => {

@@ -135,9 +135,9 @@ export default function SecretMessagesPage() {
                                 </div>
                             )
                         ) : allMessages.map((msg, index) => (
-                            <div key={msg.id} className="relative group border-b border-slate-100 last:border-b-0">
+                            <div key={msg.id || (msg as any)._id} className="relative group border-b border-slate-100 last:border-b-0">
                                 <Link
-                                    href={`/secret-messages/${msg.id}`}
+                                    href={`/explore/${msg.id || (msg as any)._id}`}
                                     className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-4 sm:px-6 py-5 transition-all hover:bg-slate-50/80"
                                 >
                                     <div className="flex-1 min-w-0">

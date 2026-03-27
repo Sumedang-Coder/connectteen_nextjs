@@ -64,7 +64,7 @@ export default function Events() {
 
   useEffect(() => {
     fetchEvents();
-  }, [fetchEvents]);
+  }, [fetchEvents, isAuthenticated]);
 
   if (loading && events.length === 0) {
     return <Loader size="sm" fullScreen />;

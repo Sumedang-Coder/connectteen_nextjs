@@ -2,35 +2,25 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { ArrowLeft, Clock, Loader2, MessageCircle } from "lucide-react"
+import { ArrowLeft, Clock, Loader2, MessageCircle, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { useArticleStore } from "@/app/store/useArticleStore"
+import { useAuthStore } from "@/app/store/useAuthStore"
 import Loader from "@/components/Loader"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuthStore } from "@/app/store/useAuthStore"
-import { Lock } from "lucide-react"
-
-type Reply = {
-  id: number
-  name: string
-  message: string
-}
-
-type Comment = {
-  id: number
-  name: string
-  message: string
-  replies: Reply[]
-}
+import { Lock as LockIcon } from "lucide-react"
+import NotFound from "@/components/NotFound"
 
 export default function ArticleDetailPage() {
 
   const router = useRouter()
   const { id } = useParams() as { id: string }
 
-  const { article, fetchArticleById, loading, error, reactToArticle, fetchComments, addComment, addReply } = useArticleStore()
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const { article, fetchArticleById, loading, error, reactToArticle, fetchComments, addComment, addReply, deleteComment, deleteReply } = useArticleStore()
+  const { user } = useAuthStore()
+  const isAuthenticated = useAuthStore((s: any) => s.isAuthenticated)
+  const isAdmin = user && ["super_admin", "content_editor"].includes(user.role)
 
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
   const [replyText, setReplyText] = useState("")
@@ -58,9 +48,20 @@ export default function ArticleDetailPage() {
         fetchComments(id)
       })
     }
-  }, [id])
+  }, [id, isAuthenticated])
 
-  if (loading || !article) return <Loader size="sm" fullScreen />
+  if (loading) return <Loader size="sm" fullScreen />
+  
+  if (!article) {
+    return (
+      <NotFound 
+        title="Artikel Tidak Ditemukan"
+        message="Duh, sepertinya artikel yang kamu cari tidak ada atau sudah dihapus oleh penulisnya."
+        backLink="/articles"
+        backText="Lihat Artikel Lain"
+      />
+    )
+  }
 
   const handleReaction = (type: string) => {
     if (!isAuthenticated) {
@@ -240,14 +241,14 @@ export default function ArticleDetailPage() {
             ) : (
               <div className="bg-gray-50 border border-dashed border-gray-300 rounded-2xl p-8 text-center space-y-3 w-full">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                  <Lock size={20} />
+                  <LockIcon size={20} />
                 </div>
                 <p className="text-sm text-gray-500">Silakan login untuk memberikan komentar</p>
                 <Button
                   variant="outline"
                   size="sm"
                   className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50"
-                  onClick={() => router.push("/signin")}
+                onClick={() => router.push(`/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`)}
                 >
                   Sign In Sekarang
                 </Button>
@@ -281,6 +282,19 @@ export default function ArticleDetailPage() {
                         </button>
                       )}
 
+                      {isAuthenticated && (user?.id === c.userId || isAdmin) && (
+                        <button
+                          onClick={async () => {
+                            if (article && confirm("Hapus komentar ini?")) {
+                              await deleteComment(article.id, c._id);
+                            }
+                          }}
+                          className="text-xs font-medium text-red-500 hover:text-red-600 transition flex items-center gap-1"
+                        >
+                          <Trash2 className="h-3 w-3" /> Hapus
+                        </button>
+                      )}
+
                       {c.replies && c.replies.length > 0 && (
                         <button
                           onClick={() => toggleReplies(c._id)}
@@ -297,24 +311,31 @@ export default function ArticleDetailPage() {
                 </div>
 
                 {expandedComments.has(c._id) && c.replies && c.replies.map((r: any) => (
-
                   <div key={r._id} className="flex gap-3 ml-12 animate-in slide-in-from-top-2 duration-300">
-
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={r.avatarUrl} alt={r.name} />
                       <AvatarFallback>{r.name.charAt(0)}</AvatarFallback>
                     </Avatar>
 
                     <div className="bg-gray-100 p-2 rounded-2xl rounded-tl-none grow border border-white">
-
-                      <p className="text-xs font-bold text-blue-600 mb-0.5">{r.name}</p>
-
+                      <div className="flex items-center justify-between mb-0.5">
+                        <p className="text-xs font-bold text-blue-600">{r.name}</p>
+                        {isAuthenticated && (user?.id === r.userId || isAdmin) && (
+                          <button
+                            onClick={async () => {
+                              if (article && confirm("Hapus balasan ini?")) {
+                                await deleteReply(article.id, c._id, r._id);
+                              }
+                            }}
+                            className="text-gray-400 hover:text-red-500 transition"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-700">{r.message}</p>
-
                     </div>
-
                   </div>
-
                 ))}
 
                 {replyingTo === c._id && (
@@ -363,13 +384,13 @@ export default function ArticleDetailPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="w-full max-w-[380px] bg-white rounded-2xl shadow-2xl p-8 text-center">
             <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100">
-              <Lock className="w-6 h-6 text-blue-600" />
+              <LockIcon className="w-6 h-6 text-blue-600" />
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Kamu belum Login</h2>
             <p className="text-sm text-gray-600 leading-relaxed mb-6">Kalo mau kasih reaksi Login dulu yaa</p>
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setShowLoginModal(false)}>Tutup</Button>
-              <Button className="flex-1 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white" onClick={() => router.push("/signin")}>Sign In</Button>
+              <Button className="flex-1 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white" onClick={() => router.push(`/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`)}>Sign In</Button>
             </div>
           </div>
         </div>

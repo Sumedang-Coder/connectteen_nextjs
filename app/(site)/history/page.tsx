@@ -36,7 +36,7 @@ export default function HistoryPage() {
   // Proteksi Route
   useEffect(() => {
     if (!loadingAuth && !isAuthenticated) {
-      router.replace("/signin");
+      router.replace(`/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
     }
   }, [loadingAuth, isAuthenticated, router]);
 

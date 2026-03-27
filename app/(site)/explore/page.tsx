@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search } from "lucide-react";
+import { Search, MessageCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useMessageStore } from "@/app/store/useMessageStore";
+import { useAuthStore } from "@/app/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Loader from "@/components/Loader";
@@ -22,6 +23,7 @@ export default function ExplorePage() {
     hasMore,
     isFetching,
   } = useMessageStore();
+  const { isAuthenticated } = useAuthStore();
 
   const router = useRouter();
 
@@ -29,7 +31,7 @@ export default function ExplorePage() {
     resetAllMessages();
     // specify pagination options as object to match store API
     fetchAllMessages({ page: 1, limit: 6 });
-  }, []);
+  }, [fetchAllMessages, isAuthenticated]);
 
   const handleLoadMore = () => {
     if (!isFetching && hasMore) {
@@ -97,63 +99,75 @@ export default function ExplorePage() {
       <main className="px-6 lg:px-20 pb-20">
         <div className="max-w-7xl mx-auto animate-fade-in">
           <h2 className="text-2xl font-extrabold mb-10">
-             Recent Explorations
+            ✨ Recent Explorations
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-15 gap-8">
-            {allMessages.map((msg: any) => (
-              <Card
-                key={msg.id}
-                onClick={() => router.push(`/explore/${msg.id}`)}
-                className="group bg-white rounded-3xl p-1 shadow-lg border-[6px] border-white transition-all hover:-translate-y-2 cursor-pointer"
-              >
-                <CardContent className="flex flex-col flex-1 min-h-[260px] rounded-2xl p-6 space-y-6">
-                  {/* Header */}
-                  <div className="flex items-center gap-3">
-                    <Avatar className="border-2 border-cyan-500">
-                      <AvatarFallback className="bg-linear-to-br from-cyan-500 to-blue-500 text-white">
-                        {msg.recipient_name?.[0] || "?"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-bold text-gray-900">
-                        To: {msg.recipient_name || "Unknown"}
-                      </p>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide">
-                        Shared Message
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Message */}
-                  <p className="text-gray-700 leading-relaxed line-clamp-3">
-                    {msg.message || "–"}
-                  </p>
-
-                  {/* Song */}
-                  {msg.song_name && (
-                    <div className="mt-auto bg-linear-to-r from-cyan-500 to-blue-500 rounded-2xl p-4 flex items-center gap-4">
-                      {msg.song_image && (
-                        <img
-                          src={msg.song_image}
-                          alt={msg.song_name}
-                          className="w-14 h-14 rounded-xl object-cover shrink-0 bg-white p-1"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white font-bold truncate">
-                          {msg.song_name}
+          {allMessages.length === 0 && !isFetching ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+              <div className="h-16 w-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6">
+                <MessageCircle size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Belum ada pesan</h3>
+              <p className="text-gray-500 text-center max-w-sm">
+                Jadilah yang pertama untuk membagikan ceritamu dengan menekan tombol Kirim Pesan!
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:px-15 gap-8">
+              {allMessages.map((msg: any) => (
+                <Card
+                  key={msg.id}
+                  onClick={() => router.push(`/explore/${msg.id}`)}
+                  className="group bg-white rounded-3xl p-1 shadow-lg border-[6px] border-white transition-all hover:-translate-y-2 cursor-pointer"
+                >
+                  <CardContent className="bg-cyan-50 flex flex-col flex-1 min-h-[260px] rounded-2xl p-6 space-y-6">
+                    {/* Header */}
+                    <div className="flex items-center gap-3">
+                      <Avatar className="border-2 border-cyan-500">
+                        <AvatarFallback className="bg-linear-to-br from-cyan-500 to-blue-500 text-white">
+                          {msg.recipient_name?.[0] || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-bold text-gray-900">
+                          To: {msg.recipient_name || "Unknown"}
                         </p>
-                        <p className="text-white/80 text-xs truncate">
-                          {msg.song_artist}
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">
+                          Shared Message
                         </p>
                       </div>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+
+                    {/* Message */}
+                    <p className="text-gray-700 leading-relaxed line-clamp-3">
+                      {msg.message || "–"}
+                    </p>
+
+                    {/* Song */}
+                    {msg.song_name && (
+                      <div className="mt-auto bg-linear-to-r from-cyan-500 to-blue-500 rounded-2xl p-4 flex items-center gap-4">
+                        {msg.song_image && (
+                          <img
+                            src={msg.song_image}
+                            alt={msg.song_name}
+                            className="w-14 h-14 rounded-xl object-cover shrink-0 bg-white p-1"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-bold truncate">
+                            {msg.song_name}
+                          </p>
+                          <p className="text-white/80 text-xs truncate">
+                            {msg.song_artist}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
           {/* Pagination Controls */}
           {hasMore && (

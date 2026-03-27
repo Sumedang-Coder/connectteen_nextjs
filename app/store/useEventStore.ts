@@ -87,6 +87,7 @@ interface EventState {
     search?: string;
     sort?: string;
   }) => Promise<void>;
+  resetStore: () => void;
 }
 
 export const useEventStore = create<EventState>((set, get) => ({
@@ -305,5 +306,24 @@ export const useEventStore = create<EventState>((set, get) => ({
     } finally {
       set({ loading: false });
     }
+  },
+
+  resetStore: () => {
+    set({
+      events: [],
+      event: null,
+      registrants: [],
+      page: 1,
+      hasMore: true,
+      isFetching: false,
+      loading: false,
+      error: null,
+      pagination: {
+        totalEvents: 0,
+        totalPages: 0,
+        currentPage: 1,
+        limit: 10,
+      },
+    });
   },
 }));

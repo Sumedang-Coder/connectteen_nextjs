@@ -29,6 +29,9 @@ export function RecentPosts() {
     return <Loader size="md" fullScreen />;
   }
 
+  if (!messages || messages.length === 0) {
+    return null;
+  }
 
   return (
     <section className="relative px-6 pt-10 pb-16 bg-slate-50 animate-fade-in">

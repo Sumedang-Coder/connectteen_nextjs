@@ -9,27 +9,17 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import MusicPlayerCard from "@/components/MusicPlayerCard";
-import { ArrowLeft, Loader2, MessageCircle } from "lucide-react";
+import { ArrowLeft, Loader2, MessageCircle, Trash2, Lock as LockIcon } from "lucide-react";
+import { toast } from "sonner";
 import { useAuthStore } from "@/app/store/useAuthStore";
-import { Lock } from "lucide-react";
-
-type Reply = {
-  id: number;
-  name: string;
-  message: string;
-};
-
-type Comment = {
-  id: number;
-  name: string;
-  message: string;
-  replies: Reply[];
-};
+import NotFound from "@/components/NotFound";
 
 export default function MessageDetailPage() {
 
   const { id } = useParams();
-  const { selectedMessage, fetchMessageById, reactToMessage, addComment, addReply } = useMessageStore();
+  const { selectedMessage, fetchMessageById, reactToMessage, addComment, addReply, deleteMessage, deleteComment, deleteReply, loading } = useMessageStore();
+  const { user } = useAuthStore();
+  const isAdmin = user && ["super_admin", "content_editor"].includes(user.role);
 
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -39,7 +29,7 @@ export default function MessageDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [replyLoadingId, setReplyLoadingId] = useState<string | null>(null);
   const router = useRouter();
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isAuthenticated = useAuthStore((s: any) => s.isAuthenticated);
 
   const reactions = selectedMessage?.reactions || {
     heart: 0,
@@ -54,17 +44,26 @@ export default function MessageDetailPage() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-
     if (id) fetchMessageById(id as string);
 
     return () => {
       useMessageStore.setState({ selectedMessage: null })
     }
+  }, [id, fetchMessageById, isAuthenticated]);
 
-  }, [id, fetchMessageById]);
+  if (loading) {
+    return <Loader size="sm" fullScreen />
+  }
 
   if (!selectedMessage) {
-    return <Loader size="sm" fullScreen />
+    return (
+      <NotFound 
+        title="Pesan Tidak Ditemukan"
+        message="Oops! Pesan rahasia ini sepertinya sudah tidak ada atau link yang kamu gunakan salah."
+        backLink="/explore"
+        backText="Cari Pesan Lain"
+      />
+    );
   }
 
   const avatarLetter = selectedMessage.recipient_name?.charAt(0).toUpperCase() || "?";
@@ -76,6 +75,19 @@ export default function MessageDetailPage() {
     }
     if (selectedMessage) {
       reactToMessage(selectedMessage.id, type);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedMessage) return;
+    if (confirm("Are you sure you want to delete this secret message?")) {
+      try {
+        await deleteMessage(selectedMessage.id);
+        toast.success("Message deleted successfully");
+        router.push("/explore");
+      } catch (err) {
+        toast.error("Failed to delete message");
+      }
     }
   };
 
@@ -135,6 +147,17 @@ export default function MessageDetailPage() {
           />
           Kembali
         </Button>
+
+        {isAdmin && (
+          <Button
+            onClick={handleDelete}
+            variant="destructive"
+            className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-medium shadow-lg ml-4"
+          >
+            <Trash2 size={18} />
+            Hapus Pesan
+          </Button>
+        )}
 
         {/* MESSAGE CARD */}
         <Card className="overflow-hidden rounded-3xl border border-white/40 shadow-2xl bg-white/90 backdrop-blur">
@@ -243,14 +266,14 @@ export default function MessageDetailPage() {
           ) : (
             <div className="bg-gray-50 border border-dashed border-gray-300 rounded-2xl p-8 text-center space-y-3">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                <Lock size={20} />
+                <LockIcon size={20} />
               </div>
               <p className="text-sm text-gray-500">Silakan login untuk memberikan komentar</p>
               <Button 
                 variant="outline" 
                 size="sm" 
                 className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50"
-                onClick={() => router.push("/signin")}
+                onClick={() => router.push(`/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`)}
               >
                 Sign In Sekarang
               </Button>
@@ -289,6 +312,19 @@ export default function MessageDetailPage() {
                         </button>
                       )}
 
+                      {isAuthenticated && (user?.id === c.userId || isAdmin) && (
+                        <button
+                          onClick={async () => {
+                            if (confirm("Hapus komentar ini?")) {
+                              await deleteComment(selectedMessage.id, c._id);
+                            }
+                          }}
+                          className="text-xs font-medium text-red-500 hover:text-red-600 transition flex items-center gap-1"
+                        >
+                          <Trash2 className="h-3 w-3" /> Hapus
+                        </button>
+                      )}
+
                       {c.replies && c.replies.length > 0 && (
                         <button
                           onClick={() => toggleReplies(c._id)}
@@ -314,7 +350,21 @@ export default function MessageDetailPage() {
 
                     <div className="bg-gray-100 p-2 rounded-xl grow">
 
-                      <p className="text-xs font-bold text-blue-600">{r.name}</p>
+                      <div className="flex items-center justify-between mb-0.5">
+                        <p className="text-xs font-bold text-blue-600">{r.name}</p>
+                        {isAuthenticated && (user?.id === r.userId || isAdmin) && (
+                          <button
+                            onClick={async () => {
+                              if (confirm("Hapus balasan ini?")) {
+                                await deleteReply(selectedMessage.id, c._id, r._id);
+                              }
+                            }}
+                            className="text-gray-400 hover:text-red-500 transition"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        )}
+                      </div>
 
                       <p className="text-sm text-gray-700">{r.message}</p>
 
@@ -360,7 +410,7 @@ export default function MessageDetailPage() {
 
                 {/* Icon */}
                 <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100">
-                  <Lock className="w-6 h-6 text-blue-600" />
+                  <LockIcon className="w-6 h-6 text-blue-600" />
                 </div>
 
                 {/* Title */}
@@ -385,7 +435,7 @@ export default function MessageDetailPage() {
 
                   <Button
                     className="flex-1 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white"
-                    onClick={() => router.push("/signin")}
+                    onClick={() => router.push(`/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`)}
                   >
                     Sign In
                   </Button>

@@ -62,7 +62,10 @@ interface ArticleState {
   fetchComments: (articleId: string) => Promise<void>;
   reactToArticle: (id: string, type: string) => Promise<void>;
   addComment: (articleId: string, name: string, message: string) => Promise<void>;
+  deleteComment: (articleId: string, commentId: string) => Promise<void>;
   addReply: (commentId: string, name: string, message: string) => Promise<void>;
+  deleteReply: (articleId: string, commentId: string, replyId: string) => Promise<void>;
+  resetStore: () => void;
 }
 
 export const useArticleStore = create<ArticleState>((set, get) => ({
@@ -304,5 +307,62 @@ export const useArticleStore = create<ArticleState>((set, get) => ({
     } catch (err) {
       console.error("Reply failed:", err);
     }
+  },
+
+  deleteComment: async (articleId: string, commentId: string) => {
+    try {
+      const res = await api.delete(`/comments/${commentId}`);
+      if (res.data.success) {
+        set((state) => ({
+          article: state.article && state.article.id === articleId 
+            ? { ...state.article, comments: state.article.comments?.filter((c: any) => c._id !== commentId) }
+            : state.article
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to delete comment:", err);
+    }
+  },
+
+  deleteReply: async (articleId: string, commentId: string, replyId: string) => {
+    try {
+      const res = await api.delete(`/comments/${commentId}/reply/${replyId}`);
+      if (res.data.success) {
+        set((state) => {
+          if (!state.article || state.article.id !== articleId) return state;
+          
+          const newComments = state.article.comments?.map((c: any) => {
+            if (c._id === commentId) {
+              return { ...c, replies: c.replies.filter((r: any) => r._id !== replyId) };
+            }
+            return c;
+          });
+
+          return {
+            article: { ...state.article, comments: newComments }
+          };
+        });
+      }
+    } catch (err) {
+      console.error("Failed to delete reply:", err);
+    }
+  },
+
+  resetStore: () => {
+    set({
+      articles: [],
+      article: null,
+      page: 1,
+      hasMore: true,
+      isFetching: false,
+      loading: false,
+      error: null,
+      pagination: {
+        totalArticles: 0,
+        totalPages: 1,
+        currentPage: 1,
+        limit: 10,
+      },
+    });
   },
 }));

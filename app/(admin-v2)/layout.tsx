@@ -88,6 +88,15 @@ export default function AdminV2Layout({
           router.push("/signin-admin");
         } else if (!ADMIN_ROLES.includes(user.role)) {
           router.push("/");
+        } else if (user.role === "viewer" && (pathname === "/write-article" || pathname === "/create-event")) {
+          // Redirect viewer back to their previous page, or dashboard if no history
+          import("sonner").then((mod) => mod.toast.error("Account Viewer tidak diizinkan."));
+          
+          if (typeof window !== "undefined" && window.history.length > 2) {
+            router.back();
+          } else {
+            router.replace("/dashboard");
+          }
         }
       }
     }
@@ -117,8 +126,9 @@ export default function AdminV2Layout({
   // Prevent rendering if not authorized and not on auth page
   const isAuthPage = ["/signin-admin", "/forgot-password", "/reset-password"].includes(pathname);
   const isAdmin = user && ["super_admin", "content_editor", "viewer"].includes(user.role);
+  const isViewerBlocked = user?.role === "viewer" && (pathname === "/write-article" || pathname === "/create-event");
 
-  if (!isAuthPage && !isAdmin) {
+  if (!isAuthPage && (!isAdmin || isViewerBlocked)) {
     return null;
   }
 

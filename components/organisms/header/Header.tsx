@@ -17,6 +17,10 @@ function Avatar({
 }) {
   const [imgSrc, setImgSrc] = useState(src);
 
+  useEffect(() => {
+    setImgSrc(src);
+  }, [src]);
+
   const displayName = name || "Guest";
   const initials = displayName
     .split(" ")
@@ -229,7 +233,7 @@ export function Header() {
               </div>
             ) : (
               <Button
-                onClick={() => router.push("/signin")}
+                onClick={() => router.push(`/signin?callbackUrl=${encodeURIComponent(pathname)}`)}
                 variant="ghost"
                 className="hover:bg-blue-100 font-semibold"
               >
@@ -308,38 +312,38 @@ export function Header() {
               About Us
             </span>
           </div>
-        {/* MOBILE AUTH SECTION */}
-        <div className="border-t mt-4 pt-4">
-          {user ? (
-            <div className="flex items-center justify-between px-4">
-              <div className="flex items-center gap-3">
-                <Avatar
-                  name={user.name || user.anonymous_name || "Tamu"}
-                  src={user.avatarUrl}
-                  className="w-8 h-8 rounded-full"
-                />
-                <span className="font-medium text-sm">{user.name || user.anonymous_name || "Tamu"}</span>
-              </div>
+          {/* MOBILE AUTH SECTION */}
+          <div className="border-t mt-4 pt-4">
+            {user ? (
+              <div className="flex items-center justify-between px-4">
+                <div className="flex items-center gap-3">
+                  <Avatar
+                    name={user.name || user.anonymous_name || "Tamu"}
+                    src={user.avatarUrl}
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <span className="font-medium text-sm">{user.name || user.anonymous_name || "Tamu"}</span>
+                </div>
 
-              <button
-                onClick={() => setShowLogoutModal(true)}
-                className="flex items-center gap-1 text-red-500 text-sm font-medium hover:opacity-80"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div className="px-4">
-              <Button
-                onClick={() => router.push("/signin")}
-                className="w-full font-semibold"
-              >
-                Sign In
-              </Button>
-            </div>
-          )}
-        </div>
+                <button
+                  onClick={() => setShowLogoutModal(true)}
+                  className="flex items-center gap-1 text-red-500 text-sm font-medium hover:opacity-80"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="px-4">
+                <Button
+                  onClick={() => router.push(`/signin?callbackUrl=${encodeURIComponent(pathname)}`)}
+                  className="w-full font-semibold"
+                >
+                  Sign In
+                </Button>
+              </div>
+            )}
+          </div>
         </nav>
 
 
