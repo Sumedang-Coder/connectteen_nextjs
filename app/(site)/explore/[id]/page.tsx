@@ -31,7 +31,15 @@ export default function MessageDetailPage() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((s: any) => s.isAuthenticated);
 
-  const reactions = selectedMessage?.reactions || {
+  type ReactionType = {
+    heart: number;
+    laugh: number;
+    like: number;
+    wow: number;
+    sad: number;
+  };
+
+  const defaultReactions: ReactionType = {
     heart: 0,
     laugh: 0,
     like: 0,
@@ -39,9 +47,10 @@ export default function MessageDetailPage() {
     sad: 0
   };
 
-  const comments = selectedMessage?.comments || [];
+  const [localReactions, setLocalReactions] = useState(defaultReactions);
+  const [localUserReaction, setLocalUserReaction] = useState<string | null>(null);
 
-  const [page, setPage] = useState(1);
+  const comments = selectedMessage?.comments || [];
 
   useEffect(() => {
     if (id) fetchMessageById(id as string);
@@ -51,13 +60,23 @@ export default function MessageDetailPage() {
     }
   }, [id, fetchMessageById, isAuthenticated]);
 
+  useEffect(() => {
+    if (selectedMessage) {
+      setLocalReactions({
+        ...defaultReactions,
+        ...(selectedMessage.reactions || {})
+      });
+      setLocalUserReaction(selectedMessage.userReaction || null);
+    }
+  }, [selectedMessage]);
+
   if (loading) {
     return <Loader size="sm" fullScreen />
   }
 
   if (!selectedMessage) {
     return (
-      <NotFound 
+      <NotFound
         title="Pesan Tidak Ditemukan"
         message="Oops! Pesan rahasia ini sepertinya sudah tidak ada atau link yang kamu gunakan salah."
         backLink="/explore"
@@ -68,18 +87,46 @@ export default function MessageDetailPage() {
 
   const avatarLetter = selectedMessage.recipient_name?.charAt(0).toUpperCase() || "?";
 
-  const handleReaction = (type: string) => {
-    if (!isAuthenticated) {
-      setShowLoginModal(true);
-      return;
+  const handleReaction = async (type: keyof ReactionType) => {
+  if (!isAuthenticated) {
+    setShowLoginModal(true);
+    return;
+  }
+
+  if (!selectedMessage) return;
+
+  const prevReaction = localUserReaction;
+  const prevReactionsState = { ...localReactions };
+
+  setLocalReactions((prev) => {
+    const updated = { ...prev };
+
+    if (prevReaction) {
+      updated[prevReaction as keyof ReactionType] -= 1;
     }
-    if (selectedMessage) {
-      reactToMessage(selectedMessage.id, type);
+
+    if (prevReaction === type) {
+      setLocalUserReaction(null);
+      return updated;
     }
-  };
+
+    updated[type] += 1;
+    setLocalUserReaction(type);
+
+    return updated;
+  });
+
+  try {
+    await reactToMessage(selectedMessage.id, type);
+  } catch (err) {
+    setLocalReactions(prevReactionsState);
+    setLocalUserReaction(prevReaction);
+  }
+};
 
   const handleDelete = async () => {
     if (!selectedMessage) return;
+
     if (confirm("Are you sure you want to delete this secret message?")) {
       try {
         await deleteMessage(selectedMessage.id);
@@ -96,7 +143,11 @@ export default function MessageDetailPage() {
 
     setIsSubmitting(true);
     try {
-      await addComment(selectedMessage.id, "User " + Math.floor(Math.random() * 1000), commentInput);
+      await addComment(
+        selectedMessage.id,
+        "User " + Math.floor(Math.random() * 1000),
+        commentInput
+      );
       setCommentInput("");
     } finally {
       setIsSubmitting(false);
@@ -108,11 +159,16 @@ export default function MessageDetailPage() {
 
     setReplyLoadingId(commentId);
     try {
-      await addReply(commentId, "User " + Math.floor(Math.random() * 1000), replyText);
+      await addReply(
+        commentId,
+        "User " + Math.floor(Math.random() * 1000),
+        replyText
+      );
       setReplyText("");
       setReplyingTo(null);
-      // Auto expand when replying
-      setExpandedComments(prev => new Set(prev).add(commentId));
+
+      // auto expand
+      setExpandedComments((prev) => new Set(prev).add(commentId));
     } finally {
       setReplyLoadingId(null);
     }
@@ -121,15 +177,16 @@ export default function MessageDetailPage() {
   const toggleReplies = (commentId: string) => {
     setExpandedComments((prev) => {
       const newSet = new Set(prev);
+
       if (newSet.has(commentId)) {
         newSet.delete(commentId);
       } else {
         newSet.add(commentId);
       }
+
       return newSet;
     });
   };
-
   // Removed loadMoreComments as it's not implemented on backend yet for simplicity
 
   return (
@@ -171,7 +228,7 @@ export default function MessageDetailPage() {
               </Avatar>
 
               <div>
-                <p className="text-sm opacity-80">Untuk</p>
+                <p className="text-sm opacity-80">To</p>
                 <h2 className="text-xl font-semibold leading-tight">
                   {selectedMessage.recipient_name}
                 </h2>
@@ -229,11 +286,11 @@ export default function MessageDetailPage() {
 
           <div className="flex flex-wrap gap-2">
 
-            <button onClick={() => handleReaction("heart")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "heart" ? "bg-red-100 border-red-500 scale-105" : "bg-white hover:bg-red-50"}`}>❤️ {reactions.heart}</button>
-            <button onClick={() => handleReaction("laugh")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "laugh" ? "bg-yellow-100 border-yellow-500 scale-105" : "bg-white hover:bg-yellow-50"}`}>😂 {reactions.laugh}</button>
-            <button onClick={() => handleReaction("like")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "like" ? "bg-blue-100 border-blue-500 scale-105" : "bg-white hover:bg-blue-50"}`}>👍 {reactions.like}</button>
-            <button onClick={() => handleReaction("wow")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "wow" ? "bg-orange-100 border-orange-500 scale-105" : "bg-white hover:bg-orange-50"}`}>😮 {reactions.wow}</button>
-            <button onClick={() => handleReaction("sad")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${selectedMessage.userReaction === "sad" ? "bg-indigo-100 border-indigo-500 scale-105" : "bg-white hover:bg-indigo-50"}`}>😢 {reactions.sad}</button>
+            <button onClick={() => handleReaction("heart")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${localUserReaction === "heart" ? "bg-red-100 border-red-500 scale-105" : "bg-white hover:bg-red-50"}`}>❤️ {localReactions.heart}</button>
+            <button onClick={() => handleReaction("laugh")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${localUserReaction === "laugh" ? "bg-yellow-100 border-yellow-500 scale-105" : "bg-white hover:bg-yellow-50"}`}>😂 {localReactions.laugh}</button>
+            <button onClick={() => handleReaction("like")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${localUserReaction === "like" ? "bg-blue-100 border-blue-500 scale-105" : "bg-white hover:bg-blue-50"}`}>👍 {localReactions.like}</button>
+            <button onClick={() => handleReaction("wow")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${localUserReaction === "wow" ? "bg-orange-100 border-orange-500 scale-105" : "bg-white hover:bg-orange-50"}`}>😮 {localReactions.wow}</button>
+            <button onClick={() => handleReaction("sad")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${localUserReaction === "sad" ? "bg-indigo-100 border-indigo-500 scale-105" : "bg-white hover:bg-indigo-50"}`}>😢 {localReactions.sad}</button>
 
           </div>
 
@@ -269,9 +326,9 @@ export default function MessageDetailPage() {
                 <LockIcon size={20} />
               </div>
               <p className="text-sm text-gray-500">Silakan login untuk memberikan komentar</p>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50"
                 onClick={() => router.push(`/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`)}
               >

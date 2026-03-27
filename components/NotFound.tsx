@@ -40,7 +40,7 @@ export default function NotFound({
           {message}
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full">
           <Button
             asChild
             variant="outline"
