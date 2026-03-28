@@ -31,13 +31,25 @@ export default function ArticleDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [replyLoadingId, setReplyLoadingId] = useState<string | null>(null)
 
-  const reactions = article?.reactions || {
+  type ReactionType = {
+    heart: number;
+    laugh: number;
+    like: number;
+    wow: number;
+    sad: number;
+  };
+
+  const defaultReactions: ReactionType = {
     heart: 0,
     laugh: 0,
     like: 0,
     wow: 0,
     sad: 0
-  }
+  };
+
+  const [localReactions, setLocalReactions] = useState(defaultReactions);
+  const [localUserReaction, setLocalUserReaction] = useState<string | null>(null);
+
 
   const comments = article?.comments || []
 
@@ -51,10 +63,10 @@ export default function ArticleDetailPage() {
   }, [id, isAuthenticated])
 
   if (loading) return <Loader size="sm" fullScreen />
-  
+
   if (!article) {
     return (
-      <NotFound 
+      <NotFound
         title="Artikel Tidak Ditemukan"
         message="Duh, sepertinya artikel yang kamu cari tidak ada atau sudah dihapus oleh penulisnya."
         backLink="/articles"
@@ -63,15 +75,42 @@ export default function ArticleDetailPage() {
     )
   }
 
-  const handleReaction = (type: string) => {
+  const handleReaction = async (type: keyof ReactionType) => {
     if (!isAuthenticated) {
-      setShowLoginModal(true)
-      return
+      setShowLoginModal(true);
+      return;
     }
-    if (article) {
-      reactToArticle(article.id, type)
+
+    if (!article) return;
+
+    const prevReaction = localUserReaction;
+    const prevReactionsState = { ...localReactions };
+
+    setLocalReactions((prev) => {
+      const updated = { ...prev };
+
+      if (prevReaction) {
+        updated[prevReaction as keyof ReactionType] -= 1;
+      }
+
+      if (prevReaction === type) {
+        setLocalUserReaction(null);
+        return updated;
+      }
+
+      updated[type] += 1;
+      setLocalUserReaction(type);
+
+      return updated;
+    });
+
+    try {
+      await reactToArticle(article.id, type);
+    } catch (err) {
+      setLocalReactions(prevReactionsState);
+      setLocalUserReaction(prevReaction);
     }
-  }
+  };
 
   const handleCommentSubmit = async () => {
     if (!commentInput.trim() || !article || isSubmitting) return
@@ -180,36 +219,11 @@ export default function ArticleDetailPage() {
             </h3>
 
             <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => handleReaction("heart")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'heart' ? 'bg-red-50 border-red-200 text-red-600 shadow-sm' : 'bg-white hover:bg-red-50'}`}
-              >
-                ❤️ <span className="text-sm">{reactions.heart}</span>
-              </button>
-              <button
-                onClick={() => handleReaction("laugh")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'laugh' ? 'bg-yellow-50 border-yellow-200 text-yellow-600 shadow-sm' : 'bg-white hover:bg-yellow-50'}`}
-              >
-                😂 <span className="text-sm">{reactions.laugh}</span>
-              </button>
-              <button
-                onClick={() => handleReaction("like")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'like' ? 'bg-blue-50 border-blue-200 text-blue-600 shadow-sm' : 'bg-white hover:bg-blue-50'}`}
-              >
-                👍 <span className="text-sm">{reactions.like}</span>
-              </button>
-              <button
-                onClick={() => handleReaction("wow")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'wow' ? 'bg-orange-50 border-orange-200 text-orange-600 shadow-sm' : 'bg-white hover:bg-orange-50'}`}
-              >
-                😮 <span className="text-sm">{reactions.wow}</span>
-              </button>
-              <button
-                onClick={() => handleReaction("sad")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition font-medium ${article.userReaction === 'sad' ? 'bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm' : 'bg-white hover:bg-indigo-50'}`}
-              >
-                😢 <span className="text-sm">{reactions.sad}</span>
-              </button>
+              <button onClick={() => handleReaction("heart")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${localUserReaction === "heart" ? "bg-red-100 border-red-500 scale-105" : "bg-white hover:bg-red-50"}`}>❤️ {localReactions.heart}</button>
+              <button onClick={() => handleReaction("laugh")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${localUserReaction === "laugh" ? "bg-yellow-100 border-yellow-500 scale-105" : "bg-white hover:bg-yellow-50"}`}>😂 {localReactions.laugh}</button>
+              <button onClick={() => handleReaction("like")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${localUserReaction === "like" ? "bg-blue-100 border-blue-500 scale-105" : "bg-white hover:bg-blue-50"}`}>👍 {localReactions.like}</button>
+              <button onClick={() => handleReaction("wow")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${localUserReaction === "wow" ? "bg-orange-100 border-orange-500 scale-105" : "bg-white hover:bg-orange-50"}`}>😮 {localReactions.wow}</button>
+              <button onClick={() => handleReaction("sad")} className={`px-3 py-1.5 border rounded-full text-sm shadow transition ${localUserReaction === "sad" ? "bg-indigo-100 border-indigo-500 scale-105" : "bg-white hover:bg-indigo-50"}`}>😢 {localReactions.sad}</button>
             </div>
 
           </div>
@@ -248,7 +262,7 @@ export default function ArticleDetailPage() {
                   variant="outline"
                   size="sm"
                   className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50"
-                onClick={() => router.push(`/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`)}
+                  onClick={() => router.push(`/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`)}
                 >
                   Sign In Sekarang
                 </Button>
