@@ -197,6 +197,31 @@ export default function ArticleDetailPage() {
 
       {/* CONTENT */}
       <div className="relative pb-20 px-6">
+        <div className="pointer-events-none select-none">
+
+          {/* Necta - Top Left */}
+          <div className="absolute left-0 top-10 hidden lg:block">
+            <Image
+              src="/img/necta.png"
+              alt=""
+              width={260}
+              height={260}
+              className="translate-x-[-20%]"
+            />
+          </div>
+
+          {/* Coco - Bottom Right */}
+          <div className="absolute right-0 bottom-10 hidden lg:block">
+            <Image
+              src="/img/coco.png"
+              alt=""
+              width={260}
+              height={260}
+              className="translate-x-[20%]"
+            />
+          </div>
+
+        </div>
         <div className="max-w-4xl mx-auto px-2 md:px-6 py-8">
           <div
             className="prose prose-lg max-w-none text-slate-800"

@@ -13,6 +13,7 @@ import { ArrowLeft, Loader2, MessageCircle, Trash2, Lock as LockIcon } from "luc
 import { toast } from "sonner";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import NotFound from "@/components/NotFound";
+import Image from "next/image";
 
 export default function MessageDetailPage() {
 
@@ -88,41 +89,41 @@ export default function MessageDetailPage() {
   const avatarLetter = selectedMessage.recipient_name?.charAt(0).toUpperCase() || "?";
 
   const handleReaction = async (type: keyof ReactionType) => {
-  if (!isAuthenticated) {
-    setShowLoginModal(true);
-    return;
-  }
-
-  if (!selectedMessage) return;
-
-  const prevReaction = localUserReaction;
-  const prevReactionsState = { ...localReactions };
-
-  setLocalReactions((prev) => {
-    const updated = { ...prev };
-
-    if (prevReaction) {
-      updated[prevReaction as keyof ReactionType] -= 1;
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
     }
 
-    if (prevReaction === type) {
-      setLocalUserReaction(null);
+    if (!selectedMessage) return;
+
+    const prevReaction = localUserReaction;
+    const prevReactionsState = { ...localReactions };
+
+    setLocalReactions((prev) => {
+      const updated = { ...prev };
+
+      if (prevReaction) {
+        updated[prevReaction as keyof ReactionType] -= 1;
+      }
+
+      if (prevReaction === type) {
+        setLocalUserReaction(null);
+        return updated;
+      }
+
+      updated[type] += 1;
+      setLocalUserReaction(type);
+
       return updated;
+    });
+
+    try {
+      await reactToMessage(selectedMessage.id, type);
+    } catch (err) {
+      setLocalReactions(prevReactionsState);
+      setLocalUserReaction(prevReaction);
     }
-
-    updated[type] += 1;
-    setLocalUserReaction(type);
-
-    return updated;
-  });
-
-  try {
-    await reactToMessage(selectedMessage.id, type);
-  } catch (err) {
-    setLocalReactions(prevReactionsState);
-    setLocalUserReaction(prevReaction);
-  }
-};
+  };
 
   const handleDelete = async () => {
     if (!selectedMessage) return;
@@ -193,6 +194,32 @@ export default function MessageDetailPage() {
     <div className="min-h-screen bg-linear-to-br px-6 py-12">
 
       <div className="max-w-3xl mx-auto space-y-10">
+
+        <div className="pointer-events-none select-none">
+
+          {/* Necta - Top Left */}
+          <div className="absolute left-0 top-10 hidden lg:block">
+            <Image
+              src="/img/necta.png"
+              alt=""
+              width={260}
+              height={260}
+              className="translate-x-[-20%]"
+            />
+          </div>
+
+          {/* Coco - Bottom Right */}
+          <div className="absolute right-0 bottom-10 hidden lg:block">
+            <Image
+              src="/img/coco.png"
+              alt=""
+              width={260}
+              height={260}
+              className="translate-x-[20%]"
+            />
+          </div>
+
+        </div>
 
         <Button
           onClick={() => router.back()}

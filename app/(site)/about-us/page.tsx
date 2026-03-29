@@ -405,7 +405,7 @@ export default function AboutUs() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
-          className="bg-linear-to-br from-blue-600 via-indigo-600 to-indigo-900 text-white rounded-3xl p-12 md:p-20 shadow-2xl relative overflow-hidden"
+          className="bg-blue-600 text-white rounded-3xl p-12 md:p-20 shadow-2xl relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-[radial-linear(ellipse_at_top,var(--tw-linear-stops))] from-white/10 to-transparent" />
           <div className="relative z-10">
@@ -445,7 +445,7 @@ export default function AboutUs() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6 }}
-          className="bg-linear-to-br from-blue-600 via-indigo-600 to-indigo-900 text-white rounded-3xl p-12 md:p-20 shadow-2xl text-center relative overflow-hidden"
+          className="bg-blue-600 text-white rounded-3xl p-12 md:p-20 shadow-2xl text-center relative overflow-hidden"
         >
           {/* Background effect */}
           <div className="absolute inset-0 bg-[radial-linear(circle_at_center,rgba(255,255,255,0.15),transparent_70%)]" />
