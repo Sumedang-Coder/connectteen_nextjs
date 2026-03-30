@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useInView, useAnimation } from 'framer-motion'
+import { motion, useInView, useAnimation, AnimatePresence } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import {
   Users,
@@ -15,6 +15,8 @@ import {
   ChevronDown,
   Instagram
 } from 'lucide-react'
+
+import Image from 'next/image'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -59,6 +61,7 @@ export default function AboutUs() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const controls = useAnimation()
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     if (isInView) {
@@ -172,26 +175,126 @@ export default function AboutUs() {
       </section>
 
       {/* ABOUT */}
-      <section className="max-w-5xl mx-auto px-6 py-24">
+      <section className="max-w-6xl mx-auto px-6 py-24">
         <motion.div
-          ref={ref}
-          initial="hidden"
-          animate={controls}
-          variants={containerVariants}
-          className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl p-12 md:p-20 border border-white/50"
+          className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-16 border border-white/50"
         >
-          <motion.div variants={fadeInUp}>
-            <h2 className="text-4xl md:text-5xl font-black bg-linear-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent mb-8 text-center">
-              Apa itu ConnecTeen?
-            </h2>
-            <p className="text-xl md:text-2xl text-gray-700 leading-relaxed max-w-4xl mx-auto text-center">
-              ConnecTeen adalah <span className="font-bold text-blue-600">program pengembangan diri</span> untuk remaja yang fokus pada
-              kesehatan reproduksi, mental wellness, self love, dan social awareness.
-              Kami hadir sebagai <span className="font-bold text-blue-900">ruang aman</span>, teman, dan kompas bagi remaja yang sedang menghadapi tekanan hidup.
-            </p>
-          </motion.div>
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+
+            {/* FOTO FOUNDER */}
+            <motion.div className="flex justify-center">
+              <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-3xl overflow-hidden shadow-xl">
+                <Image
+                  src="/img/founder.jpeg"
+                  alt="Founder ConnecTeen"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </motion.div>
+
+            {/* TEXT */}
+            <motion.div>
+              <h2 className="text-4xl md:text-5xl font-black bg-linear-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent mb-6">
+                Apa itu ConnecTeen?
+              </h2>
+
+              <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6">
+                ConnecTeen adalah <span className="font-bold text-blue-600">program pengembangan diri</span> untuk remaja yang fokus pada
+                kesehatan reproduksi, mental wellness, self love, dan social awareness.
+              </p>
+
+              <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6">
+                Kami hadir sebagai <span className="font-bold text-blue-900">ruang aman</span>, teman, dan kompas bagi remaja.
+              </p>
+
+              {/* BUTTON OPEN MODAL */}
+              <button
+                onClick={() => setOpen(true)}
+                className="text-blue-600 font-semibold hover:underline"
+              >
+                Baca selengkapnya →
+              </button>
+
+              {/* IDENTITAS FOUNDER */}
+              <div className="mt-6">
+                <p className="font-semibold text-gray-900 text-lg">Nama Founder</p>
+                <p className="text-gray-600">Founder ConnecTeen</p>
+              </div>
+            </motion.div>
+
+          </div>
         </motion.div>
       </section>
+
+      {/* MODAL */}
+      <AnimatePresence>
+        {open && (
+          <>
+            {/* BACKDROP */}
+            <motion.div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setOpen(false)}
+            />
+
+            {/* CONTENT */}
+            <motion.div
+              className="fixed inset-0 flex items-center justify-center z-50 p-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+            >
+              <div className="bg-white rounded-3xl max-w-3xl w-full p-8 shadow-2xl overflow-y-auto max-h-[80vh] space-y-6">
+
+                <button
+                  onClick={() => setOpen(false)}
+                  className="absolute top-4 right-4 bg-gray-100 hover:bg-gray-200 rounded-full w-10 h-10 flex items-center justify-center text-gray-600"
+                >
+                  ✕
+                </button>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                  Apa itu ConnectTeen?
+                </h2>
+
+                <p className="text-gray-700 leading-relaxed">
+                  ConnectTeen adalah program pengembangan diri untuk remaja yang fokus pada
+                  Kesehatan Reproduksi, Mental Wellness, Self Love, dan Social Awareness dengan pendekatan yang relatable, kreatif, dan fun.
+                </p>
+
+                <p className="text-gray-700 leading-relaxed">
+                  Remaja hari ini hidup di banyak tekanan — sekolah, pertemanan, ekspektasi, body image, hingga kesehatan mental — dan sering kali nggak tahu harus cerita ke siapa.
+                </p>
+
+                <p className="text-gray-700 leading-relaxed">
+                  Di sinilah ConnectTeen hadir: sebagai teman, ruang aman, dan kompas.
+                </p>
+
+                <p className="text-gray-700 leading-relaxed">
+                  ConnectTeen lahir saat Founder kami <strong>Hariz Fairuz Kamal</strong> menjalani peran sebagai Duta Genre Kabupaten Sumedang.
+                </p>
+
+                <p className="text-gray-700 leading-relaxed">
+                  Dari interaksi langsung dengan remaja, terlihat bahwa banyak dari mereka menghadapi tekanan dan membutuhkan ruang aman yang relevan.
+                </p>
+
+                <p className="text-gray-700 leading-relaxed">
+                  Berangkat dari kepedulian tersebut, ConnectTeen berkembang menjadi komunitas yang menghubungkan, mendukung, dan menginspirasi remaja.
+                </p>
+
+                <p className="text-gray-700 leading-relaxed">
+                  Kami percaya setiap remaja berhak merasa diterima dan didukung.
+                </p>
+
+
+
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* MISSION & VISION */}
       <section className="max-w-6xl mx-auto px-6 py-24">
@@ -302,7 +405,7 @@ export default function AboutUs() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
-          className="bg-linear-to-br from-blue-600 via-indigo-600 to-indigo-900 text-white rounded-3xl p-12 md:p-20 shadow-2xl relative overflow-hidden"
+          className="bg-blue-600 text-white rounded-3xl p-12 md:p-20 shadow-2xl relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-[radial-linear(ellipse_at_top,var(--tw-linear-stops))] from-white/10 to-transparent" />
           <div className="relative z-10">
@@ -342,7 +445,7 @@ export default function AboutUs() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6 }}
-          className="bg-linear-to-br from-blue-600 via-indigo-600 to-indigo-900 text-white rounded-3xl p-12 md:p-20 shadow-2xl text-center relative overflow-hidden"
+          className="bg-blue-600 text-white rounded-3xl p-12 md:p-20 shadow-2xl text-center relative overflow-hidden"
         >
           {/* Background effect */}
           <div className="absolute inset-0 bg-[radial-linear(circle_at_center,rgba(255,255,255,0.15),transparent_70%)]" />

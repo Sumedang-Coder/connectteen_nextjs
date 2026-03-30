@@ -13,7 +13,7 @@ export function Hero() {
 
       {/* background */}
       <Image
-        src="/img/hero-landing3.jpg"
+        src="/img/hero-landing-page.png"
         alt="Haii Teens! Selamat Datang"
         fill
         priority
