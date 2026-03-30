@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 
 import Image from 'next/image'
+import Link from 'next/link'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -78,24 +79,24 @@ export default function AboutUs() {
   const member = [
     {
       name: 'Adryan',
-      role: 'Founder & Visioner',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=center',
+      role: 'Website Developer',
+      image: '/img/adryan.jpeg',
       color: 'from-blue-500 to-indigo-500',
-      instagram: 'https://instagram.com/username_adryan',
+      instagram: 'https://instagram.com/ryaan.vh',
     },
     {
       name: 'Alifah',
       role: 'Mental Health Lead',
-      image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=center',
+      image: '/img/alifah.jpeg',
       color: 'from-pink-500 to-rose-500',
-      instagram: 'https://instagram.com/username_alifah',
+      instagram: 'https://instagram.com/4lz_artt',
     },
     {
       name: 'Aditya',
-      role: 'Community Builder',
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=center',
+      role: 'Website Developer',
+      image: '/img/aditya.jpeg',
       color: 'from-emerald-500 to-teal-500',
-      instagram: 'https://instagram.com/username_aditya',
+      instagram: 'https://instagram.com/adityrstu',
     }
   ]
 
@@ -139,10 +140,10 @@ export default function AboutUs() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            <button className="group bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-10 py-4 rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-3">
+            <Link href={'https://whatsapp.com/channel/0029VaxJTD1GE56idHGxL30O'} className="group bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-10 py-4 rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-3">
               Gabung Sekarang
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
+            </Link>
             <button className="flex items-center gap-3 text-gray-700 font-medium hover:text-blue-600 transition-colors">
               <MessageCircle className="w-6 h-6" />
               Pelajari Lebih Lanjut
@@ -218,8 +219,8 @@ export default function AboutUs() {
 
               {/* IDENTITAS FOUNDER */}
               <div className="mt-6">
-                <p className="font-semibold text-gray-900 text-lg">Nama Founder</p>
-                <p className="text-gray-600">Founder ConnecTeen</p>
+                <p className="font-semibold text-gray-900 text-lg">Hariz Fairuz Kamal</p>
+                <p className="text-gray-600">Founder ConnectTeen</p>
               </div>
             </motion.div>
 
@@ -485,7 +486,7 @@ export default function AboutUs() {
       {/* TEAM */}
       <section className="max-w-6xl mx-auto px-6 py-24">
         <h2 className="text-4xl md:text-5xl font-black text-center mb-20 bg-linear-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent">
-          Orang di Balik ConnecTeen
+          Orang di Balik ConnectTeen
         </h2>
 
         <div className="grid md:grid-cols-3 gap-10">
