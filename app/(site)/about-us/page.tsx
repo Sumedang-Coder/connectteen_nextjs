@@ -86,7 +86,7 @@ export default function AboutUs() {
     },
     {
       name: 'Alifah',
-      role: 'Mental Health Lead',
+      role: 'Illustrator',
       image: '/img/alifah.jpeg',
       color: 'from-pink-500 to-rose-500',
       instagram: 'https://instagram.com/4lz_artt',
@@ -140,11 +140,19 @@ export default function AboutUs() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            <Link href={'https://whatsapp.com/channel/0029VaxJTD1GE56idHGxL30O'} className="group bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-10 py-4 rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-3">
+            <Link 
+              href={'https://whatsapp.com/channel/0029VaxJTD1GE56idHGxL30O'} 
+              target="_blank"
+              className="group bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-10 py-4 rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-3"
+            >
               Gabung Sekarang
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <button className="flex items-center gap-3 text-gray-700 font-medium hover:text-blue-600 transition-colors">
+
+            <button 
+              onClick={() => document.getElementById('apa-itu')?.scrollIntoView({ behavior: 'smooth' })}
+              className="flex items-center gap-3 text-gray-700 font-medium hover:text-blue-600 transition-colors px-6 py-4"
+            >
               <MessageCircle className="w-6 h-6" />
               Pelajari Lebih Lanjut
             </button>
@@ -176,7 +184,7 @@ export default function AboutUs() {
       </section>
 
       {/* ABOUT */}
-      <section className="max-w-6xl mx-auto px-6 py-24">
+      <section id="apa-itu" className="max-w-6xl mx-auto px-6 py-24">
         <motion.div
           className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-16 border border-white/50"
         >
@@ -558,9 +566,13 @@ export default function AboutUs() {
           Tempat di mana kamu bisa jadi diri sendiri tanpa takut.
         </p>
 
-        <button className="bg-linear-to-r from-blue-500 to-indigo-600 text-white px-10 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:scale-105 transition">
+        <Link 
+          href={'https://whatsapp.com/channel/0029VaxJTD1GE56idHGxL30O'}
+          target="_blank"
+          className="inline-block bg-linear-to-r from-blue-500 to-indigo-600 text-white px-10 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:scale-105 transition"
+        >
           Gabung Sekarang
-        </button>
+        </Link>
       </section>
 
     </div>
