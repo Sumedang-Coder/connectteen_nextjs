@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 import { useMessageStore } from "@/app/store/useMessageStore";
 import { useRouter } from "next/navigation";
 import Loader from "./Loader";
+import Link from "next/link";
 
 export function RecentPosts() {
   const [loading, setLoading] = useState(true);
@@ -50,61 +51,61 @@ export function RecentPosts() {
             const avatarLetter = msg.recipient_name?.[0] || "?";
 
             return (
-              <Card
-                key={msg.id}
-                onClick={() => router.push(`/explore/${msg.id}`)}
-                className="group bg-white rounded-3xl p-1 shadow-lg border-[6px] border-white transition-all hover:-translate-y-2 cursor-pointer"
-              >
-                <CardContent className="flex flex-col flex-1 min-h-[260px] rounded-2xl p-6 space-y-6">
+              <Link href={`/explore/${msg.id}`}>
+                <Card
+                  key={msg.id}
+                  className="group bg-white rounded-3xl p-1 shadow-lg border-[6px] border-white transition-all hover:-translate-y-2 cursor-pointer"
+                >
+                  <CardContent className="flex flex-col flex-1 min-h-[260px] rounded-2xl p-6 space-y-6">
 
-                  {/* Header */}
-                  <div className="flex items-center gap-3">
-                    <Avatar className="border-2 border-cyan-500">
-                      <AvatarFallback className="bg-linear-to-br from-cyan-500 to-blue-500 text-white">
-                        {msg.recipient_name?.[0] || "?"}
-                      </AvatarFallback>
-                    </Avatar>
+                    {/* Header */}
+                    <div className="flex items-center gap-3">
+                      <Avatar className="border-2 border-cyan-500">
+                        <AvatarFallback className="bg-linear-to-br from-cyan-500 to-blue-500 text-white">
+                          {msg.recipient_name?.[0] || "?"}
+                        </AvatarFallback>
+                      </Avatar>
 
-                    <div>
-                      <p className="font-bold text-gray-900">
-                        To: {msg.recipient_name || "Unknown"}
-                      </p>
-                      <p className="text-xs text-gray-500 uppercase tracking-wide">
-                        Shared Message
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Message */}
-                  <p className="text-gray-700 leading-relaxed line-clamp-3">
-                    {msg.message || "–"}
-                  </p>
-
-                  {/* Song */}
-                  {msg.song_name && (
-                    <div className="mt-auto bg-linear-to-r from-cyan-500 to-blue-500 rounded-2xl p-4 flex items-center gap-4">
-
-                      {msg.song_image && (
-                        <img
-                          src={msg.song_image}
-                          alt={msg.song_name}
-                          className="w-14 h-14 rounded-xl object-cover shrink-0 bg-white p-1"
-                        />
-                      )}
-
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white font-bold truncate">
-                          {msg.song_name}
+                      <div>
+                        <p className="font-bold text-gray-900">
+                          To: {msg.recipient_name || "Unknown"}
                         </p>
-                        <p className="text-white/80 text-xs truncate">
-                          {msg.song_artist}
+                        <p className="text-xs text-gray-500 uppercase tracking-wide">
+                          Shared Message
                         </p>
                       </div>
                     </div>
-                  )}
 
-                </CardContent>
-              </Card>
+                    {/* Message */}
+                    <p className="text-gray-700 leading-relaxed line-clamp-3">
+                      {msg.message || "–"}
+                    </p>
+
+                    {/* Song */}
+                    {msg.song_name && (
+                      <div className="mt-auto bg-linear-to-r from-cyan-500 to-blue-500 rounded-2xl p-4 flex items-center gap-4">
+
+                        {msg.song_image && (
+                          <img
+                            src={msg.song_image}
+                            alt={msg.song_name}
+                            className="w-14 h-14 rounded-xl object-cover shrink-0 bg-white p-1"
+                          />
+                        )}
+
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-bold truncate">
+                            {msg.song_name}
+                          </p>
+                          <p className="text-white/80 text-xs truncate">
+                            {msg.song_artist}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                  </CardContent>
+                </Card></Link>
             );
           })}
         </div>
