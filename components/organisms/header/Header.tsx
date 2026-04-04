@@ -203,6 +203,12 @@ export function Header() {
             >
               Events
             </span>
+            <span
+              onClick={() => handleNavClick("/self-check")}
+              className={`cursor-pointer font-medium ${isActive("/self-check")}`}
+            >
+              Self Check
+            </span>
 
             <span
               onClick={() => handleNavClick("/about-us")}
@@ -303,6 +309,13 @@ export function Header() {
               className="text-sm text-gray-700 py-2 cursor-pointer"
             >
               Events
+            </span>
+
+            <span
+              onClick={() => handleNavClick("/self-check")}
+              className="text-sm text-gray-700 py-2 cursor-pointer"
+            >
+              Self Check
             </span>
 
             <span

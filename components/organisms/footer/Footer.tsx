@@ -1,4 +1,5 @@
-import { Mail, Facebook, Twitter, Instagram, Heart } from "lucide-react";
+import { Mail, Facebook, Instagram, Heart } from "lucide-react";
+import { FaTiktok } from "react-icons/fa";
 import { Button } from "../../ui/button";
 import Image from "next/image";
 import Link from "next/link";
@@ -53,11 +54,15 @@ export function Footer() {
                   <Instagram className="w-5 h-5" />
                 </a>
               </Button>
-              <Button variant="ghost" size="icon" className="hover:bg-white/20 border-2 border-white/30 rounded-xl">
-                <Twitter className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="hover:bg-white/20 border-2 border-white/30 rounded-xl" asChild>
+                <a href="https://www.tiktok.com/@connect.teen_">
+                  <FaTiktok className="w-5 h-5" />
+                </a>
               </Button>
-              <Button variant="ghost" size="icon" className="hover:bg-white/20 border-2 border-white/30 rounded-xl">
-                <Mail className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="hover:bg-white/20 border-2 border-white/30 rounded-xl" asChild>
+                <a href="mailto:connect.teen@example.com">
+                  <Mail className="w-5 h-5" />
+                </a>
               </Button>
             </div>
           </div>
