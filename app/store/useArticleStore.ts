@@ -1,11 +1,23 @@
 import { create } from "zustand";
 import api from "@/lib/axios";
+import { toast } from "sonner";
 
 export interface Article {
   id: string;
   title: string;
   description: string;
   image_url: string;
+  subtitle?: string;
+  polls?: {
+    _id: string;
+    question: string;
+    options: {
+      _id: string;
+      text: string;
+      votes: number;
+    }[];
+    voters: string[];
+  }[];
   created_at?: string;
   updated_at?: string;
   reactions: {
@@ -65,6 +77,7 @@ interface ArticleState {
   deleteComment: (articleId: string, commentId: string) => Promise<void>;
   addReply: (commentId: string, name: string, message: string) => Promise<void>;
   deleteReply: (articleId: string, commentId: string, replyId: string) => Promise<void>;
+  votePoll: (articleId: string, pollId: string, optionId: string) => Promise<void>;
   resetStore: () => void;
 }
 
@@ -345,6 +358,32 @@ export const useArticleStore = create<ArticleState>((set, get) => ({
       }
     } catch (err) {
       console.error("Failed to delete reply:", err);
+    }
+  },
+
+  votePoll: async (articleId, pollId, optionId) => {
+    try {
+      set({ loading: true, error: null });
+      const res = await api.post(`/articles/${articleId}/polls/${pollId}/vote`, { optionId });
+      if (res.data.success) {
+        const updatedPoll = res.data.data;
+        set((state) => {
+          if (!state.article || state.article.id !== articleId) return state;
+          const updatedPolls = state.article.polls?.map((p: any) => 
+            p._id === pollId ? updatedPoll : p
+          );
+          return {
+            article: { ...state.article, polls: updatedPolls }
+          };
+        });
+        toast.success("Vote berhasil!");
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Gagal melakukan vote";
+      set({ error: msg });
+      toast.error(msg);
+    } finally {
+      set({ loading: false });
     }
   },
 

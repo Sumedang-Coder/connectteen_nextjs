@@ -233,6 +233,8 @@ function ArticleEditor() {
     const { createArticle, updateArticle, fetchArticleById, article, loading, deleteArticle } = useArticleStore();
 
     const [title, setTitle] = useState("");
+    const [subtitle, setSubtitle] = useState("");
+    const [polls, setPolls] = useState<{ question: string; options: string[] }[]>([]);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -270,6 +272,13 @@ function ArticleEditor() {
     useEffect(() => {
         if (editId && article) {
             setTitle(article.title);
+            setSubtitle(article.subtitle || "");
+            if (article.polls) {
+                setPolls(article.polls.map(p => ({
+                    question: p.question,
+                    options: p.options.map(o => o.text)
+                })));
+            }
             setImagePreview(article.image_url);
             if (editor && article.description) {
                 editor.commands.setContent(article.description);
@@ -361,7 +370,15 @@ function ArticleEditor() {
 
         const formData = new FormData();
         formData.append("title", title);
+        formData.append("subtitle", subtitle);
         formData.append("description", description);
+        if (polls.length > 0) {
+            const formattedPolls = polls.map(p => ({
+                question: p.question,
+                options: p.options.map(o => ({ text: o, votes: 0 }))
+            }));
+            formData.append("polls", JSON.stringify(formattedPolls));
+        }
         if (imageFile) {
             formData.append("image", imageFile);
         }
@@ -489,6 +506,13 @@ function ArticleEditor() {
                                 rows={1}
                                 className="w-full bg-transparent border-none text-4xl md:text-5xl font-black text-slate-900 placeholder:text-slate-200 focus:ring-0 px-0 resize-none leading-tight"
                             />
+                            <input
+                                type="text"
+                                placeholder="Sub Judul (Opsional)..."
+                                value={subtitle}
+                                onChange={(e) => setSubtitle(e.target.value)}
+                                className="w-full bg-transparent border-none text-xl md:text-2xl font-bold text-slate-500 placeholder:text-slate-200 focus:ring-0 px-0"
+                            />
                             <div className="flex items-center justify-between text-[10px] uppercase tracking-widest font-bold text-slate-400">
                                  <span>{title.length}/200 Characters</span>
                             </div>
@@ -529,6 +553,85 @@ function ArticleEditor() {
                             
                             <div className="p-6 md:p-8 flex-1 prose prose-slate max-w-none focus:outline-none overflow-y-auto">
                                 <EditorContent editor={editor} className="outline-none min-h-[400px]" />
+                            </div>
+                        </div>
+
+                        {/* Polls Section */}
+                        <div className="mt-8 pt-8 border-t border-slate-100">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold text-slate-900">Polling Artikel</h3>
+                                <button
+                                    onClick={() => setPolls([...polls, { question: "", options: ["", ""] }])}
+                                    className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all"
+                                >
+                                    + Tambah Poll
+                                </button>
+                            </div>
+
+                            <div className="flex flex-col gap-6">
+                                {polls.map((poll, pIdx) => (
+                                    <div key={pIdx} className="p-6 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col gap-4">
+                                        <div className="flex items-start gap-4">
+                                            <input
+                                                type="text"
+                                                placeholder="Pertanyaan Poll..."
+                                                value={poll.question}
+                                                onChange={(e) => {
+                                                    const newPolls = [...polls];
+                                                    newPolls[pIdx].question = e.target.value;
+                                                    setPolls(newPolls);
+                                                }}
+                                                className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-slate-900 font-bold focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+                                            />
+                                            <button
+                                                onClick={() => setPolls(polls.filter((_, i) => i !== pIdx))}
+                                                className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                                            >
+                                                <Trash2 size={20} />
+                                            </button>
+                                        </div>
+
+                                        <div className="flex flex-col gap-2">
+                                            {poll.options.map((opt, oIdx) => (
+                                                <div key={oIdx} className="flex items-center gap-2">
+                                                    <input
+                                                        type="text"
+                                                        placeholder={`Opsi ${oIdx + 1}`}
+                                                        value={opt}
+                                                        onChange={(e) => {
+                                                            const newPolls = [...polls];
+                                                            newPolls[pIdx].options[oIdx] = e.target.value;
+                                                            setPolls(newPolls);
+                                                        }}
+                                                        className="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-600 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+                                                    />
+                                                    {poll.options.length > 2 && (
+                                                        <button
+                                                            onClick={() => {
+                                                                const newPolls = [...polls];
+                                                                newPolls[pIdx].options = newPolls[pIdx].options.filter((_, i) => i !== oIdx);
+                                                                setPolls(newPolls);
+                                                            }}
+                                                            className="p-1 text-slate-300 hover:text-red-500"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                            <button
+                                                onClick={() => {
+                                                    const newPolls = [...polls];
+                                                    newPolls[pIdx].options.push("");
+                                                    setPolls(newPolls);
+                                                }}
+                                                className="self-start text-xs font-bold text-blue-600 hover:underline mt-1"
+                                            >
+                                                + Tambah Opsi
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>

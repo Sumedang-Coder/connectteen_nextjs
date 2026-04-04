@@ -171,6 +171,7 @@ export default function ManageArticlesPage() {
                                                     </div>
                                                     <div className="flex flex-col gap-0.5">
                                                         <span className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">{article.title}</span>
+                                                        {article.subtitle && <span className="text-xs text-slate-500 line-clamp-1 italic">{article.subtitle}</span>}
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ID: {article.id.slice(-6)}</span>
                                                         </div>

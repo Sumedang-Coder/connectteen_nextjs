@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useLayoutEffect, useMemo } from "react";
 import Image from "next/image";
-import { Calendar, MapPin, Users, Search, QrCode } from "lucide-react";
+import { Calendar, MapPin, Users, Search, QrCode, Globe } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import DOMPurify from "dompurify";
 import {
@@ -198,13 +198,20 @@ export default function Events() {
                     <div className="flex flex-wrap gap-2 mt-4 mb-6">
                       <Tag>
                         <Calendar className="w-4 h-4" />
-                        {formatDate(event.date)}
+                        {formatDate(event.date)} {event.time && `• ${event.time}`}
                       </Tag>
 
-                      <Tag color="purple">
-                        <MapPin className="w-4 h-4" />
-                        {event.location}
-                      </Tag>
+                      {event.is_online ? (
+                        <Tag color="green">
+                          <Globe className="w-4 h-4" />
+                          Online
+                        </Tag>
+                      ) : (
+                        <Tag color="purple">
+                          <MapPin className="w-4 h-4" />
+                          {event.location}
+                        </Tag>
+                      )}
 
                       <Tag color="pink">
                         <Users className="w-4 h-4" />
@@ -224,20 +231,43 @@ export default function Events() {
                       )}
                     </div>
 
-                    {/* QR TICKET BUTTON (Only if registered) */}
-                    {event.is_registered && event.attendance_token && (
-                      <button
-                        onClick={() => setSelectedEventForQR({
-                          id: event.id,
-                          title: event.event_title,
-                          token: event.attendance_token!
-                        })}
-                        className="mb-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition"
-                      >
-                        <QrCode className="w-5 h-5" />
-                        Lihat QR Tiket
-                      </button>
-                    )}
+                    {/* QR TICKET & JOIN LINK BUTTONS */}
+                    <div className="flex flex-col gap-2 mb-4">
+                      {event.is_online && !event.is_registered && (
+                        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex items-start gap-3">
+                          <Globe className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+                          <p className="text-[11px] text-emerald-700 leading-tight">
+                            Event ini dilaksanakan secara <strong>Online</strong>. Link meeting akan tersedia di sini setelah Anda mendaftar.
+                          </p>
+                        </div>
+                      )}
+
+                      {event.is_registered && event.attendance_token && (
+                        <button
+                          onClick={() => setSelectedEventForQR({
+                            id: event.id,
+                            title: event.event_title,
+                            token: event.attendance_token!
+                          })}
+                          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border-2 border-blue-600 text-blue-600 font-bold hover:bg-blue-50 transition shadow-sm"
+                        >
+                          <QrCode className="w-5 h-5" />
+                          Lihat QR Tiket
+                        </button>
+                      )}
+
+                      {event.is_registered && event.is_online && event.link && (
+                        <a
+                          href={event.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition shadow-md animate-pulse-subtle"
+                        >
+                          <Globe className="w-5 h-5" />
+                          Join Meeting Sekarang
+                        </a>
+                      )}
+                    </div>
 
                     {/* BUTTON */}
                     <button

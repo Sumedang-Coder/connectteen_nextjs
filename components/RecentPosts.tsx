@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import { MessageCircle, Music } from "lucide-react";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { useMessageStore } from "@/app/store/useMessageStore";
@@ -82,25 +83,34 @@ export function RecentPosts() {
                     </p>
 
                     {/* Song */}
-                    {msg.song_name && (
-                      <div className="mt-auto bg-linear-to-r from-cyan-500 to-blue-500 rounded-2xl p-4 flex items-center gap-4">
-
-                        {msg.song_image && (
+                    {msg.song_id ? (
+                      <div className="mt-auto bg-linear-to-r from-cyan-500 to-blue-500 rounded-2xl p-4 flex items-center gap-4 shadow-md">
+                        {msg.song_image ? (
                           <img
                             src={msg.song_image}
-                            alt={msg.song_name}
+                            alt={msg.song_name || "Song"}
                             className="w-14 h-14 rounded-xl object-cover shrink-0 bg-white p-1"
                           />
+                        ) : (
+                          <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                            <Music className="w-6 h-6 text-white" />
+                          </div>
                         )}
-
                         <div className="flex-1 min-w-0">
                           <p className="text-white font-bold truncate">
-                            {msg.song_name}
+                            {msg.song_name || "Unknown Song"}
                           </p>
                           <p className="text-white/80 text-xs truncate">
-                            {msg.song_artist}
+                            {msg.song_artist || "Unknown Artist"}
                           </p>
                         </div>
+                      </div>
+                    ) : (
+                      <div className="mt-auto bg-slate-100/80 border border-slate-200 rounded-2xl p-4 flex items-center justify-center gap-2">
+                        <Music className="w-4 h-4 text-slate-400" />
+                        <p className="text-slate-500 text-[10px] font-medium italic">
+                          Pengirim tidak menambahkan musik
+                        </p>
                       </div>
                     )}
 

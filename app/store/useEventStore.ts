@@ -10,6 +10,7 @@ export interface Event {
   description: string;
   location: string;
   date: string;
+  time?: string;
   quota: number;
   status: "open" | "full" | "closed";
   visibility: "public" | "private";
@@ -19,6 +20,8 @@ export interface Event {
   is_registered?: boolean;
   attendance_token?: string;
   is_attended?: boolean;
+  is_online?: boolean;
+  link?: string;
   created_at?: string;
   updated_at?: string;
 }

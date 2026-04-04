@@ -17,8 +17,9 @@ export default function ArticleDetailPage() {
   const router = useRouter()
   const { id } = useParams() as { id: string }
 
-  const { article, fetchArticleById, loading, error, reactToArticle, fetchComments, addComment, addReply, deleteComment, deleteReply } = useArticleStore()
+  const { article, fetchArticleById, loading, error, reactToArticle, fetchComments, addComment, addReply, deleteComment, deleteReply, votePoll } = useArticleStore()
   const { user } = useAuthStore()
+  const userId = user?.id || user?._id;
   const isAuthenticated = useAuthStore((s: any) => s.isAuthenticated)
   const isAdmin = user && ["super_admin", "content_editor"].includes(user.role)
 
@@ -149,7 +150,7 @@ export default function ArticleDetailPage() {
 
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
 
       {/* HERO */}
       <div className="relative w-full h-[60vh] overflow-hidden">
@@ -177,6 +178,12 @@ export default function ArticleDetailPage() {
           <h1 className="text-4xl md:text-4xl font-extrabold leading-tight drop-shadow-lg">
             {article.title}
           </h1>
+
+          {article.subtitle && (
+            <p className="text-xl md:text-2xl font-medium text-gray-200 mt-2 line-clamp-2 drop-shadow-md">
+              {article.subtitle}
+            </p>
+          )}
 
           <div className="flex items-center gap-4 mt-4 text-sm text-gray-200">
 
@@ -227,6 +234,78 @@ export default function ArticleDetailPage() {
             className="prose prose-lg max-w-none text-slate-800"
             dangerouslySetInnerHTML={{ __html: article.description }}
           />
+
+          {/* POLLS DISPLAY */}
+          {article.polls && article.polls.length > 0 && (
+            <div className="mt-12 p-8 bg-slate-50 rounded-3xl border border-slate-200">
+              <h3 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
+                <span className="w-2 h-8 bg-blue-600 rounded-full" />
+                Polling Artikel
+              </h3>
+              
+              <div className="flex flex-col gap-8">
+                {article.polls.map((poll) => {
+                  const hasVoted = userId && poll.voters.includes(String(userId));
+                  const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+
+                  return (
+                    <div key={poll._id} className="flex flex-col gap-4">
+                      <h4 className="text-lg font-bold text-slate-800">{poll.question}</h4>
+                      
+                      <div className="flex flex-col gap-3">
+                        {poll.options.map((option) => {
+                          const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
+                          
+                          return (
+                            <button
+                              key={option._id}
+                              disabled={!isAuthenticated || hasVoted}
+                              onClick={() => votePoll(article.id, poll._id, option._id)}
+                              className={`relative w-full text-left p-4 rounded-2xl border-2 transition-all overflow-hidden group
+                                ${hasVoted 
+                                  ? 'border-slate-200 cursor-default' 
+                                  : 'border-slate-200 hover:border-blue-600 active:scale-[0.98]'
+                                }
+                              `}
+                            >
+                              {/* Progress bar background */}
+                              {hasVoted && (
+                                <div 
+                                  className="absolute inset-0 bg-blue-50 transition-all duration-1000"
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              )}
+                              
+                              <div className="relative flex items-center justify-between z-10">
+                                <span className={`font-bold transition-colors ${hasVoted ? 'text-blue-600' : 'text-slate-600 group-hover:text-blue-600'}`}>
+                                  {option.text}
+                                </span>
+                                {hasVoted && (
+                                  <span className="text-sm font-black text-blue-600">
+                                    {percentage}% ({option.votes})
+                                  </span>
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      
+                      {!isAuthenticated && (
+                        <p className="text-xs text-slate-400 italic">Harap login untuk memberikan suara pada polling ini.</p>
+                      )}
+                      {hasVoted && (
+                        <p className="text-xs text-blue-600 font-bold flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                          Terima kasih atas suara Anda!
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
         </div>
 
