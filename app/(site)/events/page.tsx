@@ -75,6 +75,12 @@ export default function Events() {
     fetchEvents();
   }, [fetchEvents, isAuthenticated]);
 
+    useEffect(() => {
+    if (searchQuery) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [fetchEvents]);
+
   const filteredEvents = useMemo(() => {
     return events.filter(event => event.visibility !== "private");
   }, [events]);
