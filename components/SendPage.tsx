@@ -63,11 +63,7 @@ export function SendPage() {
 
     if (
       !recipient ||
-      !message ||
-      !selectedSong?.id ||
-      !selectedSong?.name ||
-      !selectedSong?.artist ||
-      !selectedSong?.image
+      !message
     ) {
       return;
     }
@@ -89,11 +85,11 @@ export function SendPage() {
       await sendMessage({
         recipient_name: recipient,
         message,
-        song_id: selectedSong.id,
-        song_name: selectedSong.name,
-        song_artist: selectedSong.artist,
-        song_image: selectedSong.image,
-        preview_url: selectedSong.preview_url,
+        song_id: selectedSong?.id || "",
+        song_name: selectedSong?.name || "",
+        song_artist: selectedSong?.artist || "",
+        song_image: selectedSong?.image || "",
+        preview_url: selectedSong?.preview_url || "",
         is_admin_only: isAdminOnly,
         is_anonymous: isAnonymous,
       });
@@ -307,7 +303,7 @@ export function SendPage() {
           {/* Send button */}
           <Button
             onClick={handleSendMessage}
-            disabled={!recipient || !message || !selectedSong || loadingSend}
+            disabled={!recipient || !message || loadingSend}
             className="w-full h-12 bg-cyan-600 hover:bg-cyan-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loadingSend ? "Sending..." : <><Send className="mr-2 w-5 h-5" /> Send Message</>}

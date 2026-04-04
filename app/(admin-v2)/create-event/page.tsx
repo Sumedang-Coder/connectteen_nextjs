@@ -220,9 +220,12 @@ function EventEditorContent() {
     const [eventTitle, setEventTitle] = useState("");
     const [location, setLocation] = useState("");
     const [date, setDate] = useState("");
+    const [time, setTime] = useState("");
     const [quota, setQuota] = useState<number>(0);
     const [status, setStatus] = useState<"open" | "closed">("open");
     const [visibility, setVisibility] = useState<"public" | "private">("public");
+    const [isOnline, setIsOnline] = useState(false);
+    const [link, setLink] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -262,10 +265,13 @@ function EventEditorContent() {
             setQuota(event.quota || 0);
             setStatus(event.status === "closed" ? "closed" : "open");
             setVisibility(event.visibility || "public");
+            setIsOnline(event.is_online || false);
+            setLink(event.link || "");
             if (event.date) {
                 const d = new Date(event.date);
-                const formattedDate = d.toISOString().slice(0, 16);
+                const formattedDate = d.toISOString().slice(0, 10);
                 setDate(formattedDate);
+                setTime(event.time || "");
             }
             if (editor && event.description) {
                 editor.commands.setContent(event.description);
@@ -348,7 +354,7 @@ function EventEditorContent() {
 
     const handleSave = async () => {
         const descHtml = editor?.getHTML() || "";
-        if (!eventTitle || !descHtml || descHtml === "<p></p>" || !location || !date) {
+        if (!eventTitle || !descHtml || descHtml === "<p></p>" || !location || !date || !time) {
             toast.error("Harap isi semua field wajib");
             return;
         }
@@ -373,9 +379,12 @@ function EventEditorContent() {
         formData.append("description", descHtml);
         formData.append("location", location);
         formData.append("date", date);
+        formData.append("time", time);
         formData.append("quota", quota.toString());
         formData.append("status", status);
         formData.append("visibility", visibility);
+        formData.append("is_online", isOnline.toString());
+        if (link) formData.append("link", link);
         if (imageFile) {
             formData.append("image", imageFile);
         }
@@ -511,13 +520,25 @@ function EventEditorContent() {
                                         </div>
                                     </div>
                                     <div className="flex flex-col gap-2">
-                                        <label className="text-sm font-bold text-slate-900 uppercase tracking-wider">Date & Time</label>
+                                        <label className="text-sm font-bold text-slate-900 uppercase tracking-wider">Date</label>
                                         <div className="relative">
                                             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                             <input
-                                                type="datetime-local"
+                                                type="date"
                                                 value={date}
                                                 onChange={(e) => setDate(e.target.value)}
+                                                className="w-full pl-10 pr-4 py-3 bg-slate-50 border-none rounded-xl text-slate-900 focus:ring-2 focus:ring-indigo-600 font-medium"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-sm font-bold text-slate-900 uppercase tracking-wider">Time</label>
+                                        <div className="relative">
+                                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                            <input
+                                                type="time"
+                                                value={time}
+                                                onChange={(e) => setTime(e.target.value)}
                                                 className="w-full pl-10 pr-4 py-3 bg-slate-50 border-none rounded-xl text-slate-900 focus:ring-2 focus:ring-indigo-600 font-medium"
                                             />
                                         </div>
@@ -623,6 +644,31 @@ function EventEditorContent() {
                                                 <option value="private">Private (Hidden from feed)</option>
                                             </select>
                                         </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-slate-100">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-xs font-bold uppercase text-slate-500 tracking-wider">Online Event</label>
+                                            <input
+                                                type="checkbox"
+                                                checked={isOnline}
+                                                onChange={(e) => setIsOnline(e.target.checked)}
+                                                className="w-4 h-4 text-indigo-600 bg-slate-100 border-slate-300 rounded focus:ring-indigo-500"
+                                            />
+                                        </div>
+                                        
+                                        {isOnline && (
+                                            <div className="relative mt-2">
+                                                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                                                <input
+                                                    type="url"
+                                                    placeholder="Meeting Link (GMeet, Zoom, etc.)"
+                                                    value={link}
+                                                    onChange={(e) => setLink(e.target.value)}
+                                                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border-none rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-indigo-600 font-medium"
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

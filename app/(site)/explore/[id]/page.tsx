@@ -191,7 +191,7 @@ export default function MessageDetailPage() {
   // Removed loadMoreComments as it's not implemented on backend yet for simplicity
 
   return (
-    <div className="min-h-screen bg-linear-to-br px-6 py-12">
+    <div className="min-h-screen bg-linear-to-br px-6 py-12 overflow-x-hidden">
 
       <div className="max-w-3xl mx-auto space-y-10">
 
