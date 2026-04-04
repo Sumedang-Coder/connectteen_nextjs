@@ -27,21 +27,26 @@ export default function ExplorePage() {
 
   const router = useRouter();
 
-  useEffect(() => {
-    resetAllMessages();
-    // specify pagination options as object to match store API
-    fetchAllMessages({ page: 1, limit: 6 });
-  }, [fetchAllMessages, isAuthenticated]);
+useEffect(() => {
+  resetAllMessages();
+  fetchAllMessages({ page: 1, limit: 6, search: "" });
+}, [isAuthenticated]);
 
   const handleLoadMore = () => {
     if (!isFetching && hasMore) {
       fetchAllMessages({ page: page + 1, limit: 6 });
     }
   };
+  useEffect(() => {
+  if (searchQuery) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}, [allMessages]);
 
-  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && searchQuery.trim()) {
-      router.push(`/explore/search?q=${encodeURIComponent(searchQuery)}`);
+  const handleSearch = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      resetAllMessages();
+      await fetchAllMessages({ page: 1, limit: 6, search: searchQuery });
     }
   };
 
@@ -107,7 +112,9 @@ export default function ExplorePage() {
               <div className="h-16 w-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6">
                 <MessageCircle size={32} />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Belum ada pesan</h3>
+              <h3>
+                {searchQuery ? "Pesan tidak ditemukan" : "Belum ada pesan"}
+              </h3>
               <p className="text-gray-500 text-center max-w-sm">
                 Jadilah yang pertama untuk membagikan ceritamu dengan menekan tombol Kirim Pesan!
               </p>
@@ -120,7 +127,7 @@ export default function ExplorePage() {
                   onClick={() => router.push(`/explore/${msg.id}`)}
                   className="group bg-white rounded-3xl p-1 shadow-lg border-[6px] border-white transition-all hover:-translate-y-2 cursor-pointer"
                 >
-                  <CardContent className="bg-cyan-50 flex flex-col flex-1 min-h-[260px] rounded-2xl p-6 space-y-6">
+                  <CardContent className="flex flex-col flex-1 min-h-[260px] rounded-2xl p-6 space-y-6">
                     {/* Header */}
                     <div className="flex items-center gap-3">
                       <Avatar className="border-2 border-cyan-500">

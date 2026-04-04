@@ -52,11 +52,8 @@ export function RecentPosts() {
             const avatarLetter = msg.recipient_name?.[0] || "?";
 
             return (
-              <Link key={msg.id} href={`/explore/${msg.id}`}>
-                <Card
-
-                  className="group bg-white rounded-3xl p-1 shadow-lg border-[6px] border-white transition-all hover:-translate-y-2 cursor-pointer"
-                >
+              <Link key={msg.id} href={`/explore/${msg.id}`} className="block h-full">
+                <Card className="h-full flex flex-col bg-white rounded-3xl p-1 shadow-lg border-[6px] border-white hover:-translate-y-2 transition">
                   <CardContent className="flex flex-col flex-1 min-h-[260px] rounded-2xl p-6 space-y-6">
 
                     {/* Header */}

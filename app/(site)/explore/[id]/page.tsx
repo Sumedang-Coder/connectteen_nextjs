@@ -255,7 +255,7 @@ export default function MessageDetailPage() {
               </Avatar>
 
               <div>
-                <p className="text-sm opacity-80">To</p>
+                <p className="text-sm opacity-80">To:</p>
                 <h2 className="text-xl font-semibold leading-tight">
                   {selectedMessage.recipient_name}
                 </h2>

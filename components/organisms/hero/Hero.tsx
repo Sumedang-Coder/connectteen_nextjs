@@ -71,7 +71,7 @@ export function Hero() {
             className="gap-2 cursor-pointer bg-blue-500/80 backdrop-blur text-white border border-white/40 hover:bg-blue-400 shadow-2xl px-6 py-2 text-sm sm:text-base transition-all duration-300 hover:scale-105"
           >
             <Users className="w-5 h-5" />
-            Jelajahi komunitas
+            Cari nama kamu Yukk!
           </Button>
 
         </div>

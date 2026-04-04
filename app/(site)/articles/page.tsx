@@ -31,6 +31,12 @@ export default function ArticlesPage() {
     fetchArticles({ page: 1, limit: 6, search: "" })
   }, [isAuthenticated])
 
+    useEffect(() => {
+    if (searchQuery) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [articles]);
+
   if (isFetching && articles.length === 0) {
     return <Loader fullScreen size="sm" />
   }
