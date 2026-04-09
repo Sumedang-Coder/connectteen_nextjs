@@ -195,16 +195,16 @@ export default function MessageDetailPage() {
 
       <div className="max-w-3xl mx-auto space-y-10">
 
-        <div className="pointer-events-none select-none">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
 
           {/* Necta - Top Left */}
           <div className="absolute left-0 top-10 hidden lg:block">
             <Image
               src="/img/necta.png"
-              alt=""
+              alt="necta"
               width={260}
               height={260}
-              className="translate-x-[-20%]"
+              className="-translate-x-16"
             />
           </div>
 
@@ -212,10 +212,10 @@ export default function MessageDetailPage() {
           <div className="absolute right-0 bottom-10 hidden lg:block">
             <Image
               src="/img/coco.png"
-              alt=""
+              alt="coco"
               width={260}
               height={260}
-              className="translate-x-[20%]"
+              className="translate-x-16"
             />
           </div>
 
