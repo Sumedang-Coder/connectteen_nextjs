@@ -63,6 +63,7 @@ export default function AboutUs() {
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const controls = useAnimation()
   const [open, setOpen] = useState(false)
+  const [activeChar, setActiveChar] = useState<string | null>(null)
 
   useEffect(() => {
     if (isInView) {
@@ -140,8 +141,8 @@ export default function AboutUs() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
-            <Link 
-              href={'https://whatsapp.com/channel/0029VaxJTD1GE56idHGxL30O'} 
+            <Link
+              href={'https://whatsapp.com/channel/0029VaxJTD1GE56idHGxL30O'}
               target="_blank"
               className="group bg-linear-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-10 py-4 rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-3"
             >
@@ -149,7 +150,7 @@ export default function AboutUs() {
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
 
-            <button 
+            <button
               onClick={() => document.getElementById('apa-itu')?.scrollIntoView({ behavior: 'smooth' })}
               className="flex items-center gap-3 text-gray-700 font-medium hover:text-blue-600 transition-colors px-6 py-4"
             >
@@ -251,7 +252,7 @@ export default function AboutUs() {
 
             {/* CONTENT */}
             <motion.div
-              className="fixed inset-0 flex items-center justify-center z-50 p-6"
+              className="fixed inset-0 flex items-center justify-center mt-10 z-50 p-6"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
@@ -304,6 +305,121 @@ export default function AboutUs() {
           </>
         )}
       </AnimatePresence>
+
+      {/* Main Character */}
+      <section className="max-w-6xl mx-auto px-6 py-24">
+        <motion.h2
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          className="text-4xl md:text-5xl font-black text-center mb-20 bg-linear-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent"
+        >
+          Tokoh Utama ConnectTeen
+        </motion.h2>
+
+        <div className="grid md:grid-cols-2 gap-8">
+
+          {[
+            {
+              id: "coco",
+              title: "Coco",
+              image: "/img/coco.png",
+              short: "Kuat di luar, lembut di dalam",
+              full: [
+                "Coco itu kayak kelapa, punya tempurung yang keras, tapi isinya super lembut dan menenangkan.",
+                "Coco melambangkan remaja yang kelihatan kuat dari luar, tapi punya dunia batin yang lembut.",
+                "Coco adalah karakter yang suportif, menenangkan, dan penuh ketenangan.",
+              ]
+            },
+            {
+              id: "roboteens",
+              title: "Roboteens",
+              image: "/img/robot.png",
+              short: "Logika + emosi dalam satu karakter",
+              full: [
+                "Roboteens adalah representasi teknologi dan adaptasi remaja masa kini.",
+                "Dia bridging antara logika dan perasaan.",
+                "Teman pintar yang membantu memahami dunia digital dan hidup.",
+              ]
+            },
+            {
+              id: "necta",
+              title: "Necta",
+              image: "/img/necta.png",
+              short: "Energi positif & semangat",
+              full: [
+                "Necta adalah sumber energi dan semangat.",
+                "Membantu remaja bangkit dari lelah.",
+                "Mengubah pengalaman jadi kekuatan.",
+              ]
+            },
+            {
+              id: "connect",
+              title: "Connect (Kamu)",
+              image: "/img/connect.png",
+              short: "Tokoh utama: itu kamu",
+              full: [
+                "Connect adalah representasi dari kamu.",
+                "Remaja yang sedang mencari arah dan bertumbuh.",
+                "Bukan sempurna, tapi terus mencoba.",
+                "Belajar dari Coco, Necta, dan Roboteens.",
+              ]
+            }
+          ].map((char, i) => (
+
+            <motion.div
+              key={char.id}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              onClick={() => setActiveChar(activeChar === char.id ? null : char.id)}
+              className="group cursor-pointer bg-white/70 backdrop-blur-xl rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-white/50"
+            >
+
+              {/* IMAGE */}
+              <div className="flex justify-center mb-6">
+                <Image
+                  src={char.image}
+                  alt={char.title}
+                  width={120}
+                  height={120}
+                  className="object-contain group-hover:scale-110 transition"
+                />
+              </div>
+
+              {/* TITLE */}
+              <h3 className="text-xl font-bold text-center text-gray-900">
+                {char.title}
+              </h3>
+
+              {/* SHORT */}
+              <p className="text-sm text-gray-500 text-center mb-4">
+                {char.short}
+              </p>
+
+              {/* EXPAND */}
+              <AnimatePresence>
+                {activeChar === char.id && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-4 space-y-2 text-sm text-gray-700">
+                      {char.full.map((text, idx) => (
+                        <p key={idx}>• {text}</p>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+            </motion.div>
+
+          ))}
+
+        </div>
+      </section>
 
       {/* MISSION & VISION */}
       <section className="max-w-6xl mx-auto px-6 py-24">
@@ -566,7 +682,7 @@ export default function AboutUs() {
           Tempat di mana kamu bisa jadi diri sendiri tanpa takut.
         </p>
 
-        <Link 
+        <Link
           href={'https://whatsapp.com/channel/0029VaxJTD1GE56idHGxL30O'}
           target="_blank"
           className="inline-block bg-linear-to-r from-blue-500 to-indigo-600 text-white px-10 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:scale-105 transition"
