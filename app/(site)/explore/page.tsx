@@ -13,7 +13,7 @@ import Loader from "@/components/Loader";
 
 export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [activeSearchQuery, setActiveSearchQuery] = useState("");
   // Mengambil state dari store (sesuaikan nama fungsi dengan store terbaru Anda)
   const {
     allMessages,
@@ -34,18 +34,12 @@ useEffect(() => {
 
   const handleLoadMore = () => {
     if (!isFetching && hasMore) {
-      fetchAllMessages({ page: page + 1, limit: 6 });
+      fetchAllMessages({ page: page + 1, limit: 6, search: activeSearchQuery });
     }
   };
-  useEffect(() => {
-  if (searchQuery) {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-}, [allMessages]);
-
   const handleSearch = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      resetAllMessages();
+      setActiveSearchQuery(searchQuery);
       await fetchAllMessages({ page: 1, limit: 6, search: searchQuery });
     }
   };
