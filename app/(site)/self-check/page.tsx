@@ -7,7 +7,7 @@ const tools = [
   {
     title: 'MBTI Personality Test',
     desc: 'Kenali tipe kepribadianmu secara mendalam',
-    link: 'https://www.16personalities.com/',
+    link: 'https://www.animolife.id/16-tipe-kepribadian-mbti',
     category: 'Kepribadian',
     icon: Brain,
     highlight: true
@@ -15,22 +15,22 @@ const tools = [
   {
     title: 'BMI Calculator',
     desc: 'Cek apakah berat badanmu ideal',
-    link: 'https://www.calculator.net/bmi-calculator.html',
+    link: 'https://www.halodoc.com/bmi-calculator/?srsltid=AfmBOop6KWOggtdO7Qc45q4maW3EdVgIoRFYla_1LykG-7tYIH_8snvD',
     category: 'Kesehatan',
     icon: Activity
   },
   {
     title: 'Stress Level Test',
     desc: 'Ukur tingkat stres yang kamu rasakan saat ini',
-    link: 'https://www.mind-diagnostics.org/stress-test',
+    link: 'https://satupersen.net/psikotes-online-gratis/tes-tingkat-stress',
     category: 'Mental',
     icon: HeartPulse,
     highlight: true
   },
   {
-    title: 'Self Esteem Test',
-    desc: 'Kenali tingkat kepercayaan dirimu',
-    link: 'https://www.psychologytoday.com/us/tests/personality/self-esteem-test',
+    title: 'Tes Attachment Style',
+    desc: 'Ketahui pola hubunganmu apakah anxious, avoidance, disorganized, atau secure.',
+    link: 'https://satupersen.net/psikotes-online-gratis/tes-attachment-style',
     category: 'Mental',
     icon: Sparkles
   }
