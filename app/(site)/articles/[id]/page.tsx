@@ -32,6 +32,12 @@ export default function ArticleDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [replyLoadingId, setReplyLoadingId] = useState<string | null>(null)
 
+  const [confirmVote, setConfirmVote] = useState<{
+    articleId: string
+    pollId: string
+    optionId: string
+  } | null>(null)
+
   type ReactionType = {
     heart: number;
     laugh: number;
@@ -242,7 +248,7 @@ export default function ArticleDetailPage() {
                 <span className="w-2 h-8 bg-blue-600 rounded-full" />
                 Polling Artikel
               </h3>
-              
+
               <div className="flex flex-col gap-8">
                 {article.polls.map((poll) => {
                   const hasVoted = userId && poll.voters.includes(String(userId));
@@ -251,31 +257,42 @@ export default function ArticleDetailPage() {
                   return (
                     <div key={poll._id} className="flex flex-col gap-4">
                       <h4 className="text-lg font-bold text-slate-800">{poll.question}</h4>
-                      
+
                       <div className="flex flex-col gap-3">
                         {poll.options.map((option) => {
                           const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
-                          
+
                           return (
                             <button
                               key={option._id}
                               disabled={!isAuthenticated || hasVoted}
-                              onClick={() => votePoll(article.id, poll._id, option._id)}
+                              onClick={() => {
+                                if (!isAuthenticated) {
+                                  router.push(`/signin`);
+                                  return;
+                                }
+
+                                setConfirmVote({
+                                  articleId: article.id,
+                                  pollId: poll._id,
+                                  optionId: option._id
+                                });
+                              }}
                               className={`relative w-full text-left p-4 rounded-2xl border-2 transition-all overflow-hidden group
-                                ${hasVoted 
-                                  ? 'border-slate-200 cursor-default' 
+                                ${hasVoted
+                                  ? 'border-slate-200 cursor-default'
                                   : 'border-slate-200 hover:border-blue-600 active:scale-[0.98]'
                                 }
                               `}
                             >
                               {/* Progress bar background */}
                               {hasVoted && (
-                                <div 
+                                <div
                                   className="absolute inset-0 bg-blue-50 transition-all duration-1000"
                                   style={{ width: `${percentage}%` }}
                                 />
                               )}
-                              
+
                               <div className="relative flex items-center justify-between z-10">
                                 <span className={`font-bold transition-colors ${hasVoted ? 'text-blue-600' : 'text-slate-600 group-hover:text-blue-600'}`}>
                                   {option.text}
@@ -290,7 +307,7 @@ export default function ArticleDetailPage() {
                           );
                         })}
                       </div>
-                      
+
                       {!isAuthenticated && (
                         <p className="text-xs text-slate-400 italic">Harap login untuk memberikan suara pada polling ini.</p>
                       )}
@@ -504,12 +521,53 @@ export default function ArticleDetailPage() {
             <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100">
               <LockIcon className="w-6 h-6 text-blue-600" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Kamu belum Login</h2>
-            <p className="text-sm text-gray-600 leading-relaxed mb-6">Kalo mau kasih reaksi Login dulu yaa</p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Kamu belum Signin</h2>
+            <p className="text-sm text-gray-600 leading-relaxed mb-6">Kalo mau kasih reaksi Signin dulu yaa</p>
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setShowLoginModal(false)}>Tutup</Button>
               <Button className="flex-1 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white" onClick={() => router.push(`/signin?callbackUrl=${encodeURIComponent(window.location.pathname)}`)}>Sign In</Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {confirmVote && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6 text-center space-y-4">
+
+            <h2 className="text-lg font-bold text-gray-900">
+              Konfirmasi Voting
+            </h2>
+
+            <p className="text-sm text-gray-600">
+              Kamu hanya bisa memilih <span className="font-semibold">1 kali</span>.
+              Pilihan tidak bisa diubah setelah dikirim.
+            </p>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl"
+                onClick={() => setConfirmVote(null)}
+              >
+                Batal
+              </Button>
+
+              <Button
+                className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={async () => {
+                  await votePoll(
+                    confirmVote.articleId,
+                    confirmVote.pollId,
+                    confirmVote.optionId
+                  );
+                  setConfirmVote(null);
+                }}
+              >
+                Ya, Pilih
+              </Button>
+            </div>
+
           </div>
         </div>
       )}
