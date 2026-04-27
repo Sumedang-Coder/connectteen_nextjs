@@ -212,17 +212,17 @@ export default function AboutUs() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
                             >
-                                <div className="bg-white rounded-2xl md:rounded-3xl max-w-4xl w-full max-h-[90vh] shadow-2xl relative overflow-hidden">
+                                <div className="bg-white rounded-2xl md:rounded-3xl max-w-4xl w-full max-h-[90dvh] shadow-2xl relative overflow-y-auto">
 
                                     {/* CLOSE */}
                                     <button
                                         onClick={() => setActive(null)}
-                                        className="absolute top-4 right-4 z-20 text-gray-500 hover:text-black text-xl"
+                                        className="md:absolute md:top-4 md:right-4 fixed top-14 right-6 z-50 bg-white/80 cursor-pointer backdrop-blur rounded-full px-3 py-1 shadow"
                                     >
                                         ✕
                                     </button>
 
-                                    <div className="grid lg:grid-cols-2 h-full">
+                                    <div className="grid lg:grid-cols-2">
 
                                         {/* IMAGE (FIXED) */}
                                         <div className="bg-white flex items-center justify-center p-6 md:p-10">
@@ -236,7 +236,7 @@ export default function AboutUs() {
                                         </div>
 
                                         {/* CONTENT (SCROLL) */}
-                                        <div className="p-5 md:p-8 space-y-4 overflow-y-auto max-h-[60vh] md:max-h-[80vh]">
+                                        <div className="p-5 md:p-8 space-y-4 overflow-y-auto max-h-[70dvh] md:max-h-[80dvh] pb-10">
 
                                             <h3 className="text-xl md:text-2xl font-bold">
                                                 {active.title}
