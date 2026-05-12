@@ -238,9 +238,13 @@ export default function EventRegistrantsPage() {
 
             const formattedData = exportDatas.map((r: any, index: number) => ({
                 "No": index + 1,
-                "Nama Peserta": r.name || "Anonymous",
+                "Nama Peserta": r.reg_name || r.name || "Anonymous",
                 "Email": r.email || "N/A",
-                "No. HP": r.no_hp || "-",
+                "No. HP": r.reg_phone || r.no_hp || "-",
+                "Alamat": r.reg_address || "-",
+                "Kesibukan": r.reg_occupation || "-",
+                "Pengalaman Organisasi": r.reg_org_experience || "-",
+                "Alasan / Minat": r.reg_reason || "-",
                 "Status Kehadiran": r.is_attended ? "Hadir" : "Belum Hadir",
                 "Waktu Hadir": r.is_attended && r.attended_at ? format(new Date(r.attended_at), 'HH:mm:ss, dd MMM yyyy') : "-"
             }));
@@ -260,10 +264,11 @@ export default function EventRegistrantsPage() {
                 doc.text(`Data Peserta: ${event.event_title}`, 14, 15);
                 autoTable(doc, {
                     startY: 20,
-                    head: [["No", "Nama Peserta", "Email", "No. HP", "Status", "Waktu Hadir"]],
-                    body: formattedData.map((d: any) => [d["No"], d["Nama Peserta"], d["Email"], d["No. HP"], d["Status Kehadiran"], d["Waktu Hadir"]]),
+                    head: [["No", "Nama Peserta", "Email", "No. HP", "Alamat", "Kesibukan", "Peng. Organisasi", "Alasan/Minat", "Status", "Waktu Hadir"]],
+                    body: formattedData.map((d: any) => [d["No"], d["Nama Peserta"], d["Email"], d["No. HP"], d["Alamat"], d["Kesibukan"], d["Pengalaman Organisasi"], d["Alasan / Minat"], d["Status Kehadiran"], d["Waktu Hadir"]]),
                     theme: 'striped',
-                    headStyles: { fillColor: [37, 99, 235] }
+                    headStyles: { fillColor: [37, 99, 235] },
+                    styles: { fontSize: 7 }
                 });
                 doc.save(`${filename}.pdf`);
                 toast.success("Berhasil mengekspor ke PDF");
@@ -409,16 +414,16 @@ export default function EventRegistrantsPage() {
                                             {r.avatarUrl ? <img src={r.avatarUrl} alt="" className="w-full h-full object-cover" /> : r.name?.charAt(0)}
                                         </div>
                                     <div className="flex flex-col min-w-0 flex-1">
-                                        <span className="text-sm font-black text-slate-900 truncate">{r.name || "Anonymous"}</span>
+                                        <span className="text-sm font-black text-slate-900 truncate">{r.reg_name || r.name || "Anonymous"}</span>
                                         <span className="text-[10px] font-bold text-slate-400 truncate mt-0.5">{r.email || "No Email"}</span>
-                                        {r.no_hp && (
+                                        {(r.reg_phone || r.no_hp) && (
                                             <a 
-                                                href={`https://wa.me/${r.no_hp.replace(/\D/g, '')}`} 
+                                                href={`https://wa.me/${(r.reg_phone || r.no_hp).replace(/\D/g, '')}`} 
                                                 target="_blank" 
                                                 rel="noreferrer"
                                                 className="text-[10px] font-bold text-blue-500 hover:underline mt-0.5 flex items-center gap-1"
                                             >
-                                                WA: {r.no_hp}
+                                                WA: {r.reg_phone || r.no_hp}
                                             </a>
                                         )}
                                     </div>
@@ -434,6 +439,23 @@ export default function EventRegistrantsPage() {
                                             </span>
                                         )}
                                     </div>
+                                    {/* Registration data */}
+                                    {(r.reg_address || r.reg_occupation || r.reg_org_experience || r.reg_reason) && (
+                                        <div className="grid grid-cols-1 gap-1.5 text-[10px] bg-white p-2.5 rounded-lg border border-slate-100">
+                                            {r.reg_address && (
+                                                <div><span className="font-bold text-slate-400">Alamat:</span> <span className="text-slate-600">{r.reg_address}</span></div>
+                                            )}
+                                            {r.reg_occupation && (
+                                                <div><span className="font-bold text-slate-400">Kesibukan:</span> <span className="text-slate-600 capitalize">{r.reg_occupation}</span></div>
+                                            )}
+                                            {r.reg_org_experience && (
+                                                <div><span className="font-bold text-slate-400">Organisasi:</span> <span className="text-slate-600">{r.reg_org_experience}</span></div>
+                                            )}
+                                            {r.reg_reason && (
+                                                <div><span className="font-bold text-slate-400">Alasan:</span> <span className="text-slate-600">{r.reg_reason}</span></div>
+                                            )}
+                                        </div>
+                                    )}
                                     {!r.is_attended && (
                                         <button 
                                             onClick={() => handleManualVerify(r.attendance_token, r.name)}
@@ -461,6 +483,7 @@ export default function EventRegistrantsPage() {
                                         <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Peserta</th>
                                         <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Email</th>
                                         <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">No. HP</th>
+                                        <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Detail Registrasi</th>
                                         <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Status Kehadiran</th>
                                         <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Waktu Hadir</th>
                                         <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] text-right">Aksi</th>
@@ -480,21 +503,40 @@ export default function EventRegistrantsPage() {
                                                             {r.name?.charAt(0) || <UserCircle size={20} />}
                                                         </div>
                                                     )}
-                                                    <span className="text-sm font-bold text-slate-900">{r.name || "Anonymous"}</span>
+                                                    <span className="text-sm font-bold text-slate-900">{r.reg_name || r.name || "Anonymous"}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-slate-500 font-medium">{r.email || "N/A"}</td>
                                             <td className="px-6 py-4 text-sm text-slate-500 font-medium">
-                                                {r.no_hp ? (
+                                                {(r.reg_phone || r.no_hp) ? (
                                                     <a 
-                                                        href={`https://wa.me/${r.no_hp.replace(/\D/g, '')}`} 
+                                                        href={`https://wa.me/${(r.reg_phone || r.no_hp).replace(/\D/g, '')}`} 
                                                         target="_blank" 
                                                         rel="noreferrer"
                                                         className="text-blue-600 hover:underline flex items-center gap-1"
                                                     >
-                                                        {r.no_hp}
+                                                        {r.reg_phone || r.no_hp}
                                                     </a>
                                                 ) : "-"}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col gap-0.5 text-[11px] text-slate-500 max-w-[200px]">
+                                                    {r.reg_address && (
+                                                        <div className="truncate" title={r.reg_address}><span className="font-bold text-slate-400">Alamat:</span> {r.reg_address}</div>
+                                                    )}
+                                                    {r.reg_occupation && (
+                                                        <div><span className="font-bold text-slate-400">Kesibukan:</span> <span className="capitalize">{r.reg_occupation}</span></div>
+                                                    )}
+                                                    {r.reg_org_experience && (
+                                                        <div className="truncate" title={r.reg_org_experience}><span className="font-bold text-slate-400">Organisasi:</span> {r.reg_org_experience}</div>
+                                                    )}
+                                                    {r.reg_reason && (
+                                                        <div className="truncate" title={r.reg_reason}><span className="font-bold text-slate-400">Alasan:</span> {r.reg_reason}</div>
+                                                    )}
+                                                    {!r.reg_address && !r.reg_occupation && !r.reg_org_experience && !r.reg_reason && (
+                                                        <span className="text-slate-300">—</span>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 {r.is_attended ? (

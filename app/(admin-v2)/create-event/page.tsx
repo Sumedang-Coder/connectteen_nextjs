@@ -37,7 +37,8 @@ import {
     ChevronRight,
     User,
     Globe,
-    Lock
+    Lock,
+    ClipboardList
 } from "lucide-react";
 import { useEventStore } from "@/app/store/useEventStore";
 import { useAuthStore } from "@/app/store/useAuthStore";
@@ -229,6 +230,14 @@ function EventEditorContent() {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [registrationFields, setRegistrationFields] = useState({
+        reg_name: true,
+        reg_phone: true,
+        reg_address: true,
+        reg_occupation: true,
+        reg_org_experience: true,
+        reg_reason: true,
+    });
 
     const editor = useEditor({
         extensions: [
@@ -277,6 +286,16 @@ function EventEditorContent() {
                 editor.commands.setContent(event.description);
             }
             setImagePreview(event.image_url || null);
+            if (event.registration_fields) {
+                setRegistrationFields({
+                    reg_name: event.registration_fields.reg_name ?? true,
+                    reg_phone: event.registration_fields.reg_phone ?? true,
+                    reg_address: event.registration_fields.reg_address ?? true,
+                    reg_occupation: event.registration_fields.reg_occupation ?? true,
+                    reg_org_experience: event.registration_fields.reg_org_experience ?? true,
+                    reg_reason: event.registration_fields.reg_reason ?? true,
+                });
+            }
         }
     }, [event, editId, editor]);
 
@@ -384,6 +403,7 @@ function EventEditorContent() {
         formData.append("status", status);
         formData.append("visibility", visibility);
         formData.append("is_online", isOnline.toString());
+        formData.append("registration_fields", JSON.stringify(registrationFields));
         if (link) formData.append("link", link);
         if (imageFile) {
             formData.append("image", imageFile);
@@ -670,6 +690,55 @@ function EventEditorContent() {
                                             </div>
                                         )}
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Registration Form Settings Card */}
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-5">
+                                <div className="flex items-center gap-2 text-slate-900 font-bold mb-1">
+                                    <ClipboardList size={18} className="text-indigo-600" />
+                                    <span>Registration Form</span>
+                                </div>
+                                <p className="text-xs text-slate-400 -mt-3">Atur pertanyaan yang muncul saat pendaftaran event.</p>
+
+                                <div className="flex flex-col gap-3">
+                                    {[
+                                        { key: "reg_name" as const, label: "Nama Lengkap" },
+                                        { key: "reg_phone" as const, label: "No. HP / WhatsApp" },
+                                        { key: "reg_address" as const, label: "Alamat Domisili" },
+                                        { key: "reg_occupation" as const, label: "Kesibukan" },
+                                        { key: "reg_org_experience" as const, label: "Pengalaman Organisasi" },
+                                        { key: "reg_reason" as const, label: "Alasan / Minat / Bakat" },
+                                    ].map(({ key, label }) => (
+                                        <div
+                                            key={key}
+                                            className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-xl"
+                                        >
+                                            <span className="text-xs font-bold text-slate-700">{label}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setRegistrationFields((prev) => ({
+                                                        ...prev,
+                                                        [key]: !prev[key],
+                                                    }))
+                                                }
+                                                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
+                                                    registrationFields[key]
+                                                        ? "bg-indigo-600"
+                                                        : "bg-slate-300"
+                                                }`}
+                                            >
+                                                <span
+                                                    className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out mt-0.5 ${
+                                                        registrationFields[key]
+                                                            ? "translate-x-4 ml-0.5"
+                                                            : "translate-x-0 ml-0.5"
+                                                    }`}
+                                                />
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>

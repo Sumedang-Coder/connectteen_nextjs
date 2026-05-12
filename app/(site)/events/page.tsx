@@ -32,11 +32,7 @@ export default function Events() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const handleRegisterClick = async (event: any) => {
-    const isGuest = user?.role === "guest";
-    const hasMissingData =
-      !user?.name || user?.name.startsWith("Anonymous") || !user?.no_hp;
-
-
+    // Unregistration — langsung proses
     if (event.is_registered) {
       setLoadingId(event.id);
       await toggleRegisterEvent(event.id);
@@ -44,21 +40,15 @@ export default function Events() {
       return;
     }
 
-    if (!isAuthenticated || isGuest || hasMissingData) {
-      setPendingEventId(event.id);
-      setIsDataModalOpen(true);
-      return;
-    }
-
-    setLoadingId(event.id);
-    await toggleRegisterEvent(event.id);
-    setLoadingId(null);
+    // Registrasi baru — selalu tampilkan modal form
+    setPendingEventId(event.id);
+    setIsDataModalOpen(true);
   };
 
-  const handleDataModalSuccess = async () => {
+  const handleDataModalSuccess = async (registrationData: Record<string, string>) => {
     if (pendingEventId) {
       setLoadingId(pendingEventId);
-      await toggleRegisterEvent(pendingEventId);
+      await toggleRegisterEvent(pendingEventId, registrationData);
       setLoadingId(null);
       setPendingEventId(null);
     }
@@ -345,6 +335,7 @@ export default function Events() {
         isOpen={isDataModalOpen}
         onClose={() => setIsDataModalOpen(false)}
         onSuccess={handleDataModalSuccess}
+        registrationFields={events.find(e => e.id === pendingEventId)?.registration_fields}
       />
     </div>
   );
