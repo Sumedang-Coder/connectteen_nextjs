@@ -4,6 +4,15 @@ import { toast } from "sonner";
 
 /* ================= TYPES ================= */
 
+export interface RegistrationFields {
+  reg_name: boolean;
+  reg_phone: boolean;
+  reg_address: boolean;
+  reg_occupation: boolean;
+  reg_org_experience: boolean;
+  reg_reason: boolean;
+}
+
 export interface Event {
   id: string;
   event_title: string;
@@ -22,6 +31,7 @@ export interface Event {
   is_attended?: boolean;
   is_online?: boolean;
   link?: string;
+  registration_fields?: RegistrationFields;
   created_at?: string;
   updated_at?: string;
 }
@@ -37,6 +47,12 @@ export interface Registrant {
   attended_at?: string;
   attendance_token?: string;
   registered_at?: string;
+  reg_name?: string;
+  reg_phone?: string;
+  reg_address?: string;
+  reg_occupation?: string;
+  reg_org_experience?: string;
+  reg_reason?: string;
 }
 
 interface EventState {
@@ -80,7 +96,7 @@ interface EventState {
   resetEvents: () => void;
 
   fetchEventById: (id: string) => Promise<void>;
-  toggleRegisterEvent: (eventId: string) => Promise<void>;
+  toggleRegisterEvent: (eventId: string, registrationData?: Record<string, string>) => Promise<void>;
   createEvent: (formData: FormData) => Promise<boolean>;
   updateEvent: (id: string, formData: FormData) => Promise<boolean>;
   deleteEvent: (id: string) => Promise<boolean>;
@@ -200,10 +216,10 @@ export const useEventStore = create<EventState>((set, get) => ({
     }
   },
 
-  toggleRegisterEvent: async (eventId) => {
+  toggleRegisterEvent: async (eventId, registrationData) => {
     try {
       set({ loading: true, error: null });
-      const res = await api.post(`/events/${eventId}/register`, {});
+      const res = await api.post(`/events/${eventId}/register`, registrationData || {});
 
       if (!res.data.success) {
         toast.error("Aksi gagal");
